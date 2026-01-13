@@ -9,13 +9,14 @@ import {
     type RemoveNoteFromGridRequestDto 
 } from "../dtos/GridDto";
 import { type BasicNoteDto, type NoteDto } from "../notes/notes.dto";
-import type { Coord } from "../utils/Coord";
+import type { Vector2 } from "../utils/Coord";
 import { NotImplemented } from "../utils/NotImplemented";
 import { 
     type NoteConfigRequest, 
     type NoteAtCoordRequestDto, 
     type GridNoteConfigDto,
-    type GridItemDto
+    type GridItemDto,
+    CreateGridRequestDto
 } from "./grid.dto";
 import { dummyNoteConfigs, dummyNotes } from "./grid.dummy";
 
@@ -23,20 +24,21 @@ import { dummyNoteConfigs, dummyNotes } from "./grid.dummy";
 export const gridApi = api.injectEndpoints({
     endpoints: builder => ({
 
-
         getGridList: builder.query<GridItemDto[], void>({
             queryFn: async() => {
-                // const db = await getDb()
-
-                // return { data: await db.getGridList()}
-                return { data: []}
-            }
+                const db = await getDb()
+                return { data: await db.getGridList()}
+            },
+            providesTags: ["GridList"]
         }),
 
-        createGrid: builder.mutation<void, CreateAtlasRequestDto>({
-            queryFn: async(dto) => ({
-                data: undefined
-            })
+        createGrid: builder.mutation<void, CreateGridRequestDto>({
+            queryFn: async(dto) => {
+                const db = await getDb()
+                await db.createGrid(dto.name)
+                return { data: undefined}
+            },
+            invalidatesTags: ["GridList"]
         }),
 
         updateGrid: builder.mutation<void, GridDto>({
@@ -46,9 +48,19 @@ export const gridApi = api.injectEndpoints({
         }),
 
         deleteGrid: builder.mutation<void, string>({
-            queryFn: async(id) => ({
-                data: undefined
-            })
+            queryFn: async(id) => {
+                const db = await getDb()
+                await db.removeGrid(id)
+                return { data: undefined }
+            },
+            invalidatesTags: ["GridList"]
+        }),
+
+        getAllNotes: builder.query<BasicNoteDto[], void>({
+            queryFn: async () => {
+                const db = await getDb()
+                return { data: await db.getAllNotes() }
+            }
         }),
 
         getNoteAtCoord: builder.query<NoteDto | null, NoteAtCoordRequestDto>({
@@ -66,7 +78,7 @@ export const gridApi = api.injectEndpoints({
             serializeQueryArgs: ({ queryArgs }) => `getNoteAtCoord(${queryArgs.gridId},${queryArgs.coord.x},${queryArgs.coord.y})`,
         }),
 
-        getNotesAroundCoord: builder.query<BasicNoteDto[], Coord>({
+        getNotesAroundCoord: builder.query<BasicNoteDto[], Vector2>({
             queryFn: async(coord) => {
                 try{
                     throw new NotImplemented();
@@ -117,7 +129,12 @@ export const gridApi = api.injectEndpoints({
 })
 
 export const {
+    useCreateGridMutation,
+    useDeleteGridMutation,
+
     useGetGridListQuery,
+    
+    useGetAllNotesQuery,
     useGetNoteAtCoordQuery,
     useGetNoteConfigQuery
 } = gridApi;
@@ -151,7 +168,8 @@ export class GridApiUtils {
 
     setGridItems (items: GridItemDto[]) {
         this.store.dispatch(
-            gridApi.util.upsertQueryData("getGridList", undefined, items)
+            // Ensure items are plain objects to avoid "non-serializable value" errors
+            gridApi.util.upsertQueryData("getGridList", undefined, items.map(item => ({ ...item })))
         )
     }
 

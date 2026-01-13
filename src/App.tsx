@@ -7,12 +7,13 @@ import { NavBar } from './common/components/NavBar';
 import { GridPage } from './grid/GridPage';
 import { CreateBasicNote } from './notes/components/CreateBasicNote';
 import { ModeSelector } from './grid/components/ModeSelector';
+import { DbView } from './db/components/DbView';
 
 function App() {
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-stretch p-0 m-0'>
-      <GridPage />
+      <DbView />
       {/* <CreateBasicNote /> */}
       {/* <NavBar /> 
       <Routes>

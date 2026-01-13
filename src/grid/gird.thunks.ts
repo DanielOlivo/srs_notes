@@ -1,14 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "../app/store";
-import type { Coord } from "../utils/Coord";
+import type { Vector2 } from "../utils/Coord";
 import { gridApi } from "./grid.api";
 import type { NoteAtCoordRequestDto } from "./grid.dto";
 
-let pendingCoordinates: Coord[] = []
+let pendingCoordinates: Vector2[] = []
 let batchTimer: number | null = null;
 const BATCH_DELAY_MS = 100;
 
-export const requestCellData = createAsyncThunk<void, Coord, { dispatch: AppDispatch, state: RootState}> (
+export const requestCellData = createAsyncThunk<void, Vector2, { dispatch: AppDispatch, state: RootState}> (
     "grid/requestCellData",
     async (req: NoteAtCoordRequestDto, {dispatch, getState}) => {
         const { coord, gridId } = req

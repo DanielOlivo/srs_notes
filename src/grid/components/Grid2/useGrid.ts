@@ -1,41 +1,109 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import type { Coord } from "../../../utils/Coord"
+import { Vector2 } from "../../../utils/Coord"
 import type { Grid2Props } from "./Grid2"
 import { type MouseEvent } from "react"
-import { NotImplemented } from "../../../utils/NotImplemented"
 
-type Mode = 'normal' | 'edit'
+// type Mode = 'normal' | 'edit'
 
-interface GridState {
-    mode: Mode
+/*
+    How it works
 
+    The grid has two states: normal and edit.
+
+    Arguments:
+        - swap (coord1: Coord, coord2: Coord): void
+
+    Normal Mode
+    In this mode user can only navigate along the grid. 
+    
+    constants
+        - panning threshold
+
+    variables:
+        - mode
+        - position 1 - internal hook's variable
+        - position 2 - is used by component
+        - start drag
+        - is mouse down
+        - is panning
+        - over handler: Coord or null
+        - dragging: Coord or null
+        - draggingDelta: Coord or null
+
+    on mouse down:
+        - set is mouse down to true
+        - if <over handler> is null:
+            - store drag start position, which is current client position from event;
+        - if <mode> is edit and <over handler> is not null:
+            - set <dragging> to <over handler> value
+            - store <drag start> postition from event;
+
+    on mouse move: 
+        - if <dragging> is null:
+            - get <delta> = <client position> - <start drag> position;
+            - if mag of delta larger than <panning threshdld> then set <is panning> to true;
+            - set <position2> = <position1> + <delta>;
+        - if <dragging> is not null:
+            - set <draggingDelta> = <client position> - <start drag> position
+
+    on mouse up:
+        - set <is mouse down> to false;
+        - if <dragging> is null:
+            - set <position1> to value of <position2>;
+        - if <dragging> is not null:
+            - if <over handler> is not null, calls swap function(<dragging>, <over handler>);
+            - dragging set to null
+
+    on mouse enter (for item):
+        - if <mode> is "edit" and <dragging> is null, set <over handler> to correspondent coordinate
+
+    on mouse leave (for item):
+        - if <mode> is "edit"and <dragging> is null, set <over handler> to null
+
+    on mouse click capture:
+        - if <is panning> - stop propagation, then set to false
+
+    on mouse click:
+        - ???
+*/
+
+
+// should split the object by update frequency to avoid unnecessary copy operations
+// client must be separated
+export interface GridState {
     viewSize: {
         width: number
         height: number
     }
 
-    position: Coord
+    position1: Vector2
+    position2: Vector2
 
     isMouseDown: boolean
     isPanning: boolean
-    startDrag: Coord
-    client: Coord
+    startDrag: Vector2
+    client: Vector2
+    overCoord: Vector2
 
-    overHandler: Coord | null
+    overHandler: Vector2 | null
+    dragging: Vector2 | null
+    draggingDelta: Vector2 | null
 }
 
-const initState: GridState = {
-    mode: 'normal',
-
+export const initState: GridState = {
     viewSize: { width: 0, height: 0 },
-    position: { x: 0, y: 0 },
+    position1: Vector2.zero,
+    position2: Vector2.zero,
 
     isMouseDown: false,
     isPanning: false,
-    startDrag: { x: 0, y: 0 },
-    client: { x: 0, y: 0 },
+    startDrag: new Vector2(0, 0),
+    client: new Vector2(0, 0),
+    overCoord: Vector2.zero,
     
-    overHandler: null
+    overHandler: null,
+    dragging: null,
+    draggingDelta: null
 }
 
 export const useGrid = (props: Grid2Props) => {
@@ -49,7 +117,6 @@ export const useGrid = (props: Grid2Props) => {
             for(const entry of entries){
                 if(entry.contentBoxSize){
                     const size = entry.contentBoxSize[0]
-
                     setState(st => ({
                         ...st,
                         viewSize: {
@@ -73,120 +140,160 @@ export const useGrid = (props: Grid2Props) => {
     }, [state.viewSize, props])
 
     const startIndices = useMemo(() => {
-        const startX = -Math.floor(state.position.x / (props.cellSize.width + props.gap)) - 2
-        const startY = -Math.floor(state.position.y / (props.cellSize.height + props.gap)) - 2
+        const startX = -Math.floor(state.position1.x / (props.cellSize.width + props.gap)) - 2
+        const startY = -Math.floor(state.position1.y / (props.cellSize.height + props.gap)) - 2
         return {startX, startY}
-    }, [state.position, props])
+    }, [state.position1, props])
 
     const coords = useMemo(() => {
         const {alongX, alongY} = cellsAlongAxes
         const {startX, startY} = startIndices
         
-        console.log('along', alongX, alongY, 'indices', startX, startY)
-        return Array.from({length: alongX * alongY}, (_, i) => ({
+        // console.log('along', alongX, alongY, 'indices', startX, startY)
+        const _coords =  Array.from({length: alongX * alongY}, (_, i) => ({
             x: startX + i % alongX,
             y: startY + Math.floor(i / alongX)
         }))
-    }, [cellsAlongAxes, startIndices])
 
-    const handleMouseDown = useCallback((e: MouseEvent<HTMLDivElement>): void => {
-        switch(state.mode){
-            case "normal": {
-                setState(st => ({
-                    ...st,
-                    isMouseDown: true,
-                    startDrag: {x: e.clientX, y: e.clientY},
-                    // client: { x: e.clientX, y: e.clientY }
-                }))
-                break;
-            }
-            case "edit": {
-                throw new NotImplemented()
-                break;
-            }
+        if(state.dragging){
+            _coords.push(state.dragging)
         }
-    }, [setState, state.mode])
 
-    const handleMouseUp = useCallback((e: MouseEvent<HTMLDivElement>): void => {
-        switch(state.mode){
-            case "normal": {
-                setState(st => ({
-                    ...st,
-                    isMouseDown: false,
-                    isPanning: false
-                }))
-                break;
-            }
-            case "edit": {
-                throw new NotImplemented()
-                break;
-            }
+        return _coords;
+    }, [cellsAlongAxes, startIndices, state.dragging])
+
+    const getCoordUnderClient = (): Vector2 => {
+        const pos = Vector2.from(state.position1).sum(Vector2.from(state.client))
+        return pos.divInt(new Vector2(
+            props.cellSize.width + props.gap, 
+            props.cellSize.height + props.gap))
+    }
+
+    const handleMouseDown = (e: MouseEvent<HTMLDivElement>): void => {
+        const isMouseDown = true
+        const startDrag = new Vector2(e.clientX, e.clientY)
+        const client = Vector2.fromClient(e)
+        const dragging = props.mode === 'edit' && state.overHandler !== null ? state.overHandler : null
+        setState(st => ({
+            ...st,
+            isMouseDown,
+            startDrag,
+            dragging,
+            client
+        }))
+    }
+
+    const getItemPosition = (coord: Vector2): Vector2  => {
+        const pos = new Vector2(
+            coord.x * (props.cellSize.width + props.gap),
+            coord.y * (props.cellSize.height + props.gap)
+        )
+        if(state.dragging && coord.equals(state.dragging)){
+            const delta = state.client.sub(state.startDrag)
+            return pos.sum(delta)
         }
-    }, [setState, state.mode])
+        return pos
+    }
+
+    const handleMouseUp = (e: MouseEvent<HTMLDivElement>): void => {
+        const isMouseDown = false
+        const position1 = state.isPanning ? state.position2 : state.position1
+        const isPanning = false
+        const client = Vector2.fromClient(e)
+        
+        const overHandler = null
+        let dragging = state.dragging
+        if(dragging !== null){
+            const currentCoord = getCoordUnderClient() // Coord.zero // temp
+            props.swap(dragging, currentCoord)
+            dragging = null
+        }
+        setState(st => ({
+            ...st,
+            isPanning,
+            isMouseDown,
+            position1,
+            dragging,
+            overHandler,
+            client
+        }))
+    }
+
+    const handleClickCapture = (e: MouseEvent<HTMLDivElement>): void => {
+        if(state.isPanning){
+            e.stopPropagation()
+            setState(st => ({
+                ...st,
+                isPanning: false
+            }))
+        }
+    }
 
     const handleMouseMove = useCallback((e: MouseEvent<HTMLDivElement>): void => {
-        if(!state.isMouseDown) return
-
-        switch(state.mode){
-            case "normal": {
-                const dx = e.clientX - state.startDrag.x
-                const dy = e.clientY - state.startDrag.y
-                
-                const isPanning = state.isPanning || Math.abs(dx) > 4 || Math.abs(dy) > 4
-
-                if (isPanning) {
-                    setState(st => ({
-                        ...st,
-                        isPanning,
-                        position: isPanning ? {
-                            x: st.position.x + dx,
-                            y: st.position.y + dy
-                        } : st.position,
-                        startDrag: { x: e.clientX, y: e.clientY }
-                    }))
-                }
-
-                break;
-            }
-            case "edit": {
-                throw new NotImplemented()
-                break;
-            }
+        // const overCoord = getCoordUnderClient()
+        const client = Vector2.fromClient(e)
+        let upd: GridState;
+        if(!state.isMouseDown) {
+            // upd = {...state, client, overCoord}
+            return
         }
+        else if(state.dragging === null){
+            const delta = Vector2.fromClient(e).sub(Vector2.from(state.startDrag))
+            const isPanning = state.isPanning || (delta.mag() > 4)
+            const position2 = isPanning ? state.position1.sum(delta) : state.position1
+            upd = {...state, isPanning, position2, client } 
+        }
+        else {
+            const draggingDelta = Vector2.fromClient(e).sub(Vector2.from(state.startDrag))
+            upd = {...state, draggingDelta, client }
+        }
+        setState(upd)
     }, [
         setState, 
-        state.mode, 
-        state.isMouseDown, 
-        state.startDrag,
-        state.isPanning
+        state,
     ])
 
-    // need argument
-    const handleHandlerEnter = (coord: Coord) => () => {
-        setState(st => ({
-            ...st,
-            overHandler: coord
-        }))
+    const handleHandlerEnter = (coord: Vector2) => () => {
+        if(props.mode === 'edit' && state.dragging === null){
+            setState(st => ({
+                ...st,
+                overHandler: coord
+            }))
+        }
     }
 
-    const handleHandlerLeave = (coord: Coord) => () => {
-        setState(st => ({
-            ...st,
-            overHandler: null
-        }))
+    const handleHandlerLeave = () => () => {
+        if(props.mode === 'edit' && state.dragging === null){
+            setState(st => ({
+                ...st,
+                overHandler: null
+            }))
+        }
     }
+
+    const handleCoordEnter = useCallback((coord: Vector2) => () => {
+        setState(st => ({...st, overCoord: coord}))
+    }, [setState])
 
     return {
-        position: state.position,
+        position: state.position2,
+        isMouseDown: state.isMouseDown,
         viewRef,
         coords,
+        overHandler: state.overHandler,
+        overCoord: state.overCoord,
+        getItemPosition,
+        state,
         handlers: {
             handleMouseDown,
             handleMouseUp,
             handleMouseMove,
+            handleClickCapture,
+
+            handleCoordEnter,
 
             handleHandlerEnter,
-            handleHandlerLeave
+            handleHandlerLeave,
         }
     }
 }

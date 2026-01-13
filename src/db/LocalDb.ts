@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import type { Ease } from "../Game/Ease";
-import { type Coord } from "../utils/Coord";
+import { type Vector2 } from "../utils/Coord";
 import { v4 } from "uuid";
 import type { DocumentDto, DocumentInfoDto, DocumentListDto } from "../documents/document.dto";
 import type { BasicNoteDto } from "../notes/notes.dto";
@@ -35,7 +35,7 @@ export interface Position {
     id: number
     noteId: string
     gridId: string
-    coord: Coord
+    coord: Vector2
 }
 
 export interface Answer {
@@ -149,33 +149,6 @@ export async function getLocalDb() {
             }
         }
     })
-
-    // return await openDB<MemoryGameDb>(dbName, 1, {
-    //     upgrade(db){
-    //         const documentStore = db.createObjectStore("documents", {keyPath: "hash"});
-    //         documentStore.createIndex("by-name", "name", {unique: false});
-
-    //         const noteStore = db.createObjectStore("notes", {keyPath: "id"})
-    //         noteStore.createIndex("by-front", "front", {unique: false});
-    //         noteStore.createIndex("by-back", "back", {unique: false});
-
-    //         const gridStore = db.createObjectStore("grids", {keyPath: "id"});
-    //         gridStore.createIndex("by-name", "name", {unique: false});
-    //         gridStore.createIndex("by-createdAt", "createdAt", {unique: false});
-
-    //         const positionStore = db.createObjectStore("positions", {keyPath: "id", autoIncrement: true});
-    //         positionStore.createIndex("by-coord", ["gridId", "coord.x", "coord.y"], {unique: false});
-    //         positionStore.createIndex("by-ids", ["noteId", "gridId"], {unique: false});
-
-    //         const answerStore = db.createObjectStore("answers", {keyPath: "id"});
-    //         answerStore.createIndex("by-noteId", "noteId", {unique: false});
-
-    //         const gridNoteConfigStore = db.createObjectStore("gridNoteConfigs", {keyPath: ["gridId", "noteId"]});
-    //         gridNoteConfigStore.createIndex("by-noteId", "noteId", {unique: false});
-    //         gridNoteConfigStore.createIndex("by-gridId", "gridId", {unique: false});
-
-    //     }
-    // })
 }
 
 export async function getDb(){
@@ -211,6 +184,7 @@ class Db {
             tx
         }
     }
+
 
     // documents
     async getDocumentList(): Promise<DocumentListDto> {
@@ -312,13 +286,13 @@ class Db {
         ]);
     }
 
-    async getNotePosition(noteId: string, gridId: string): Promise<Coord | null>{
+    async getNotePosition(noteId: string, gridId: string): Promise<Vector2 | null>{
         const position = await this.db.getFromIndex("positions", "by-ids", [noteId, gridId])
         if(!position) return null;
         return position.coord;
     }
 
-    async getNoteByPosition(gridId: string, coord: Coord){
+    async getNoteByPosition(gridId: string, coord: Vector2){
         const position = await this.db.getFromIndex("positions", "by-coord", [gridId, coord.x, coord.y]);
         if(!position) return null
         return await this.db.get("notes", position.noteId); 
@@ -338,6 +312,11 @@ class Db {
     }
 
     async createGrid(name: string): Promise<void> {
+        const existing = await this.db.getFromIndex("grids", "by-name", name);
+        if (existing) {
+            throw new Error(`Grid with name "${name}" already exists`);
+        }
+
         const grid: Grid = {
             id: v4(),
             name, 
@@ -347,7 +326,23 @@ class Db {
         await this.db.add("grids", grid);
     }
 
-    async addNoteToGrid(gridId: string, noteId: string, coord: Coord): Promise<number>{
+    async removeGrid(id: string): Promise<void> {
+        const tx = this.getTx();
+        await Promise.all([
+            tx.gridStore.delete(id),
+            await this.removeNotesByGridId(id, tx),
+            tx.tx.done
+        ])
+    }
+
+    async removeNotesByGridId(gridId: string, tx: any): Promise<void> {
+        const _tx = tx as ReturnType<typeof this.getTx>
+        const index = _tx.gridNoteConfigStore.index("by-gridId")
+        const keys = await index.getAllKeys(gridId)
+        await Promise.all(keys.map(key => _tx.gridNoteConfigStore.delete(key)))
+    }
+
+    async addNoteToGrid(gridId: string, noteId: string, coord: Vector2): Promise<number>{
         const position: Omit<Position, "id"> = {
             noteId,
             gridId,

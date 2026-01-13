@@ -75,6 +75,7 @@ export const noteApi = api.injectEndpoints({
 
 export const {
     useGetNotesQuery,
+    useGetNoteQuery,
 
     useCreateBasicNoteMutation,
     useUpdateBasicNoteMutation,

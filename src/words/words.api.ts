@@ -1,7 +1,7 @@
 import { api } from "../api";
 import { getDb, type Note } from "../db/LocalDb";
 import type { CreateNoteDto } from "../dtos/CreateNoteDto";
-import { type Coord } from "../utils/Coord";
+import { type Vector2 } from "../utils/Coord";
 
 export const wordApi = api.injectEndpoints({
     endpoints: builder => ({
@@ -29,7 +29,7 @@ export const wordApi = api.injectEndpoints({
             }
         }),
 
-        getNoteByPosition: builder.query<Note | null, Coord>({
+        getNoteByPosition: builder.query<Note | null, Vector2>({
             queryFn: async (coord) => {
                 try{
                     const db = await getDb();

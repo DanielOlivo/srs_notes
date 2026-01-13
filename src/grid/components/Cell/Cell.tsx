@@ -1,5 +1,5 @@
 import { useMemo, useState, type FC, type ReactNode } from "react";
-import type { Coord } from "../../../utils/Coord";
+import type { Vector2 } from "../../../utils/Coord";
 import { useGetNoteAtCoordQuery } from "../../grid.api";
 import { BasicNote } from "../../../notes/components/BasicNote/BasicNote";
 // import { useGridState } from "./Grid/Grid";
@@ -12,7 +12,7 @@ import { ImageNote } from "../../../notes/components/ImageNote/ImageNote";
 import { isEditMode, setIsOver, setOnMoving } from "../../grid.slice";
 
 export interface CellProps {
-    coord: Coord
+    coord: Vector2
     gridId: string
     cellSize: {
         width: number

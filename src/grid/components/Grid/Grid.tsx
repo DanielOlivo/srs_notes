@@ -4,7 +4,7 @@ import {
     useState, 
     type FC, 
     type ReactNode } from "react";
-import type { Coord } from "../../../utils/Coord";
+import type { Vector2 } from "../../../utils/Coord";
 import { Cell } from "../Cell/Cell";
 import { isEditMode, setOnMoving, type OnMoving } from "../../grid.slice";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
@@ -50,7 +50,7 @@ export const Grid: FC<GridProps> = ({cellSize, gap}) => {
     })
     , [panning.position, panning.scale])
 
-    const calculateCellIndexes = (position: Coord, scale: number) => {
+    const calculateCellIndexes = (position: Vector2, scale: number) => {
         if (!viewRef.current) return panning.cellIndexes;
         return {
             startX: Math.floor(-position.x / ((cellSize.width + gap) * scale)),

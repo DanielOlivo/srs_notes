@@ -1,7 +1,6 @@
-import { useCallback, useState } from "react";
-import type { Coord } from "./Coord";
+import { createContext, useCallback, useState } from "react";
+import { Vector2 } from "./Coord";
 import { NotImplemented } from "./NotImplemented";
-import type { useGrid } from "../grid/components/Grid2/useGrid";
 
 type CountersState = {[K: string]: number}
 type PositionsState = {[K: number]: string}
@@ -25,7 +24,7 @@ export const useCounters = (initState?: CountersState, positionState?: Positions
         })
     }, [setCounters])  
 
-    const add = useCallback((id: string, initValue: number, position: Coord) => {
+    const add = useCallback((id: string, initValue: number, position: Vector2) => {
         setCounters(st => ({...st, [id]: initValue}))
         setPositions(st => ({...st, [hashCoord(position)]: id}))
     }, [setCounters, setPositions])
@@ -42,14 +41,14 @@ export const useCounters = (initState?: CountersState, positionState?: Positions
         
     }, [setCounters, setPositions])
 
-    const tryGetByCoord = useCallback((coord: Coord) => {
+    const tryGetByCoord = useCallback((coord: Vector2) => {
         const hash = hashCoord(coord)
         if(hash in positions)
             return positions[hash]
         return null
     }, [positions])
 
-    const swap = useCallback((coord1: Coord, coord2: Coord) => {
+    const swap = useCallback((coord1: Vector2, coord2: Vector2) => {
         const hash1 = hashCoord(coord1)
         const hash2 = hashCoord(coord2)
         setPositions(st => {
@@ -79,9 +78,9 @@ export const useCounters = (initState?: CountersState, positionState?: Positions
     }, [setPositions])
 
     const seed = useCallback(() => {
-        add("counter0", 1, {x: 0, y: 0})
-        add("counter1", 1, {x: 1, y: 0})
-        add("counter2", 1, {x: 0, y: 1})
+        add("counter0", 1, new Vector2(0, 0))
+        add("counter1", 1, new Vector2(0, 1))
+        add("counter2", 1, new Vector2(1, 0))
     }, [add])
 
     return {
@@ -97,6 +96,20 @@ export const useCounters = (initState?: CountersState, positionState?: Positions
     }
 }
 
+export type Counters = ReturnType<typeof useCounters>
+
+export const CounterContext = createContext<Counters>({
+    counters: {},
+    positions: {},
+    increment: () => {},
+    decrement: () => {},
+    add: () => {},
+    remove: () => {},
+    swap: () => {},
+    tryGetByCoord: () => null,
+    seed: () => {}
+})
+
 function toUnit16(n: number): number {
     return (n + 0x8000) & 0xffff;
 }
@@ -105,13 +118,13 @@ function fromUnit16(n: number): number {
     return (n & 0xffff) - 0x8000
 }
 
-function hashCoord(coord: Coord){
+function hashCoord(coord: Vector2){
     return (toUnit16(coord.x) << 16) | toUnit16(coord.y)
 }
 
-function unpackCoord(hash: number): Coord {
-    return {
-        x: fromUnit16(hash >>> 16),
-        y: fromUnit16(hash)
-    }
+function unpackCoord(hash: number): Vector2 {
+    return new Vector2(
+        fromUnit16(hash >>> 16),
+        fromUnit16(hash)
+    )
 }

@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { Coord } from "../utils/Coord";
+import type { Vector2 } from "../utils/Coord";
 import { NotImplemented } from "../utils/NotImplemented";
 import type { ILocalDb } from "./ILocalDb";
 import type { useDeleteBasicNoteMutation } from "../notes/note.api";
@@ -25,7 +25,7 @@ export class DummyDb implements ILocalDb {
         throw new NotImplemented()
     }
 
-    async createNote(gridId: string, coord: Coord, front: string, back: string){
+    async createNote(gridId: string, coord: Vector2, front: string, back: string){
         throw new NotImplemented()
     } 
 
@@ -41,11 +41,11 @@ export class DummyDb implements ILocalDb {
         throw new NotImplemented()
     }
 
-    async getNoteAtCoord(gridId: string, coord: Coord) {
+    async getNoteAtCoord(gridId: string, coord: Vector2) {
         throw new NotImplemented()
     }
 
-    async getNotesAroundCoord(gridId: string, coord: Coord, squareHalfSize: number) {
+    async getNotesAroundCoord(gridId: string, coord: Vector2, squareHalfSize: number) {
         throw new NotImplemented()
     }
 
@@ -62,15 +62,15 @@ export class DummyDb implements ILocalDb {
         return id
     }
 
-    addTextNote(gridId: string, coord: Coord, text: string): string {
+    addTextNote(gridId: string, coord: Vector2, text: string): string {
         throw new NotImplemented()
     }
 
-    addImageNote(gridId: string, coord: Coord, imageSrc: string): string {
+    addImageNote(gridId: string, coord: Vector2, imageSrc: string): string {
         throw new NotImplemented()
     }
 
-    addBasicNote(gridId: string, coord: Coord, front: string, back: string): string {
+    addBasicNote(gridId: string, coord: Vector2, front: string, back: string): string {
         throw new NotImplemented()
     }
 

@@ -1,4 +1,4 @@
-import type { Coord } from "../utils/Coord"
+import type { Vector2 } from "../utils/Coord"
 
 export interface CreateAtlasRequestDto {
     name: string
@@ -14,7 +14,7 @@ export interface GridDto {
 export interface AddNoteToGridRequestDto {
     atlasId: string
     noteId: string
-    coord: Coord
+    coord: Vector2
 }
 
 export interface RemoveNoteFromGridRequestDto {
@@ -25,5 +25,5 @@ export interface RemoveNoteFromGridRequestDto {
 export interface ReplaceNoteRequestDto {
     atlasId: string
     noteId: string
-    newCoord: Coord
+    newCoord: Vector2
 }

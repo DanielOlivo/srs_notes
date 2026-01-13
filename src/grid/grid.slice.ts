@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Coord } from "../utils/Coord";
+import type { Vector2 } from "../utils/Coord";
 
 
 export interface NormalMode {
@@ -7,15 +7,15 @@ export interface NormalMode {
 }
 
 export type OnMoving = {
-    dragStart: Coord
-    client: Coord
+    dragStart: Vector2
+    client: Vector2
 }
 
 export interface EditMode {
     kind: 'edit'
-    selected: Coord | null
+    selected: Vector2 | null
 
-    isOver: Coord | null
+    isOver: Vector2 | null
 
     onMoving: null | OnMoving
 }
@@ -63,7 +63,7 @@ export const slice = createSlice({
             }
         },
 
-        setIsOver: (state, action: PayloadAction<Coord | null>) => {
+        setIsOver: (state, action: PayloadAction<Vector2 | null>) => {
             if(state.mode.kind !== 'edit') return
             state.mode.isOver = action.payload
         },

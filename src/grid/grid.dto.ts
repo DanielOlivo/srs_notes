@@ -1,10 +1,9 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator"
-import type { Coord } from "../utils/Coord"
+import { IsNotEmpty, IsNumber, IsString, MinLength } from "class-validator"
+import type { Vector2 } from "../utils/Coord"
 import { v4 } from "uuid";
 import { faker } from "@faker-js/faker";
 
 export class GridItemDto {
-
     @IsString() 
     @IsNotEmpty()
     id: string;
@@ -33,9 +32,19 @@ export class GridItemDto {
     }
 }
 
+export class CreateGridRequestDto {
+    @IsString()
+    @IsNotEmpty()
+    name: string
+
+    constructor(name: string){
+        this.name = name
+    }
+}
+
 export interface NoteAtCoordRequestDto {
     gridId: string
-    coord: Coord
+    coord: Vector2
 }
 
 export interface NoteConfigRequest {

@@ -1,27 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { GridList } from './GridList';
-import type { StoreState } from '../../../app/store';
+import { IntroPage } from './IntroPage';
 import { GridItemDto } from '../../grid.dto';
+import type { StoreState } from '../../../app/store';
 
 const meta = {
-  title: 'Grid/GridList',
+  title: 'Grid/IntroPage',
+  component: IntroPage,
   parameters: {
-    // layout: "centered"
+    layout: 'centered',
   },
-  component: GridList,
   tags: ['autodocs'],
-} satisfies Meta<typeof GridList>;
+} satisfies Meta<typeof IntroPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
     parameters: {
-        styles: {
-          width: "80vh",
-          height: "80vh"
-        },
-        redux:{
+        redux: {
             gridApi: {
                 getGridList: GridItemDto.random(10)
             }

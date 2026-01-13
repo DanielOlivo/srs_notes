@@ -19,7 +19,7 @@ export const GridList: FC = () => {
     }
 
     return (
-        <ul>
+        <ul className="list ">
             {grids.map(grid => <GridListItem key={grid.id} {...grid} />)}
         </ul>
     )

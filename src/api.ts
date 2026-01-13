@@ -20,7 +20,10 @@ export const api = createApi({
         })
 
     }),
-    tagTypes: ["DocumentList"]
+    tagTypes: [
+        "DocumentList",
+        "GridList"
+    ]
 });
 
 export const {
