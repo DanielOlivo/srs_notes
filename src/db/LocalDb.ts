@@ -1,140 +1,24 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import type { Ease } from "../Game/Ease";
-import { type Vector2 } from "../utils/Coord";
-import { v4 } from "uuid";
-import type { DocumentDto, DocumentInfoDto, DocumentListDto } from "../documents/document.dto";
-import type { BasicNoteDto } from "../notes/notes.dto";
-import { documentMappers } from "../utils/mappers/documentMappers";
-import { getHash } from "./hasher";
-import { noteMappers } from "../utils/mappers/noteMappers";
+import type { Document, DocumentDb } from "./entities/document";
+import type { Db } from "./Db";
+import { DocumentOps } from "./ops/document.ops";
+import { PositionOps } from "./ops/position.ops";
+import type { Note } from "./entities/Note";
+import { IntervalOps } from "./ops/interval.ops";
+import { NoteOps } from "./ops/Note.ops";
+import { AnswerOps } from "./ops/answer.ops";
+import { storeName as intervalStoreName } from "./entities/interval";
 
 const dbName = "memoryGameDb";
 
-export interface Document {
-    hash: string // used as id
-    name: string
-    uploadedAt: Date 
-    data: Blob
-}
-
-export interface Note {
-    id: string
-    front: string
-    back: string
-    createdAt: number
-    updatedAt: number
-}
-
-export interface Grid {
-    id: string
-    name: string
-    createdAt: number
-}
-
-export interface Position {
-    id: number
-    noteId: string
-    gridId: string
-    coord: Vector2
-}
-
-export interface Answer {
-    id: string
-    noteId: string
-    gridId: string
-    answer: Ease
-    timestamp: number
-}
-
-export interface GridNoteConfig {
-    id: string
-    noteId: string
-    gridId: string
-    currentOpenInterval: number
-    lastOpenTimestamp: number
-}
-
-
-export interface MemoryGameDb extends DBSchema {
-
-    documents: {
-        key: string, // hash
-        value: Document,
-        indexes: {
-            "by-name": string
-        },
-    },
-
-    notes: {
-        key: string
-        value: Note
-        indexes: {
-            "by-front": string
-            "by-back": string
-            "by-createdAt": number
-        }
-    },
-
-    grids: {
-        key: string,
-        value: Grid,
-        indexes: {
-            "by-name": string,
-            "by-createdAt": number
-        }
-    },
-
-    positions: {
-        key: number,
-        value: Position
-        indexes: {
-            "by-coord": [string, number, number] // [gridId, x, y]
-            "by-noteId": string
-            "by-ids": [string, string] // [noteId, gridId]
-        }
-    },
-
-    answers: {
-        key: string,
-        value: Answer
-        indexes: {
-            "by-noteId": string,
-        }
-    },
-
-    gridNoteConfigs: {
-        key: [string, string] // [gridId, noteId]
-        value: GridNoteConfig
-        indexes: {
-            "by-noteId": string
-            "by-gridId": string
-        }
-    }
-}
-
 const migrations = [
-    (db: IDBPDatabase<MemoryGameDb>) => {
-        const documentStore = db.createObjectStore("documents", {keyPath: "hash"});
-        documentStore.createIndex("by-name", "name", {unique: false});
-
-        const noteStore = db.createObjectStore("notes", {keyPath: "id"})
-        noteStore.createIndex("by-front", "front", {unique: false});
-        noteStore.createIndex("by-back", "back", {unique: false});
-
-        const gridStore = db.createObjectStore("grids", {keyPath: "id"});
-        gridStore.createIndex("by-name", "name", {unique: false});
-        gridStore.createIndex("by-createdAt", "createdAt", {unique: false});
-
-        const positionStore = db.createObjectStore("positions", {keyPath: "id", autoIncrement: true});
-        positionStore.createIndex("by-coord", ["gridId", "coord.x", "coord.y"], {unique: false});
-        positionStore.createIndex("by-ids", ["noteId", "gridId"], {unique: false});
-
-        const answerStore = db.createObjectStore("answers", {keyPath: "id"});
-        answerStore.createIndex("by-noteId", "noteId", {unique: false});
-
-        const gridNoteConfigStore = db.createObjectStore("gridNoteConfigs", {keyPath: ["gridId", "noteId"]});
-        gridNoteConfigStore.createIndex("by-noteId", "noteId", {unique: false});
-        gridNoteConfigStore.createIndex("by-gridId", "gridId", {unique: false});
+    (db: IDBPDatabase<Db>) => {
+        DocumentOps.createStore(db)
+        NoteOps.createStore(db)
+        PositionOps.createStore(db)
+        AnswerOps.createStore(db)
+        IntervalOps.createStore(db)
     }
 ]
 
@@ -142,7 +26,7 @@ export async function getLocalDb() {
 
     const latestVersion = migrations.length;
 
-    return await openDB<MemoryGameDb>(dbName,latestVersion, {
+    return await openDB<Db>(dbName,latestVersion, {
         upgrade(db, oldVersion, newVersion){
             for(let i = oldVersion; i < (newVersion ?? 0); i++){
                 migrations[i](db);
@@ -153,234 +37,196 @@ export async function getLocalDb() {
 
 export async function getDb(){
     const db = await getLocalDb();
-    return new Db(db);
+    return new DbOps(db);
 }
 
+export function getTx(db: IDBPDatabase<Db>) {
+    const tx = db.transaction(["documents", "noteStore", "answers", intervalStoreName, "positions"], "readwrite")
+    const documentStore = tx.objectStore("documents");
+    const noteStore = tx.objectStore("noteStore")
+    const answerStore = tx.objectStore("answers")
+    const positionStore = tx.objectStore("positions")
+    const intervalStore = tx.objectStore(intervalStoreName)
 
-class Db {
+    // to remove
 
-    private db: IDBPDatabase<MemoryGameDb>
+    return {
+        documentStore,
+        positionStore,
+        noteStore,
+        answerStore,
+        intervalStore,
 
-    constructor(db: IDBPDatabase<MemoryGameDb>){
+        tx
+    }
+
+}
+
+export type Tx = ReturnType<typeof getTx>
+
+
+class DbOps {
+
+    private db: IDBPDatabase<Db>
+    private positionOps: PositionOps
+    private documentOps: DocumentOps
+    private noteOps: NoteOps    
+    private answerOps: AnswerOps
+    private intervalOps: IntervalOps
+
+    constructor(db: IDBPDatabase<Db>){
         this.db = db;
+        this.positionOps = new PositionOps()
+        this.documentOps = new DocumentOps()
+        this.noteOps = new NoteOps()    
+        this.answerOps = new AnswerOps()
+        this.intervalOps = new IntervalOps()
     }
     
-    private getTx(){
-        const tx = this.db.transaction(["documents", "notes", "grids", "answers", "positions", "gridNoteConfigs"], "readwrite")
-        const documentStore = tx.objectStore("documents");
-        const noteStore = tx.objectStore("notes"); 
-        const gridStore = tx.objectStore("grids");
-        const positionStore = tx.objectStore("positions");
-        const answerStore = tx.objectStore("answers");
-        const gridNoteConfigStore = tx.objectStore("gridNoteConfigs");
+    setTx() {
+        const tx = getTx(this.db)
 
-        return {
-            documentStore,
-            noteStore,
-            gridStore,
-            positionStore,
-            answerStore,
-            gridNoteConfigStore,
-            tx
-        }
+        this.documentOps.tx = tx
+        this.positionOps.tx = tx
+        this.noteOps.tx = tx 
+        this.answerOps.tx = tx
+        this.intervalOps.tx = tx
+
+        return tx
     }
 
+    async withTx<T extends any[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) {
 
-    // documents
-    async getDocumentList(): Promise<DocumentListDto> {
-        const documents = await this.db.getAll("documents");
-        return { documents: documents.map(doc => documentMappers.documentToDocumentInfoDto(doc)) }
-    }
+        const tx = this.setTx()
 
-    async getDocumnet(hash: string): Promise<DocumentDto | null> {
-        const document = await this.db.get("documents", hash);
-        if(!document) return null;
-        return documentMappers.documentToDocumentDto(document);
-    }
-
-    async getDocumentByName(name: string): Promise<DocumentInfoDto[]> {
-        const documents = await this.db.getAllFromIndex("documents", "by-name", name);
-        return documents.map(doc => documentMappers.documentToDocumentInfoDto(doc));
-    }
-
-    async uploadDocument(data: Blob): Promise<void> {
-        const now = new Date();  
-        const nowString = now.toISOString();
-        const name = `document-${nowString}`;
-        const hash = await getHash(data)
-
-        const doc: Document = {
-            hash,
-            name,
-            uploadedAt: now,
-            data,
-        }
-
-        await this.db.put("documents", doc);
-    }
-
-    async removeDocument(hash: string): Promise<void> {
-        await this.db.delete("documents", hash);
-    }
-
-    async updateDocumentName(hash: string, name: string): Promise<void> {
-        const document = await this.db.get("documents", hash);
-        if (!document) {
-            return;
-        }
-        document.name = name;
-        await this.db.put("documents", document);
-    }
-    
-    // notes
-    async getNoteById(id: string): Promise<BasicNoteDto | null>{
-        const note = await this.db.get("notes", id);
-        if(!note) return null
-        return noteMappers.noteToNoteDto(note);
-    }
-
-    async getAllNotes(): Promise<BasicNoteDto[]> {
-        const notes = await this.db.getAll("notes")
-        return notes.map(noteMappers.noteToNoteDto);
-    }
-
-    async updateNote(note: Note): Promise<void> {
-        const dbNote = await this.db.get("notes", note.id);
-        if(!dbNote) return
-        await this.db.put("notes", note)
-    }
-
-    // should be without coord
-    async createNote(front: string, back: string){
-        const note: Note = {
-            id: v4(),
-            front,
-            back,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-        }
-
-        const tx = this.getTx();
-
-        await Promise.all([
-            tx.noteStore.add(note),
-            tx.tx.done
-        ]);
-    }
-
-    async deleteNote(id: string){
-        const [answerIds, positionIds, noteGridConfigIds] = await Promise.all([
-            this.db.getAllKeysFromIndex("answers", "by-noteId", id),
-            this.db.getAllKeysFromIndex("positions", "by-noteId", id),
-            this.db.getAllKeysFromIndex("gridNoteConfigs", "by-noteId", id)
-        ]);
-
-        const tx = this.getTx();
-
-        await Promise.all([
-            tx.noteStore.delete(id),
-            ...positionIds.map(tx.positionStore.delete),
-            ...answerIds.map(tx.answerStore.delete),
-            ...noteGridConfigIds.map(tx.gridNoteConfigStore.delete),
-            tx.tx.done 
-        ]);
-    }
-
-    async getNotePosition(noteId: string, gridId: string): Promise<Vector2 | null>{
-        const position = await this.db.getFromIndex("positions", "by-ids", [noteId, gridId])
-        if(!position) return null;
-        return position.coord;
-    }
-
-    async getNoteByPosition(gridId: string, coord: Vector2){
-        const position = await this.db.getFromIndex("positions", "by-coord", [gridId, coord.x, coord.y]);
-        if(!position) return null
-        return await this.db.get("notes", position.noteId); 
-    }
-
-
-    // note config
-    async getNoteConfig(gridId: string, noteId: string): Promise<GridNoteConfig | null> {
-        const config = await this.db.get("gridNoteConfigs", [gridId, noteId]);
-        if(!config) return null
-        return config
-    }
-
-    // grid
-    async getGridList(): Promise<Grid[]> {
-        return await this.db.getAll("grids");
-    }
-
-    async createGrid(name: string): Promise<void> {
-        const existing = await this.db.getFromIndex("grids", "by-name", name);
-        if (existing) {
-            throw new Error(`Grid with name "${name}" already exists`);
-        }
-
-        const grid: Grid = {
-            id: v4(),
-            name, 
-            createdAt: Date.now()
-        }
-
-        await this.db.add("grids", grid);
-    }
-
-    async removeGrid(id: string): Promise<void> {
-        const tx = this.getTx();
-        await Promise.all([
-            tx.gridStore.delete(id),
-            await this.removeNotesByGridId(id, tx),
+        const results = await Promise.all([
+            ...fns.map(fn => fn(tx)),
             tx.tx.done
         ])
+
+        this.documentOps.tx = null
+        this.positionOps.tx = null
+        this.noteOps.tx = null
+        this.answerOps.tx = null
+        this.intervalOps.tx = null
+
+        return results.slice(0, -1) as T
     }
 
-    async removeNotesByGridId(gridId: string, tx: any): Promise<void> {
-        const _tx = tx as ReturnType<typeof this.getTx>
-        const index = _tx.gridNoteConfigStore.index("by-gridId")
-        const keys = await index.getAllKeys(gridId)
-        await Promise.all(keys.map(key => _tx.gridNoteConfigStore.delete(key)))
+    // documents
+   async getDocumentList(): Promise<Document[]> {
+        const [docs] = await this.withTx(
+            this.documentOps.getAllDocuments()
+        )
+        return docs
     }
 
-    async addNoteToGrid(gridId: string, noteId: string, coord: Vector2): Promise<number>{
-        const position: Omit<Position, "id"> = {
-            noteId,
-            gridId,
-            coord
+    async getDocumentById(id: string): Promise<Document | undefined>{
+        try{
+            const [doc] = await this.withTx(
+                this.documentOps.getById(id)
+            )
+            return doc
+        } catch(error){
+            console.error(error)
+            return undefined
         }
-        return await this.db.add("positions", position as Position)
     }
 
-    async answer(noteId: string, gridId: string, answer: Ease, nextInterval: number){
-        let noteConfig = await this.db.get("gridNoteConfigs", [gridId, noteId]);
-        if(!noteConfig){
-            noteConfig = {
-                id: v4(),
-                noteId, 
-                gridId,
-                currentOpenInterval: nextInterval
-            }
-        }
-        else {
-            noteConfig.currentOpenInterval = nextInterval;
-        }
-
-        const tx = this.getTx();
-        await Promise.all([
-            tx.answerStore.add({
-                id: v4(),
-                noteId,
-                gridId,
-                answer,
-                timestamp: Date.now()
-            }),
-            tx.gridNoteConfigStore.put(noteConfig),
-            tx.tx.done
-        ]);
+    async getDocumentByName(name: string): Promise<Document | undefined>{
+        return await this.db.getFromIndex("documents", "by-name", name);
     }
 
-    async dump(){
+    async createDocument(document: Document){
+        await this.withTx(
+            this.documentOps.createDocument(document)
+        )
+    }
 
+    async removeDocument(id: string): Promise<void> {
+        await this.withTx(
+            this.documentOps.deleteDocument(id)
+        )
+    }
+
+    async updateDocumentName(id: string, name: string): Promise<void> {
+        const [doc] = await this.withTx(this.documentOps.getById(id))
+        if(!doc) throw new Error(`document with id ${id} not found`)
+        await this.withTx(this.documentOps.updateName(doc, name))
+    }
+    
+    // basic notes
+    async getNoteById(id: string) {
+        const [ note ] = await this.withTx(this.noteOps.getById(id))
+        if(!note) throw new Error(`note with id ${id} not found`)
+        return note
+    }
+
+
+    async getAllDocNotes(docId: string) {
+        const [ positions ] = await this.withTx(
+            this.positionOps.getAllByDocId(docId)
+        )
+
+        const notes = await this.withTx(
+            ...positions.map(pos => this.noteOps.getById(pos.noteId))
+        ) 
+        return notes
+    }
+
+    async createListNote<T extends Note>(docId: string, note: T){
+        const [doc] = await this.withTx(this.documentOps.getById(docId)) 
+        if(!doc){
+            throw new Error(`document with id ${docId} not found`)
+        }
+
+        const [ positions ] = await this.withTx(
+            this.positionOps.getAllByDocId(docId)
+        )
+
+        const maxY = Math.max(...positions.map(pos => pos.coord.y))
+        const coord = {
+            x: 0,
+            y: maxY + 1
+        }
+
+        await this.withTx(
+            this.noteOps.create(note),
+            this.positionOps.create(note.id, docId, coord)
+        )
+    }
+
+    async updateNote<T extends Note>(note: T): Promise<void> {
+        await this.withTx(
+            this.noteOps.update(note)
+        )
+    }
+
+    async deleteNote(noteId: string){
+        const [ position ] = await this.withTx(
+            this.positionOps.getbyNoteId(noteId)
+        )
+
+        if(!position) throw new Error(`note with id ${noteId} not found`)
+
+        await this.withTx(
+            this.noteOps.delete(noteId),
+            this.positionOps.delete(position.id)
+        )
+    }
+
+
+
+    async answer(noteId: string, answer: Ease, nextInterval: number){
+        const [ currentInterval ] = await this.withTx(
+            this.intervalOps.getByNoteId(noteId)
+        )
+
+        await this.withTx(
+            this.answerOps.create(noteId, answer),
+            this.intervalOps.create(noteId, nextInterval),
+            currentInterval ? this.intervalOps.delete(currentInterval.id) : (_: Tx) => Promise.resolve()
+        )
     }
 
     async clear(){
