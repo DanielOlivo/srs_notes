@@ -4,7 +4,10 @@ import type { Preview } from '@storybook/react-vite'
 import "../src/index.css"
 import { withRedux } from './withRedux';
 import { withRouter } from "storybook-addon-remix-react-router"
-import { withIdb } from "../src/db/decorator"
+// import { withIdb } from "../src/db/decorator"
+import { idbLoader } from '../src/db/idbLoader'
+
+
 
 const preview: Preview = {
   parameters: {
@@ -25,7 +28,10 @@ const preview: Preview = {
   decorators: [
     withRedux,
     withRouter,
-    withIdb
+    // withIdb
+  ],
+  loaders: [
+    idbLoader
   ]
 };
 
