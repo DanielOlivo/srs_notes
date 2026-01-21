@@ -1,28 +1,35 @@
 export type NoteType = "basic" | "text" | "image"
 
-export interface Note {
+export interface BaseNote {
     id: string
-    type: NoteType
     createdAt: number
     updatedAt: number
 }
 
-export interface BasicNote extends Note {
+export interface BasicNote extends BaseNote {
+    kind: 'basic'
     front: string
     back: string
 }
 
-export interface TextNote extends Note {
+export interface TextNote extends BaseNote {
+    kind: 'text'
     text: string
 }
 
-export interface ImageNote extends Note {
+export interface ImageNote extends BaseNote {
+    kind: 'image'
     name: string
     data: Blob
 }
 
+export type Note = BasicNote | TextNote | ImageNote
+
 export const storeName = "noteStore"
 
+/**
+ * @deprecated Do not use: idb doesn't recoginise union discriminations
+ */
 export interface NoteDb {
     [storeName]: {
         key: string,
@@ -33,14 +40,39 @@ export interface NoteDb {
     }
 }
 
+export const basicNoteStoreName = "basicNoteStore"
+export const textNoteStoreName = "textNoteStore"
+export const imageNoteStoreName = "imageNoteStore"
+
+export interface BasicNoteDb {
+    [basicNoteStoreName]: {
+        key: string,
+        value: BasicNote,
+    }
+}
+
+export interface TextNoteDb {
+    [textNoteStoreName]: {
+        key: string,
+        value: TextNote,
+    }
+}
+
+export interface ImageNoteDb {
+    [imageNoteStoreName]: {
+        key: string,
+        value: ImageNote,
+    }
+}
+
 export function isBasicNote(note: Note): note is BasicNote {
-    return note.type === "basic"
+    return note.kind === "basic"
 }
 
 export function isTextNote(note: Note): note is TextNote {
-    return note.type === "text"
+    return note.kind === "text"
 }
 
 export function isImageNote(note: Note): note is ImageNote {
-    return note.type === "image"
+    return note.kind === "image"
 }

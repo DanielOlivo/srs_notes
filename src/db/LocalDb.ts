@@ -1,6 +1,6 @@
-import { openDB, type DBSchema, type IDBPDatabase } from "idb";
+import { openDB, type IDBPDatabase } from "idb";
 import type { Ease } from "../Game/Ease";
-import type { Document, DocumentDb } from "./entities/document";
+import type { Document } from "./entities/document";
 import type { Db } from "./Db";
 import { DocumentOps } from "./ops/document.ops";
 import { PositionOps } from "./ops/position.ops";
@@ -9,6 +9,7 @@ import { IntervalOps } from "./ops/interval.ops";
 import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
 import { storeName as intervalStoreName } from "./entities/interval";
+import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
 
 const dbName = "memoryGameDb";
 
@@ -41,9 +42,22 @@ export async function getDb(){
 }
 
 export function getTx(db: IDBPDatabase<Db>) {
-    const tx = db.transaction(["documents", "noteStore", "answers", intervalStoreName, "positions"], "readwrite")
+    const tx = db.transaction([
+        "documents", 
+        // noteStoreName, 
+        basicNoteStoreName,
+        textNoteStoreName,
+        imageNoteStoreName,
+        "answers", 
+        intervalStoreName, 
+        "positions"], 
+        "readwrite"
+    )
     const documentStore = tx.objectStore("documents");
-    const noteStore = tx.objectStore("noteStore")
+    // const noteStore = tx.objectStore(noteStoreName)
+    const basicNoteStore = tx.objectStore(basicNoteStoreName)
+    const textNoteStore = tx.objectStore(textNoteStoreName)
+    const imageNoteStore = tx.objectStore(imageNoteStoreName)
     const answerStore = tx.objectStore("answers")
     const positionStore = tx.objectStore("positions")
     const intervalStore = tx.objectStore(intervalStoreName)
@@ -53,7 +67,10 @@ export function getTx(db: IDBPDatabase<Db>) {
     return {
         documentStore,
         positionStore,
-        noteStore,
+        // noteStore,
+        basicNoteStore,
+        textNoteStore,
+        imageNoteStore,
         answerStore,
         intervalStore,
 
@@ -85,13 +102,6 @@ class DbOps {
     
     setTx() {
         const tx = getTx(this.db)
-
-        this.documentOps.tx = tx
-        this.positionOps.tx = tx
-        this.noteOps.tx = tx 
-        this.answerOps.tx = tx
-        this.intervalOps.tx = tx
-
         return tx
     }
 
@@ -103,12 +113,6 @@ class DbOps {
             ...fns.map(fn => fn(tx)),
             tx.tx.done
         ])
-
-        this.documentOps.tx = null
-        this.positionOps.tx = null
-        this.noteOps.tx = null
-        this.answerOps.tx = null
-        this.intervalOps.tx = null
 
         return results.slice(0, -1) as T
     }
@@ -155,13 +159,23 @@ class DbOps {
         await this.withTx(this.documentOps.updateName(doc, name))
     }
     
-    // basic notes
+    async tryGetNoteById(id: string){
+        const [ maybeNote ] = await this.withTx(this.noteOps.getById(id))
+        return maybeNote 
+    }
+
     async getNoteById(id: string) {
         const [ note ] = await this.withTx(this.noteOps.getById(id))
         if(!note) throw new Error(`note with id ${id} not found`)
         return note
     }
 
+    async getNotePositions(noteIds: string[]){
+        const positions = await this.withTx(
+            ...noteIds.map(noteId => this.positionOps.getbyNoteId(noteId))
+        )
+        return positions
+    } 
 
     async getAllDocNotes(docId: string) {
         const [ positions ] = await this.withTx(
@@ -171,7 +185,7 @@ class DbOps {
         const notes = await this.withTx(
             ...positions.map(pos => this.noteOps.getById(pos.noteId))
         ) 
-        return notes
+        return { notes, positions }
     }
 
     async createListNote<T extends Note>(docId: string, note: T){
@@ -184,7 +198,7 @@ class DbOps {
             this.positionOps.getAllByDocId(docId)
         )
 
-        const maxY = Math.max(...positions.map(pos => pos.coord.y))
+        const maxY = positions.length === 0 ? 0 : Math.max(...positions.map(pos => pos.coord.y))
         const coord = {
             x: 0,
             y: maxY + 1
@@ -202,7 +216,7 @@ class DbOps {
         )
     }
 
-    async deleteNote(noteId: string){
+    async deleteNote(noteId: string, kind: Note['kind']){
         const [ position ] = await this.withTx(
             this.positionOps.getbyNoteId(noteId)
         )
@@ -210,12 +224,16 @@ class DbOps {
         if(!position) throw new Error(`note with id ${noteId} not found`)
 
         await this.withTx(
-            this.noteOps.delete(noteId),
+            this.noteOps.delete(noteId, kind),
             this.positionOps.delete(position.id)
         )
     }
 
-
+    async deletePosition(positionId: number){
+        await this.withTx(
+            this.positionOps.delete(positionId)
+        )
+    }
 
     async answer(noteId: string, answer: Ease, nextInterval: number){
         const [ currentInterval ] = await this.withTx(
