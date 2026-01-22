@@ -6,6 +6,7 @@ import { withRedux } from './withRedux';
 import { withRouter } from "storybook-addon-remix-react-router"
 // import { withIdb } from "../src/db/decorator"
 import { idbLoader } from '../src/db/idbLoader'
+import { withLayout } from './withLayout';
 
 
 
@@ -26,12 +27,13 @@ const preview: Preview = {
     }
   },
   decorators: [
+    withLayout,
     withRedux,
     withRouter,
     // withIdb
   ],
   loaders: [
-    idbLoader
+    // idbLoader
   ]
 };
 
