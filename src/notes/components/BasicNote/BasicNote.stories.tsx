@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { StoreStateUtility } from '../../../utils/StoreState';
+import { BasicNote as BasicNoteUtils } from '../../../db/entities/Note.utils';
 import { BasicNote } from './BasicNote';
-import { Provider } from 'react-redux';
-import { getStore } from '../../../app/store';
+import type { IBasicNote } from '../../../db/entities/Note';
 
 const meta = {
   title: 'Notes/BasicNote',
@@ -11,28 +12,28 @@ const meta = {
   },
   tags: ['autodocs'],
   args: {
-    note: {
-        id: '',
-        kind: 'basic',
-        front: "front",
-        back: "back",
-        createdAt: 0,
-        updatedAt: 0
-    },
-    gridId: '',
+    id: '',
+    kind: 'basic',
+    front: "front",
+    back: "back",
+    createdAt: 0,
+    updatedAt: 0
   }
 } satisfies Meta<typeof BasicNote>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Closed: Story = {
-    parameters: {} ,
-    decorators: [
-      (Story) => (
-        <Provider store={getStore()}>
-          <Story />
-        </Provider>
-      )
-    ]
+const apiState = new StoreStateUtility()
+const doc = apiState.addDocument('doc', 'list')
+const { note } = apiState.addNote(doc, BasicNoteUtils.random())
+apiState.addInterval(note, { openDuration: 10000, openTimestamp: Date.now()})
+
+export const Opened: Story = {
+  args: {
+    ...note as IBasicNote
+  },
+  parameters: {
+    redux: apiState
+  } ,
 }

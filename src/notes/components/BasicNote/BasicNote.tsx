@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from "react"
+import { useEffect, useEffectEvent, useState, type FC } from "react"
 import type { IBasicNote as BasicNoteRecord } from "../../../db/entities/Note"
 import { useGetIntervalQuery } from "../../note.api"
 import dayjs from "dayjs"
@@ -13,11 +13,15 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
     const [isOpen, setIsOpen] = useState<boolean | null>(null)
     const [remained, setReamined] = useState<string | null>(null)
 
+    const updateIsOpen = useEffectEvent((opened: boolean) => setIsOpen(opened))
+    const updateIntervalId = useEffectEvent((id: NodeJS.Timeout | null) => setIntervalId(id))
+
     useEffect(() => {
         if(!isError && !isLoading && interval){
             const closeTime = interval.openTimestamp + interval.openDuration
             const opened = Date.now() < closeTime
-            setIsOpen(opened)
+            // setIsOpen(opened)
+            updateIsOpen(opened)
 
             const reaminedUpdater = () => {
                 const rem = Math.floor((closeTime - Date.now()))
@@ -34,8 +38,9 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
             }
 
             if(opened){
-                const int = setInterval(reaminedUpdater, 1000)
-                setIntervalId(int)
+                const id = setInterval(reaminedUpdater, 1000)
+                // setIntervalId(id)
+                updateIntervalId(id)
             }
 
             return () => {
