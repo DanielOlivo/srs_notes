@@ -1,19 +1,21 @@
 import { api } from "../api";
+import type { Document } from "../db/entities/document";
 import { getDb } from "../db/LocalDb";
 import { 
     type DocumentRenameRequestDto, 
-    type DocumentDto, 
-    type DocumentListDto 
+    // type DocumentDto, 
+    // type DocumentListDto 
 } from "./document.dto";
 
 export const documentApi = api.injectEndpoints({
     endpoints: builder => ({
 
-        getDocumentList: builder.query<DocumentListDto, void>({
+        getDocumentList: builder.query<string[], void>({
             queryFn: async () => {
                 try{
                     const db = await getDb();
-                    return { data: await db.getDocumentList() }
+                    // return { data: await db.getDocumentList() }
+                    return { data : undefined }
                 }
                 catch(error) {
                     return { error }
@@ -22,11 +24,11 @@ export const documentApi = api.injectEndpoints({
             providesTags: ['DocumentList']
         }),
 
-        getDocument: builder.query<DocumentDto | null, string>({
+        getDocument: builder.query<Document, string>({
             queryFn: async(docId) => {
                 try{
                     const db = await getDb();
-                    return { data: await db.getDocumnet(docId) }
+                    return { data: await db.getDocumentById(docId) }
                 }
                 catch(error){
                     return { error }

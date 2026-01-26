@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { DocumentList } from "./components/DocumentList";
+import { DocumentList } from "./components/DocumentList/DocumentList";
 import { DocumentControls } from "./components/DocumentControls";
 import { DocumentLoader } from "./components/DocumentLoader";
 

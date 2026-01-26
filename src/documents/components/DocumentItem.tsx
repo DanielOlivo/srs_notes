@@ -1,8 +1,14 @@
 import { useRef, useState, type FC } from "react";
 import type { DocumentInfoDto } from "../document.dto";
-import { useDeleteDocumentMutation, useRenameDocumentMutation } from "../document.api";
+import { useDeleteDocumentMutation, useGetDocumentQuery, useRenameDocumentMutation } from "../document.api";
 
-export const DocumentItem: FC<DocumentInfoDto> = ({hash, name, uploadedAt, size}) => {
+export interface DocumentItemProps {
+    id: string
+}
+
+export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
+
+    const { data: document, isLoading, isError, error } = useGetDocumentQuery(id)
 
     const [onEdit, setOnEdit] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -10,33 +16,52 @@ export const DocumentItem: FC<DocumentInfoDto> = ({hash, name, uploadedAt, size}
     const [deleteDocument] = useDeleteDocumentMutation();
 
     const handleSave = () => {
-        if(inputRef.current){
-            rename({id: hash, newName: inputRef.current.value})
+        if(inputRef.current && document){
+            rename({id: document.id, newName: inputRef.current.value})
         }
     }
 
     const handleCancel = () => {
         setOnEdit(false);
-        if(inputRef.current)
-            inputRef.current.value = name;
+        if(inputRef.current && document)
+            inputRef.current.value = document.name;
     }
 
-    const handleDelete = () => deleteDocument(hash);
+    const handleDelete = () => {
+        if(document)
+            deleteDocument(document.id);
+    }
+
+    if(isLoading){
+        return <li>Loading...</li>
+    }
+
+    if(isError || !document){
+        return <li>Error {errorToString(error)}</li>
+    }
 
     return (
         <li>
-            <span>{hash}</span>
+            {document && <span>{document.id}</span>}
 
             <input
                 ref={inputRef}
-                defaultValue={name}
+                defaultValue={document.name}
                 disabled={!onEdit}
             />
             <button onClick={handleSave}>Save</button>
             <button onClick={handleCancel}>Cancel</button>
-            <span>{uploadedAt.toString()}</span>
-            <span>{size}</span>
+            {/* <span>{uploadedAt.toString()}</span> */}
+            {/* <span>{size}</span> */}
             <button onClick={handleDelete}>Delete</button>
         </li>
     )
+}
+
+function errorToString(err: unknown): string {
+    if(typeof err === 'string')
+        return err as string
+    if(typeof err === 'object')
+        return JSON.stringify(err)
+    return `unknown error ${err}`
 }
