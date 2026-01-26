@@ -2,10 +2,10 @@ import { Decorator } from "@storybook/react";
 
 export const withLayout: Decorator = (Story, context) => {
 
-    const { classNames } = context.parameters 
+    const { classNames, styles } = context.parameters 
 
     return (
-        <div className={classNames}>
+        <div className={classNames} style={styles}>
             <Story />
         </div>
     )
