@@ -6,24 +6,31 @@ export interface BaseNote {
     updatedAt: number
 }
 
-export interface BasicNote extends BaseNote {
+export interface BasicNoteData {
     kind: 'basic'
     front: string
     back: string
 }
+export interface IBasicNote extends BaseNote, BasicNoteData {}
 
-export interface TextNote extends BaseNote {
+
+export interface TextNoteData {
     kind: 'text'
     text: string
 }
+export interface ITextNote extends BaseNote, TextNoteData {}
 
-export interface ImageNote extends BaseNote {
+
+export interface ImageNoteData {
     kind: 'image'
     name: string
     data: Blob
 }
+export interface IImageNote extends BaseNote, ImageNoteData {}
 
-export type Note = BasicNote | TextNote | ImageNote
+
+export type NoteData = BasicNoteData | TextNoteData | ImageNoteData
+export type Note = IBasicNote | ITextNote | IImageNote
 
 export const storeName = "noteStore"
 
@@ -47,32 +54,32 @@ export const imageNoteStoreName = "imageNoteStore"
 export interface BasicNoteDb {
     [basicNoteStoreName]: {
         key: string,
-        value: BasicNote,
+        value: IBasicNote,
     }
 }
 
 export interface TextNoteDb {
     [textNoteStoreName]: {
         key: string,
-        value: TextNote,
+        value: ITextNote,
     }
 }
 
 export interface ImageNoteDb {
     [imageNoteStoreName]: {
         key: string,
-        value: ImageNote,
+        value: IImageNote,
     }
 }
 
-export function isBasicNote(note: Note): note is BasicNote {
+export function isBasicNote(note: Note): note is IBasicNote {
     return note.kind === "basic"
 }
 
-export function isTextNote(note: Note): note is TextNote {
+export function isTextNote(note: Note): note is ITextNote {
     return note.kind === "text"
 }
 
-export function isImageNote(note: Note): note is ImageNote {
+export function isImageNote(note: Note): note is IImageNote {
     return note.kind === "image"
 }
