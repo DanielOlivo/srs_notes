@@ -3,6 +3,7 @@ import { DocumentList } from "./components/DocumentList/DocumentList";
 import { DocumentControls } from "./components/DocumentControls";
 import { DocumentLoader } from "./components/DocumentLoader";
 import { CleanAllButton } from "../db/components/CleanAll";
+import { SeedButton } from "../db/components/SeedButton";
 
 /** list and buttons */
 export const Documents: FC = () => {
@@ -13,6 +14,7 @@ export const Documents: FC = () => {
         <div className="w-full h-full flex flex-col justify-start items-stretch">
             <DocumentList />
             <CleanAllButton />
+            <SeedButton />
             <DocumentLoader />
         </div>
     )

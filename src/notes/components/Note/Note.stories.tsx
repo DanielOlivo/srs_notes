@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Note } from './Note';
 import type { IBasicNote, ITextNote } from '../../../db/entities/Note';
-import type { Document } from '../../../db/entities/document';
+import type { IDocument } from '../../../db/entities/document';
 import type { Position } from '../../../db/entities/position';
 import type { StoreState } from '../../../app/store';
 
@@ -17,7 +17,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const document: Document = {
+const document: IDocument = {
     id: "1",
     type: 'list',
     name: "some document",

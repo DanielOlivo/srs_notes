@@ -1,6 +1,6 @@
 import { api } from "../api";
 import type { AppStore } from "../app/store";
-import type { Document } from "../db/entities/document";
+import type { IDocument } from "../db/entities/document";
 import { type NoteData, type Note } from "../db/entities/Note";
 import type { Position } from "../db/entities/position";
 import { getDb } from "../db/LocalDb";
@@ -153,7 +153,7 @@ export const {
 
 
 export type NoteApiData = {
-    documents: Document[]
+    documents: IDocument[]
     notes: Note[]
     positions: Position[]
     intervals: Interval[]

@@ -1,7 +1,6 @@
 import { v4 } from "uuid";
 import type { RootState, StoreState } from "../app/store";
-import type { Document } from "../db/entities/document";
-import type { GridApiData } from "../grid/grid.api";
+import type { IDocument } from "../db/entities/document";
 import type { NoteApiData } from "../notes/note.api";
 import type { Note, NoteData } from "../db/entities/Note";
 import type { Position } from "../db/entities/position";
@@ -12,7 +11,7 @@ type SlicesOnlyState = Omit<RootState, "api">
 
 export class StoreStateUtility implements StoreState {
     slices?: Partial<SlicesOnlyState>  = undefined
-    gridApi?: GridApiData = undefined
+    // gridApi?: GridApiData = undefined
     noteApi: NoteApiData = {
         documents: [],
         notes: [],
@@ -20,8 +19,8 @@ export class StoreStateUtility implements StoreState {
         intervals: [],
     }
 
-    addDocument(name: string, type: Document["type"]) {
-        const document: Document = {
+    addDocument(name: string, type: IDocument["type"]) {
+        const document: IDocument = {
             id: v4(),
             name,
             type,
@@ -40,7 +39,7 @@ export class StoreStateUtility implements StoreState {
         }
     }
 
-    addNote(document: Document, data: NoteData) {
+    addNote(document: IDocument, data: NoteData) {
         if(document.type === 'grid'){
             throw new Error("not implemented")
         }

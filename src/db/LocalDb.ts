@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { Ease } from "../Game/Ease";
-import type { Document } from "./entities/document";
+import type { IDocument } from "./entities/document";
 import type { Db } from "./Db";
 import { DocumentOps } from "./ops/document.ops";
 import { PositionOps } from "./ops/position.ops";
@@ -118,14 +118,14 @@ class DbOps {
     }
 
     // documents
-   async getDocumentList(): Promise<Document[]> {
+   async getDocumentList(): Promise<IDocument[]> {
         const [docs] = await this.withTx(
             this.documentOps.getAllDocuments()
         )
         return docs
     }
 
-    async getDocumentById(id: string): Promise<Document | undefined>{
+    async getDocumentById(id: string): Promise<IDocument | undefined>{
         try{
             const [doc] = await this.withTx(
                 this.documentOps.getById(id)
@@ -137,11 +137,11 @@ class DbOps {
         }
     }
 
-    async getDocumentByName(name: string): Promise<Document | undefined>{
+    async getDocumentByName(name: string): Promise<IDocument | undefined>{
         return await this.db.getFromIndex("documents", "by-name", name);
     }
 
-    async createDocument(document: Document){
+    async createDocument(document: IDocument){
         await this.withTx(
             this.documentOps.createDocument(document)
         )

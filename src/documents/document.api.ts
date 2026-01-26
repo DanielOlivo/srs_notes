@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { Document } from "../db/entities/document";
+import type { IDocument } from "../db/entities/document";
 import { getDb } from "../db/LocalDb";
 import { 
     type DocumentRenameRequestDto, 
@@ -24,7 +24,7 @@ export const documentApi = api.injectEndpoints({
             providesTags: ['DocumentList']
         }),
 
-        getDocument: builder.query<Document, string>({
+        getDocument: builder.query<IDocument, string>({
             queryFn: async(docId) => {
                 try{
                     const db = await getDb();

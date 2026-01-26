@@ -1,6 +1,6 @@
 import type { IDBPDatabase } from "idb"
 import type { Db } from "../Db"
-import type { Document } from "../entities/document"
+import type { IDocument } from "../entities/document"
 import type { Tx } from "../LocalDb"
 
 const storeName = "documents"
@@ -28,8 +28,8 @@ export class DocumentOps {
         return tx.documentStore.index("by-name").get(name)
     }
 
-    createDocument = (document: Document) => (tx: Tx) => {
-        const doc: Document = {
+    createDocument = (document: IDocument) => (tx: Tx) => {
+        const doc: IDocument = {
             ...document,
             createdAt: Date.now()
         }
@@ -40,7 +40,7 @@ export class DocumentOps {
         return tx.documentStore.delete(id)
     }
 
-    updateName = (doc: Document, name: string) => (tx: Tx) => {
+    updateName = (doc: IDocument, name: string) => (tx: Tx) => {
         return tx.documentStore.put(doc, name)
     }
 }

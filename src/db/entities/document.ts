@@ -1,4 +1,4 @@
-export interface Document {
+export interface IDocument {
     id: string
     name: string
     createdAt: number
@@ -8,7 +8,7 @@ export interface Document {
 export interface DocumentDb {
     documents: {
         key: string // id
-        value: Document,
+        value: IDocument,
         indexes: {
             "by-name": string
         }
