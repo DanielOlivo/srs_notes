@@ -1,4 +1,4 @@
-import type { Vector2 } from "./Coord";
+import type { Vector2 } from "./Vector2";
 
 export interface GridItem {
     coord: Vector2

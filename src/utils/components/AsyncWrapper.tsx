@@ -12,8 +12,8 @@ export const AsyncWrapper: FC<PropsWithChildren<AsyncWrapperProps>> = ({children
     useEffect(() => {
         fn().then(() => {
             setIsReady(true)
-        }).catch(() => {
-            setError("Error occurred")
+        }).catch((err) => {
+            setError(`Error occurred: ${err}`)
         })
     }, [])
 

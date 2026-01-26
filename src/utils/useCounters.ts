@@ -1,5 +1,5 @@
 import { createContext, useCallback, useState } from "react";
-import { Vector2 } from "./Coord";
+import { Vector2 } from "./Vector2";
 import { NotImplemented } from "./NotImplemented";
 
 type CountersState = {[K: string]: number}
