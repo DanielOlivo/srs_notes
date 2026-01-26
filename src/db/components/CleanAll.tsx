@@ -1,18 +1,14 @@
 import type { FC } from "react";
-import { getDb } from "../LocalDb";
-
-const cleanAll = async () => {
-    console.log('cleanAll...')
-    const db = await getDb()
-    await db.clear()
-    console.log('...cleanAll done')
-}
+import { useDeleteAllDocumentsMutation } from "../../documents/document.api";
 
 export const CleanAllButton: FC = () => {
+
+    const [ deleteAll, ] = useDeleteAllDocumentsMutation()
+
     return (
         <button
             className="btn btn-warning"
-            onClick={cleanAll} 
+            onClick={() => deleteAll()} 
         >Clean All</button>
     )
 }

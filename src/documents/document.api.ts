@@ -14,8 +14,11 @@ export const documentApi = api.injectEndpoints({
             queryFn: async () => {
                 try{
                     const db = await getDb();
-                    // return { data: await db.getDocumentList() }
-                    return { data : undefined }
+                    const docs = await db.getDocumentList()
+                    for(const doc of docs){
+                        documentApi.util.upsertQueryData('getDocument', doc.id, doc)
+                    } 
+                    return { data: docs.map(doc => doc.id) }
                 }
                 catch(error) {
                     return { error }
@@ -33,7 +36,8 @@ export const documentApi = api.injectEndpoints({
                 catch(error){
                     return { error }
                 }
-            }
+            },
+            providesTags: (result, error, docId) => [{type: "DocumentList" as const, id: docId}]
         }),
 
         uploadDocument: builder.mutation<void, Blob>({
@@ -74,6 +78,15 @@ export const documentApi = api.injectEndpoints({
                     return { error }
                 }
             }
+        }),
+
+        deleteAllDocuments: builder.mutation<void, void>({
+            queryFn: async () => {
+                const db = await getDb();
+                await db.clear();
+                return { data: undefined }
+            },
+            invalidatesTags: ["DocumentList"]
         })
     })
 })
@@ -85,4 +98,6 @@ export const {
     useUploadDocumentMutation,
     useRenameDocumentMutation,
     useDeleteDocumentMutation,
+
+    useDeleteAllDocumentsMutation,
 } = documentApi;
