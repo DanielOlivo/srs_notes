@@ -12,9 +12,9 @@ const seed = async () => {
         new Document("doc3", "list"),
     ]
 
-    await Promise.all(
-        docs.map(db.createDocument)
-    )
+    await db.createDocument(docs[0])
+    await db.createDocument(docs[1])
+    await db.createDocument(docs[2])
 
     console.log('..seeding done')
 }

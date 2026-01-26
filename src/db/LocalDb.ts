@@ -107,7 +107,8 @@ class DbOps {
 
     async withTx<T extends any[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) {
 
-        const tx = this.setTx()
+        // const tx = this.setTx()
+        const tx = getTx(this.db)
 
         const results = await Promise.all([
             ...fns.map(fn => fn(tx)),
