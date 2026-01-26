@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import gridReducer, { initialState as gridInitialState } from '../grid/grid.slice'
 import { api } from "../api";
 import { GridApiUtils, type GridApiData } from "../grid/grid.api";
+import { handleNoteCache, type NoteApiData } from "../notes/note.api";
 
 
 export const getStore = () => configureStore({
@@ -25,10 +26,11 @@ type SlicesOnlyState = Omit<RootState, "api">
 export type StoreState = {
     slices?: Partial<SlicesOnlyState>
     gridApi?: GridApiData
+    noteApi?: NoteApiData
 }
 
 
-export const getStoreWithState = ({slices, gridApi}: StoreState) => {
+export const getStoreWithState = ({slices, gridApi, noteApi}: StoreState) => {
 
     const initialState: SlicesOnlyState = {
         gridReducer: slices?.gridReducer ?? gridInitialState,
@@ -48,6 +50,10 @@ export const getStoreWithState = ({slices, gridApi}: StoreState) => {
         const utils = new GridApiUtils(store)
         utils.apply(gridApi)
     }
+
+    if(noteApi){
+        handleNoteCache(noteApi, store)
+    } 
 
     return store
 }
