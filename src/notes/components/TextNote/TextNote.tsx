@@ -1,11 +1,7 @@
 import type { FC } from "react";
+import type { ITextNote as TextNoteRecord } from "../../../db/entities/Note";
 
-export interface TextNoteProps {
-    id: string
-    text: string
-}
-
-export const TextNote: FC<TextNoteProps> = ({id, text}) => {
+export const TextNote: FC<TextNoteRecord> = ({id, text}) => {
 
     return (
         <div className="w-full h-full flex justify-center items-center">

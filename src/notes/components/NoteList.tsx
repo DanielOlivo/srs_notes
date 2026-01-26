@@ -1,10 +1,10 @@
 import type { FC } from "react";
-import { useGetNotesQuery } from "../note.api";
+import { useGetAllNotesQuery } from "../note.api";
 import { NoteItem } from "./NoteItem";
 
 export const NoteList: FC = () => {
 
-    const { data: noteList, isLoading, isError, error } = useGetNotesQuery();
+    const { data: noteList, isLoading, isError, error } = useGetAllNotesQuery();
 
     if(isLoading){
         return <div>Loading...</div>
