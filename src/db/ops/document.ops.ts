@@ -17,7 +17,7 @@ export class DocumentOps {
     }
 
     getAllDocuments = () => (tx: Tx) => {
-        return tx.documentStore.getAll(storeName)
+        return tx.documentStore.getAll()
     }
 
     getById = (id: string) => (tx: Tx) => {
