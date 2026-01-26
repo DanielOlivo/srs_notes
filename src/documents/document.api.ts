@@ -1,6 +1,7 @@
 import { api } from "../api";
 import type { IDocument } from "../db/entities/document";
 import { getDb } from "../db/LocalDb";
+import { seed } from "../db/seed";
 import { 
     type DocumentRenameRequestDto, 
     // type DocumentDto, 
@@ -38,6 +39,14 @@ export const documentApi = api.injectEndpoints({
                 }
             },
             providesTags: (result, error, docId) => [{type: "DocumentList" as const, id: docId}]
+        }),
+
+        seed: builder.mutation<void, void>({
+            queryFn: async () => {
+                await seed()
+                return { data: undefined }
+            },
+            invalidatesTags: ["DocumentList"]
         }),
 
         uploadDocument: builder.mutation<void, Blob>({
@@ -94,6 +103,8 @@ export const documentApi = api.injectEndpoints({
 export const {
     useGetDocumentListQuery,
     useGetDocumentQuery,
+
+    useSeedMutation,
 
     useUploadDocumentMutation,
     useRenameDocumentMutation,
