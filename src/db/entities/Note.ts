@@ -1,6 +1,6 @@
 export type NoteType = "basic" | "text" | "image"
 
-export interface BaseNote {
+export interface IBaseNote {
     id: string
     createdAt: number
     updatedAt: number
@@ -11,14 +11,14 @@ export interface BasicNoteData {
     front: string
     back: string
 }
-export interface IBasicNote extends BaseNote, BasicNoteData {}
+export interface IBasicNote extends IBaseNote, BasicNoteData {}
 
 
 export interface TextNoteData {
     kind: 'text'
     text: string
 }
-export interface ITextNote extends BaseNote, TextNoteData {}
+export interface ITextNote extends IBaseNote, TextNoteData {}
 
 
 export interface ImageNoteData {
@@ -26,7 +26,7 @@ export interface ImageNoteData {
     name: string
     data: Blob
 }
-export interface IImageNote extends BaseNote, ImageNoteData {}
+export interface IImageNote extends IBaseNote, ImageNoteData {}
 
 
 export type NoteData = BasicNoteData | TextNoteData | ImageNoteData
