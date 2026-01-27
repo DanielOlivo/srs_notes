@@ -1,5 +1,5 @@
 import { useRef, useState, type FC } from "react";
-import type { DocumentInfoDto } from "../document.dto";
+import { Link } from "react-router";
 import { useDeleteDocumentMutation, useGetDocumentQuery, useRenameDocumentMutation } from "../document.api";
 
 export interface DocumentItemProps {
@@ -33,27 +33,50 @@ export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
     }
 
     if(isLoading){
-        return <li>Loading...</li>
+        return <li className="list-row">Loading...</li>
     }
 
     if(isError || !document){
-        return <li>Error {errorToString(error)}</li>
+        return <li className="list-row">Error {errorToString(error)}</li>
     }
 
     return (
-        <li>
-            {document && <span>{document.id}</span>}
+        <li className="list-row">
+            <div className="max-w-16">
+                <p className="truncate">{document.id}</p>
+            </div>
 
-            <input
-                ref={inputRef}
-                defaultValue={document.name}
-                disabled={!onEdit}
-            />
-            <button onClick={handleSave}>Save</button>
-            <button onClick={handleCancel}>Cancel</button>
-            {/* <span>{uploadedAt.toString()}</span> */}
-            {/* <span>{size}</span> */}
-            <button onClick={handleDelete}>Delete</button>
+            <div>
+                {/* <input
+                    ref={inputRef}
+                    defaultValue={document.name}
+                    disabled={!onEdit}
+                /> */}
+                <p>
+                    <Link to={`/doc/${document.id}`}>{document.name}</Link>
+                </p>
+            </div>
+
+            <div>
+                <button 
+                    className="btn" 
+                    onClick={handleSave}
+                >Save</button>
+            </div>
+
+            <div>
+                <button 
+                    className="btn" 
+                    onClick={handleCancel}
+                >Cancel</button>
+            </div>
+
+            <div>
+                <button 
+                    className="btn btn-warning"
+                    onClick={handleDelete}
+                >Delete</button>
+            </div>
         </li>
     )
 }

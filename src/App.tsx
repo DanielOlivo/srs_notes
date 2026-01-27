@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import './App.css'
 import { Documents } from './documents/Documents';
 import { NavBar } from './common/components/NavBar';
+import { ListPage } from './List/components/ListPage/ListPage';
 
 function App() {
 
@@ -15,6 +16,8 @@ function App() {
         {/* <Route path="notes" element={<Notes />} /> */}
         {/* <Route path="grid" element={<GridPage /> } /> */}
         {/* <Route path="grid/:gridId" element={<GridPage /> } /> */}
+        <Route path="doc/:docId" element={<ListPage />} />
+            
         <Route path="*" element={<Navigate to="docs" />} />
       </Routes>
     </div>

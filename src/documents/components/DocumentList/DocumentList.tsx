@@ -21,7 +21,7 @@ export const DocumentList: FC = () => {
     }
 
     return (
-        <ul>
+        <ul className="list">
             {ids.map(id => <DocumentItem key={id} id={id} />)}
         </ul>
     );
