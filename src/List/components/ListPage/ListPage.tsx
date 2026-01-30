@@ -1,9 +1,18 @@
 import type { FC } from "react";
 import { useParams } from "react-router";
+import { List } from "../List";
 
 export const ListPage: FC = () => {
 
     const { docId } = useParams<{docId: string}>() 
 
-    return <>List page: {docId}</>
+    if(!docId){
+        return <div>docId not found in the url</div>
+    }
+
+    return (
+        <div>
+            <List documentId={docId} />
+        </div>
+    )
 }
