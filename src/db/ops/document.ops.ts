@@ -41,6 +41,6 @@ export class DocumentOps {
     }
 
     updateName = (doc: IDocument, name: string) => (tx: Tx) => {
-        return tx.documentStore.put(doc, name)
+        return tx.documentStore.put({ ...doc, name })
     }
 }

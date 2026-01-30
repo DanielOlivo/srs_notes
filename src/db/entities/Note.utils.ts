@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote } from "./Note";
+import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, NoteType, TextNoteData } from "./Note";
 import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
 
@@ -49,12 +49,21 @@ export class BasicNote extends BaseNote implements IBasicNote {
 
 }
 
-export class TextNote {
-    static random = (): ITextNote => ({
-        id: v4(),
-        kind: 'text',
-        text: faker.lorem.sentence(),
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-    })
+export class TextNote extends BaseNote implements ITextNote {
+
+    text: string
+    kind: TextNoteData['kind']
+
+    constructor(id: string, createdAt: number, updatedAt: number, text: string) {
+        super(id, createdAt, updatedAt)
+        this.text = text
+        this.kind = 'text'
+    } 
+
+    static random = (): ITextNote => new TextNote(
+        v4(),
+        Date.now(),
+        Date.now(),
+        faker.lorem.sentence(),
+    )
 }

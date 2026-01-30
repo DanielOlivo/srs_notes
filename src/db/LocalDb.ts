@@ -167,7 +167,7 @@ class DbOps {
 
     async getNoteById(id: string) {
         const [ note ] = await this.withTx(this.noteOps.getById(id))
-        if(!note) throw new Error(`note with id ${id} not found`)
+        // if(!note) throw new Error(`note with id ${id} not found`)
         return note
     }
 

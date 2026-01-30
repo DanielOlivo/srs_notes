@@ -4,6 +4,7 @@ import { DocumentControls } from "./components/DocumentControls";
 import { DocumentLoader } from "./components/DocumentLoader";
 import { CleanAllButton } from "../db/components/CleanAll";
 import { SeedButton } from "../db/components/SeedButton";
+import { TestButton } from "../db/components/TestButton";
 
 /** list and buttons */
 export const Documents: FC = () => {
@@ -15,6 +16,7 @@ export const Documents: FC = () => {
             <DocumentList />
             <CleanAllButton />
             <SeedButton />
+            <TestButton />
             <DocumentLoader />
         </div>
     )
