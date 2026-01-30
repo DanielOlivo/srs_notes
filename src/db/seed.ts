@@ -1,5 +1,5 @@
 import { Document } from "./Document"
-import { BasicNote } from "./entities/Note.utils"
+import { BasicNote, TextNote } from "./entities/Note.utils"
 import { getDb } from "./LocalDb"
 
 export const seed = async () => {
@@ -26,6 +26,14 @@ export const seed = async () => {
             break
         }
     }
+
+    const docTextNotes = Array.from({length: 10}, () => TextNote.random())
+    for(const note of docTextNotes){
+        await db.createListNote(docs[0].id, note)
+    }
+    // await Promise.all(docTextNotes.map(async note => {
+    //     await db.createListNote(docs[1].id, note)
+    // }))
 
     console.log('..seeding done')
 }
