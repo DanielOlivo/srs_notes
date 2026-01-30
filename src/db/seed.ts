@@ -1,4 +1,5 @@
 import { Document } from "./Document"
+import { BasicNote } from "./entities/Note.utils"
 import { getDb } from "./LocalDb"
 
 export const seed = async () => {
@@ -15,6 +16,16 @@ export const seed = async () => {
     await db.createDocument(docs[1])
     await db.createDocument(docs[2])
 
-    console.log('..seeding done')
+    const doc1BasicNotes = Array.from({length: 10}, () => BasicNote.random())    
+    for(const note of doc1BasicNotes){
+        try{
+            await db.createListNote(docs[0].id, note)
+        }
+        catch(error){
+            console.error(`failed to create note ${note}\n${error}`)
+            break
+        }
+    }
 
+    console.log('..seeding done')
 }

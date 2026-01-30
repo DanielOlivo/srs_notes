@@ -35,11 +35,10 @@ export class PositionOps {
 
     create = (noteId: string, documentId: string, coord: IVector2) => (tx: Tx) => {
         const position = {
-            id: 0,
             noteId,
             documentId,
             coord
-        }
+        } as Position
         return tx.positionStore.add(position)
     }
 
