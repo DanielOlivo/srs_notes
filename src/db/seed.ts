@@ -31,9 +31,6 @@ export const seed = async () => {
     for(const note of docTextNotes){
         await db.createListNote(docs[0].id, note)
     }
-    // await Promise.all(docTextNotes.map(async note => {
-    //     await db.createListNote(docs[1].id, note)
-    // }))
 
     console.log('..seeding done')
 }

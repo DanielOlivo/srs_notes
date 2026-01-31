@@ -4,7 +4,7 @@ import type { IDocument } from "../db/entities/document";
 import type { NoteApiData } from "../notes/note.api";
 import type { Note, NoteData } from "../db/entities/Note";
 import type { Position } from "../db/entities/position";
-import type { Interval } from "../db/entities/interval";
+import type { IInterval } from "../db/entities/interval";
 import { faker } from "@faker-js/faker";
 
 type SlicesOnlyState = Omit<RootState, "api">
@@ -61,9 +61,9 @@ export class StoreStateUtility implements StoreState {
         return { note, position }
     }
 
-    addInterval(note: Note, data?: Omit<Interval, 'id' | 'noteId'>){
+    addInterval(note: Note, data?: Omit<IInterval, 'id' | 'noteId'>){
         const id = v4()
-        const interval: Interval = {
+        const interval: IInterval = {
             id,
             noteId: note.id,
             openTimestamp: data?.openTimestamp ?? faker.date.recent().getTime(),

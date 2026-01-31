@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Document } from "../Document";
 import { getDb } from "../LocalDb";
-import { BasicNote, TextNote } from "../entities/Note.utils";
+import { BasicNote, Interval, TextNote } from "../entities/Note.utils";
 
 export const TestButton: FC = () => {
     return (
@@ -130,6 +130,62 @@ const test = async () => {
     catch(error){
         console.error(error)
     }
+
+    try{
+        console.log("testing intervals...")
+        
+        const basic = BasicNote.random()
+        await db.createListNote(doc.id, basic)
+
+
+        const interval = Interval.randomForNote(basic.id)
+        await db.addInterval(interval)
+
+        {
+            // get
+            const extracted = await db.getIntervalByNoteId(basic.id)
+            if(!extracted)
+                throw new Error('failed to get interval')
+
+        }
+
+        {
+            // update
+            const newOpenDuration = Math.floor(Math.random() * 10000)
+            const newTimestamp = Date.now() + 100
+            await db.updateNoteInterval(basic.id, newOpenDuration, newTimestamp)
+
+            const extracted = await db.getIntervalByNoteId(basic.id)
+            if(!extracted)
+                throw new Error('failed to get interval')
+            if(extracted.openDuration != newOpenDuration)
+                throw new Error("interval open duration was not updated")
+            if(extracted.openTimestamp != newTimestamp)
+                throw new Error("interval timestamp was not updated")
+        }
+
+        {
+            // delete
+            const saved = await db.getIntervalByNoteId(basic.id)
+            if(saved)
+                await db.removeInterval(saved.id)
+            // await db.removeInterval(interval.id)
+
+            const nonexisting = await db.getIntervalByNoteId(basic.id)
+            if(nonexisting)
+                throw new Error("interval was not deleted")
+
+        }
+
+        console.log('...intervals done')
+    }
+    catch(error){
+        console.error(error)
+    }
+    finally {
+        await db.clear()
+    }
+
 
     console.log('...done')
 }

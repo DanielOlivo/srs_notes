@@ -8,7 +8,7 @@ import type { Note } from "./entities/Note";
 import { IntervalOps } from "./ops/interval.ops";
 import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
-import { storeName as intervalStoreName } from "./entities/interval";
+import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
 
 const dbName = "memoryGameDb";
@@ -234,6 +234,34 @@ class DbOps {
         await this.withTx(
             this.positionOps.delete(positionId)
         )
+    }
+
+    async addInterval(interval: IInterval){
+        await this.withTx(
+            this.intervalOps.create(interval.noteId, interval.openDuration)
+        )
+    }
+
+    async getIntervalByNoteId(noteId: string){
+        const [interval] = await this.withTx(
+            this.intervalOps.getByNoteId(noteId)
+        )
+        return interval
+    }
+
+    async removeInterval(intervalId: string){
+        await this.withTx(
+            this.intervalOps.delete(intervalId)
+        )
+    }
+
+    async updateNoteInterval(noteId: string, openDuration: number, openTimestamp: number){
+        const interval = await this.getIntervalByNoteId(noteId)
+        if(interval){
+            await this.withTx(
+                this.intervalOps.update(interval, openDuration, openTimestamp)
+            )
+        }
     }
 
     async answer(noteId: string, answer: Ease, nextInterval: number){

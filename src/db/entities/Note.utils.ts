@@ -2,6 +2,7 @@ import { v4 } from "uuid";
 import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, NoteType, TextNoteData } from "./Note";
 import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
+import type { IInterval } from "./interval";
 
 export class BaseNote implements IBaseNote {
     @IsUUID()
@@ -65,5 +66,26 @@ export class TextNote extends BaseNote implements ITextNote {
         Date.now(),
         Date.now(),
         faker.lorem.sentence(),
+    )
+}
+
+export class Interval implements IInterval {
+    id: string
+    noteId: string
+    openDuration: number;
+    openTimestamp: number;
+
+    constructor(id: string, noteId: string,  openDuration: number, openTimestamp: number){
+        this.id = id
+        this.noteId = noteId
+        this.openDuration = openDuration
+        this.openTimestamp = openTimestamp
+    }
+
+    static randomForNote = (noteId: string) => new Interval(
+        v4(),
+        noteId,
+        Math.floor(Math.random() * 1000),
+        Date.now()
     )
 }

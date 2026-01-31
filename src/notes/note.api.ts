@@ -11,7 +11,7 @@ import {
     type UpdateNoteDto,
 } from "./notes.dto";
 import { groupBy } from "../utils/groupBy";
-import type { Interval } from "../db/entities/interval";
+import type { IInterval } from "../db/entities/interval";
 import { documentApi } from "../documents/document.api";
 
 export const noteApi = api.injectEndpoints({
@@ -66,7 +66,7 @@ export const noteApi = api.injectEndpoints({
             }
         }),
 
-        getInterval: builder.query<Interval, string>({
+        getInterval: builder.query<IInterval, string>({
             queryFn: async(noteId) => {
                 try{
                     const db = await getDb()
@@ -156,7 +156,7 @@ export type NoteApiData = {
     documents: IDocument[]
     notes: Note[]
     positions: Position[]
-    intervals: Interval[]
+    intervals: IInterval[]
 }
 
 export const handleNoteCache = (data: NoteApiData, store: AppStore) => {

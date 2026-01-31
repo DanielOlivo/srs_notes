@@ -1,7 +1,7 @@
 import type { IDBPDatabase } from "idb";
 import type { Tx } from "../LocalDb";
 import type { Db } from "../Db";
-import type { Interval } from "../entities/interval";
+import type { IInterval } from "../entities/interval";
 
 export class IntervalOps {
     tx: Tx | null = null
@@ -20,9 +20,13 @@ export class IntervalOps {
         return tx.intervalStore.index("by-noteId").get(noteId)
     }
 
+    update = (interval: IInterval, openDuration: number, openTimestamp: number) => (tx: Tx) => {
+        return tx.intervalStore.put({...interval, openDuration, openTimestamp})
+    }
+
     create = (noteId: string, openDuration: number) => (tx: Tx) => {
         const openTimestamp = Date.now()
-        const interval: Interval = {
+        const interval: IInterval = {
             id: noteId,
             noteId,
             openTimestamp,
