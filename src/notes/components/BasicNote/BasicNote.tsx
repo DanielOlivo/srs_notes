@@ -4,7 +4,8 @@ import { useGetIntervalQuery } from "../../note.api"
 import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
 import { selectMode } from "../../../List/list.selectors"
-import { useAppSelector } from "../../../app/hooks"
+import { useAppDispatch, useAppSelector } from "../../../app/hooks"
+import { setEditNoteId } from "../../../List/list.slice"
 
 dayjs.extend(duration)
 
@@ -19,6 +20,13 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     const updateIsOpen = useEffectEvent((opened: boolean) => setIsOpen(opened))
     const updateIntervalId = useEffectEvent((id: NodeJS.Timeout | null) => setIntervalId(id))
+
+    const dispatch = useAppDispatch()    
+
+    const handleClick = () => {
+        if(currentMode !== 'edit') return
+        dispatch(setEditNoteId(id))
+    } 
 
     useEffect(() => {
         if(!isError && !isLoading && interval){
@@ -57,7 +65,10 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
     }, [interval, isError, isLoading])
 
     return (
-        <div className="w-full h-full flex justify-center items-center">
+        <div 
+            className="w-full h-full flex justify-center items-center"
+            onClick={handleClick}
+        >
             <span>{front} - {isOpen || currentMode !== 'review' ? back : "_______"}</span>
             {remained && currentMode === 'review' && <span>{remained}</span>}
         </div>
