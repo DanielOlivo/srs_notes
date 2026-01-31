@@ -4,12 +4,15 @@ import type { IDocument } from "./entities/document";
 import type { Db } from "./Db";
 import { DocumentOps } from "./ops/document.ops";
 import { PositionOps } from "./ops/position.ops";
-import type { Note } from "./entities/Note";
+import type { Note, NoteData } from "./entities/Note";
 import { IntervalOps } from "./ops/interval.ops";
 import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
 import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
+import { BasicNote, TextNote } from "./entities/Note.utils";
+import { v4 } from "uuid";
+import { NotImplemented } from "../utils/NotImplemented";
 
 const dbName = "memoryGameDb";
 
@@ -189,7 +192,7 @@ class DbOps {
         return { notes, positions }
     }
 
-    async createListNote<T extends Note>(docId: string, note: T){
+    async createListNote<T extends NoteData>(docId: string, data: T){
         const [doc] = await this.withTx(this.documentOps.getById(docId)) 
         if(!doc){
             throw new Error(`document with id ${docId} not found`)
@@ -204,6 +207,18 @@ class DbOps {
             x: 0,
             y: maxY + 1
         }
+
+        const id = v4()
+        const created = Date.now()
+        const updated = Date.now()
+
+        const note = (() => {
+            switch(data.kind){
+                case 'basic': return new BasicNote(id, created, updated, data.front, data.back)
+                case 'text': return new TextNote(id, created, updated, data.text)
+                default: throw new NotImplemented()
+            }
+        })()
 
         await this.withTx(
             this.noteOps.create(note),

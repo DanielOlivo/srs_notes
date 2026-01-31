@@ -16,6 +16,11 @@ export interface UpdateBasicNoteDto extends CreatebasicNoteDto {
     id: string
 }
 
+export interface CreateNote {
+    data: NoteData
+    docId: string
+}
+
 export interface DocNotesDto {
     notes: Note[]
     positions: Position[]

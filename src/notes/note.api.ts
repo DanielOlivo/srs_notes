@@ -7,6 +7,7 @@ import { getDb } from "../db/LocalDb";
 import { NotImplemented } from "../utils/NotImplemented";
 import { 
     type CreatebasicNoteDto, 
+    type CreateNote, 
     type UpdateBasicNoteDto, 
     type UpdateNoteDto,
 } from "./notes.dto";
@@ -34,7 +35,10 @@ export const noteApi = api.injectEndpoints({
                 catch(error){
                     return { error }
                 }
-            }
+            },
+            providesTags: (result, error, docId) => [
+                { type: "DocumentNotes", docId}
+            ]
         }),
 
         getNote: builder.query<Note, string>({
@@ -81,10 +85,15 @@ export const noteApi = api.injectEndpoints({
             }
         }),
 
-        createNote: builder.mutation<void, NoteData>({
-            queryFn: async(data) => {
+        createNote: builder.mutation<void, CreateNote /*NoteData*/ >({
+            queryFn: async({data, docId}) => {
+                const db = await getDb()
+                await db.createListNote(docId, data)
                 return { data: undefined}
-            }
+            },
+            invalidatesTags: (result, error, req) => [
+                { type: "DocumentNotes", docId: req.docId }
+            ]
         }),
 
         createBasicNote: builder.mutation<void, CreatebasicNoteDto>({

@@ -22,6 +22,7 @@ export const api = createApi({
     }),
     tagTypes: [
         "DocumentList",
+        "DocumentNotes",
         "GridList"
     ]
 });
