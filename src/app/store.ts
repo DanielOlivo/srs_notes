@@ -3,11 +3,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { api } from "../api";
 // import { GridApiUtils, type GridApiData } from "../grid/grid.api";
 import { handleNoteCache, type NoteApiData } from "../notes/note.api";
+import { listReducer } from "../List/list.slice";
 
 
 export const getStore = () => configureStore({
     reducer: {
         // gridReducer,
+        listReducer, 
         [api.reducerPath]: api.reducer
     },
     middleware: (getDefaultMiddleware) =>
