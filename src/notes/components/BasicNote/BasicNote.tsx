@@ -66,11 +66,22 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     return (
         <div 
-            className="w-full h-full flex justify-center items-center"
+            className="w-full h-full card"
             onClick={handleClick}
         >
-            <span>{front} - {isOpen || currentMode !== 'review' ? back : "_______"}</span>
-            {remained && currentMode === 'review' && <span>{remained}</span>}
+            <div className="card-body grid gap-2 grid-cols-2">
+                <div>
+                    <span>{front}</span>
+                </div>
+
+                <div>
+                    <span>{isOpen || currentMode !== 'review' ? back : "_______"}</span>
+                </div>
+
+                <div className="col-span-2 flex justify-center items-center">
+                    {remained && currentMode === 'review' && <span>{remained}</span>}
+                </div>
+            </div>
         </div>
     )
 }
