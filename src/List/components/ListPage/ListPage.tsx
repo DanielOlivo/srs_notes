@@ -1,12 +1,25 @@
-import type { FC } from "react";
+import { useCallback, type FC } from "react";
 import { useParams } from "react-router";
 import { List } from "../List";
 import { Controls } from "../Controls/Controls";
 import { Outlet } from "react-router";
+import { useAppSelector } from "../../../app/hooks";
+import { selectEditMode } from "../../list.selectors";
+import { NoteEdit } from "../../../notes/components/NoteEdit/NoteEdit";
 
 export const ListPage: FC = () => {
 
     const { docId } = useParams<{docId: string}>() 
+    const editMode = useAppSelector(selectEditMode)
+
+    const controls = () => {
+        switch(editMode.kind){
+            case 'none': return null
+            case 'new': return <NoteEdit />
+            case 'edit': return <NoteEdit id={editMode.noteId} />
+            default: return null
+        }
+    }
 
     if(!docId){
         return <div>docId not found in the url</div>
@@ -24,7 +37,8 @@ export const ListPage: FC = () => {
             </div>
 
             <div className="">
-                <Outlet />
+                {/* <Outlet /> */}
+                {controls()}
             </div>
         </div>
     )

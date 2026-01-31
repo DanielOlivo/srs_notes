@@ -1,9 +1,10 @@
 import { useEffect, useState, type FC } from "react";
-import { Link } from "react-router";
 import type { NoteType } from "../../noteTypes";
 import { BasicNoteEdit } from "../BasicNoteEdit/BasicNoteEdit";
 import { useLazyGetNoteQuery } from "../../note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
+import { useAppDispatch } from "../../../app/hooks";
+import { setEditMode } from "../../../List/list.slice";
 
 export interface NoteEditProps {
     id?: string
@@ -11,6 +12,7 @@ export interface NoteEditProps {
 
 export const NoteEdit: FC<NoteEditProps> = ({id}) => {
 
+    const dispatch = useAppDispatch()
     const [mode, setMode] = useState<NoteType | null>(id !== undefined ? null : 'basic')
     const [getNote, { data: note} ] = useLazyGetNoteQuery()
 
@@ -43,7 +45,10 @@ export const NoteEdit: FC<NoteEditProps> = ({id}) => {
             </div>
 
             <div>
-                <Link to="..">Close</Link> 
+                {/* <Link to="..">Close</Link>  */}
+                <button
+                    onClick={() => dispatch(setEditMode({kind: 'none'}))} 
+                >Close</button>
             </div>
 
             {!id && <div className="col-span-3 flex flex-row justify-between items-center">

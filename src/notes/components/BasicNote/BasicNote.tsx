@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
 import { selectMode } from "../../../List/list.selectors"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { setEditNoteId } from "../../../List/list.slice"
+import { setEditMode } from "../../../List/list.slice"
 
 dayjs.extend(duration)
 
@@ -25,7 +25,7 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     const handleClick = () => {
         if(currentMode !== 'edit') return
-        dispatch(setEditNoteId(id))
+        dispatch(setEditMode({kind: 'edit', noteId: id}))
     } 
 
     useEffect(() => {

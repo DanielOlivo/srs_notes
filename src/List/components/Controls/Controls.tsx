@@ -1,6 +1,6 @@
 import { useCallback, type FC } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import { setListMode, type ListMode, type ListState } from "../../list.slice";
+import { setEditMode, setListMode, type ListMode, type ListState } from "../../list.slice";
 import { selectMode } from "../../list.selectors";
 import { Link } from "react-router";
 
@@ -41,7 +41,10 @@ export const Controls: FC = () => {
             </div>
 
             {currentMode === 'edit' && (
-                <Link to='add'>Add</Link>
+                // <Link to='add'>Add</Link>
+                <button
+                    onClick={() => dispatch(setEditMode({kind: 'new'}))} 
+                >Add</button>
             )}
 
         </div>

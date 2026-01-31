@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route path="docs" element={<Documents />} />
         <Route path="doc/:docId" element={<ListPage />}>
-          <Route path="add" element={<NoteEdit />} />
+          {/* <Route path="add" element={<NoteEdit />} /> */}
         </Route>
 
         <Route path="*" element={<Navigate to="docs" />} />
