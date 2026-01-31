@@ -53,7 +53,7 @@ export const NoteEdit: FC<NoteEditProps> = ({id}) => {
 
             {!id && <div className="col-span-3 flex flex-row justify-between items-center">
                 {noteTypes.map(t => (
-                    <div className="flex flex-row justify-start items-center">
+                    <div key={t} className="flex flex-row justify-start items-center">
                         <input 
                             type="radio" 
                             name="noteType" 
