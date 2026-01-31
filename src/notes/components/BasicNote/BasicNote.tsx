@@ -3,6 +3,8 @@ import type { IBasicNote as BasicNoteRecord } from "../../../db/entities/Note"
 import { useGetIntervalQuery } from "../../note.api"
 import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
+import { selectMode } from "../../../List/list.selectors"
+import { useAppSelector } from "../../../app/hooks"
 
 dayjs.extend(duration)
 
@@ -12,6 +14,8 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [isOpen, setIsOpen] = useState<boolean | null>(null)
     const [remained, setReamined] = useState<string | null>(null)
+
+    const currentMode = useAppSelector(selectMode)
 
     const updateIsOpen = useEffectEvent((opened: boolean) => setIsOpen(opened))
     const updateIntervalId = useEffectEvent((id: NodeJS.Timeout | null) => setIntervalId(id))
@@ -54,8 +58,8 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     return (
         <div className="w-full h-full flex justify-center items-center">
-            <span>{front} - {isOpen ? back : "_______"}</span>
-            {remained && <span>{remained}</span>}
+            <span>{front} - {isOpen || currentMode !== 'review' ? back : "_______"}</span>
+            {remained && currentMode === 'review' && <span>{remained}</span>}
         </div>
     )
 }

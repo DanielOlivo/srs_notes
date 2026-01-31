@@ -1,8 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 export interface ListState {
-    mode: "normal" | "review"
+    mode: "normal" | "review" | "edit"
 }
+
+export type ListMode = ListState["mode"]
 
 const initital: ListState = {
     mode: "normal"
@@ -12,11 +14,11 @@ export const listSlice = createSlice({
     name: "list",
     initialState: initital,
     reducers: {
-        setMode: (state, action) => {
+        setListMode: (state, action) => {
             state.mode = action.payload
         }
     }
 })
 
-export const { setMode } = listSlice.actions
+export const { setListMode } = listSlice.actions
 export const listReducer = listSlice.reducer
