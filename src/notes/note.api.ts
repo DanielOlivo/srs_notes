@@ -71,10 +71,12 @@ export const noteApi = api.injectEndpoints({
                 try{
                     const db = await getDb()
                     // throw new Error("getInterval not implemented")
-                    return { data: undefined }
+                    const interval = await db.getIntervalByNoteId(noteId)
+                    if(!interval) throw new Error(`interval for note ${noteId} not found`)
+                    return { data: interval }
                 }
                 catch(error){
-                    return { error }
+                    return { error, data: undefined }
                 }
             }
         }),

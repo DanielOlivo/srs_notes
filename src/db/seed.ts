@@ -1,5 +1,5 @@
 import { Document } from "./Document"
-import { BasicNote, TextNote } from "./entities/Note.utils"
+import { BasicNote, Interval, TextNote } from "./entities/Note.utils"
 import { getDb } from "./LocalDb"
 
 export const seed = async () => {
@@ -20,6 +20,8 @@ export const seed = async () => {
     for(const note of doc1BasicNotes){
         try{
             await db.createListNote(docs[0].id, note)
+            const interval = Interval.randomForNote(note.id)
+            await db.addInterval(interval)
         }
         catch(error){
             console.error(`failed to create note ${note}\n${error}`)

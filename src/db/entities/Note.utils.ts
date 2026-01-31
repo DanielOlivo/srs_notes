@@ -85,7 +85,7 @@ export class Interval implements IInterval {
     static randomForNote = (noteId: string) => new Interval(
         v4(),
         noteId,
-        Math.floor(Math.random() * 1000),
+        1000000,
         Date.now()
     )
 }
