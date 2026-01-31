@@ -2,11 +2,14 @@ import { useCallback, type FC } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { setListMode, type ListMode, type ListState } from "../../list.slice";
 import { selectMode } from "../../list.selectors";
+import { Link } from "react-router";
 
 export const Controls: FC = () => {
 
     const dispatch = useAppDispatch()
     const currentMode = useAppSelector(selectMode)
+    
+
 
     const setMode = (mode: ListState['mode']) => () => {
         dispatch(setListMode(mode))
@@ -36,6 +39,10 @@ export const Controls: FC = () => {
                     style={modeSelectionButtonStyle('edit')}
                 >Edit</button>
             </div>
+
+            {currentMode === 'edit' && (
+                <Link to='add'>Add</Link>
+            )}
 
         </div>
     )

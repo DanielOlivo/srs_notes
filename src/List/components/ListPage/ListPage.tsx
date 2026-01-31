@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { useParams } from "react-router";
 import { List } from "../List";
 import { Controls } from "../Controls/Controls";
+import { Outlet } from "react-router";
 
 export const ListPage: FC = () => {
 
@@ -20,6 +21,10 @@ export const ListPage: FC = () => {
 
             <div>
                 <Controls />
+            </div>
+
+            <div className="">
+                <Outlet />
             </div>
         </div>
     )
