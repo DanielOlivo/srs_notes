@@ -5,6 +5,7 @@ import { DocumentLoader } from "./components/DocumentLoader";
 import { CleanAllButton } from "../db/components/CleanAll";
 import { SeedButton } from "../db/components/SeedButton";
 import { TestButton } from "../db/components/TestButton";
+import { DumpButton } from "../db/components/DumpButton";
 
 /** list and buttons */
 export const Documents: FC = () => {
@@ -18,6 +19,7 @@ export const Documents: FC = () => {
             <SeedButton />
             <TestButton />
             <DocumentLoader />
+            <DumpButton />
         </div>
     )
 }
