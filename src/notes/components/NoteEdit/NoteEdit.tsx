@@ -4,7 +4,7 @@ import { BasicNoteEdit } from "../BasicNoteEdit/BasicNoteEdit";
 import { useLazyGetNoteQuery } from "../../note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
 import { useAppDispatch } from "../../../app/hooks";
-import { setEditMode } from "../../../List/list.slice";
+import { setListMode } from "../../../List/list.slice";
 
 export interface NoteEditProps {
     id?: string
@@ -45,9 +45,8 @@ export const NoteEdit: FC<NoteEditProps> = ({id}) => {
             </div>
 
             <div>
-                {/* <Link to="..">Close</Link>  */}
                 <button
-                    onClick={() => dispatch(setEditMode({kind: 'none'}))} 
+                    onClick={() => dispatch(setListMode({kind: 'edit'}))} 
                 >Close</button>
             </div>
 

@@ -6,6 +6,7 @@ import type { Position } from "../db/entities/position";
 import { getDb } from "../db/LocalDb";
 import { NotImplemented } from "../utils/NotImplemented";
 import { 
+    type AnswerReqDto,
     type CreatebasicNoteDto, 
     type CreateNote, 
     type UpdateBasicNoteDto, 
@@ -82,7 +83,10 @@ export const noteApi = api.injectEndpoints({
                 catch(error){
                     return { error, data: undefined }
                 }
-            }
+            },
+            providesTags: (result, error, noteId) => [
+                { type: "Interval", noteId }
+            ]
         }),
 
         createNote: builder.mutation<void, CreateNote /*NoteData*/ >({
@@ -140,8 +144,20 @@ export const noteApi = api.injectEndpoints({
                     return { error }
                 }
             }
-        })
+        }),
 
+        answer: builder.mutation<void, AnswerReqDto>({
+            queryFn: async ({noteId, ease}) => {
+                const db = await getDb()
+                const nextInterval = 10000000
+                db.answer(noteId, ease, nextInterval)
+                return { data: undefined }
+            },
+            invalidatesTags: (result, error, req) => [
+                { type: "DocumentNotes", docId: req.noteId },
+                { type: "Interval", noteId: req.noteId }
+            ]
+        })
     }) 
 })
 
@@ -160,6 +176,8 @@ export const {
 
     useGetIntervalQuery,
     // useDeleteBasicNoteMutation
+
+    useAnswerMutation,
 } = noteApi;
 
 

@@ -1,5 +1,6 @@
 import type { Note, NoteData } from "../db/entities/Note"
 import type { Position } from "../db/entities/position"
+import type { Ease } from "../Game/Ease"
 
 
 export interface CreatebasicNoteDto {
@@ -26,5 +27,8 @@ export interface DocNotesDto {
     positions: Position[]
 }
 
-
+export interface AnswerReqDto {
+    noteId: string
+    ease: Ease
+}
 

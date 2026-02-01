@@ -1,4 +1,4 @@
 import type { RootState } from "../app/store";
 
 export const selectMode = (root: RootState) => root.listReducer.mode
-export const selectEditMode = (root: RootState) => root.listReducer.editMode
+// export const selectEditMode = (root: RootState) => root.listReducer.editMode

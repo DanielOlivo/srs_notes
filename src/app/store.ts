@@ -32,7 +32,7 @@ export type StoreState = {
 }
 
 
-export const getStoreWithState = ({noteApi}: StoreState) => {
+export const getStoreWithState = ({noteApi }: StoreState) => {
 
     const initialState: SlicesOnlyState = {
         // gridReducer: slices?.gridReducer ?? gridInitialState,

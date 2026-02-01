@@ -1,22 +1,23 @@
-import { useCallback, type FC } from "react";
+import { /*useCallback, */ type FC } from "react";
 import { useParams } from "react-router";
 import { List } from "../List";
 import { Controls } from "../Controls/Controls";
-import { Outlet } from "react-router";
+// import { Outlet } from "react-router";
 import { useAppSelector } from "../../../app/hooks";
-import { selectEditMode } from "../../list.selectors";
+import { /*selectEditMode, */ selectMode } from "../../list.selectors";
 import { NoteEdit } from "../../../notes/components/NoteEdit/NoteEdit";
 
 export const ListPage: FC = () => {
 
     const { docId } = useParams<{docId: string}>() 
-    const editMode = useAppSelector(selectEditMode)
+    // const editMode = useAppSelector(selectEditMode)
+    const mode = useAppSelector(selectMode)
 
     const controls = () => {
-        switch(editMode.kind){
-            case 'none': return null
+        switch(mode.kind){
+            // case 'none': return null
             case 'new': return <NoteEdit />
-            case 'edit': return <NoteEdit id={editMode.noteId} />
+            case 'onUpdate': return <NoteEdit id={mode.noteId} />
             default: return null
         }
     }

@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
 import { selectMode } from "../../../List/list.selectors"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { setEditMode } from "../../../List/list.slice"
+import { setListMode, type ListMode2 } from "../../../List/list.slice"
 
 dayjs.extend(duration)
 
@@ -24,8 +24,9 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
     const dispatch = useAppDispatch()    
 
     const handleClick = () => {
-        if(currentMode !== 'edit') return
-        dispatch(setEditMode({kind: 'edit', noteId: id}))
+        const modes: ListMode2['kind'][] = ['edit', 'onUpdate', 'new']
+        if(!modes.some(m => m === currentMode.kind)) return
+        dispatch(setListMode({kind: 'onUpdate', noteId: id}))
     } 
 
     useEffect(() => {
@@ -75,11 +76,11 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
                 </div>
 
                 <div>
-                    <span>{isOpen || currentMode !== 'review' ? back : "_______"}</span>
+                    <span>{isOpen || currentMode.kind !== 'onReview' ? back : "_______"}</span>
                 </div>
 
                 <div className="col-span-2 flex justify-center items-center">
-                    {remained && currentMode === 'review' && <span>{remained}</span>}
+                    {remained && currentMode.kind === 'onReview' && <span>{remained}</span>}
                 </div>
             </div>
         </div>
