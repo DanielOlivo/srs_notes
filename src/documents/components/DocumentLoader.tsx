@@ -11,7 +11,7 @@ interface Data {
 
 export const DocumentLoader: FC = () => {
     const [loadDocument] = useUploadDocumentMutation(); 
-    const [docs, setDocs] = useState<IDocument[]>([]);
+    const [data, setData] = useState<Data>({docs: []});
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -24,6 +24,7 @@ export const DocumentLoader: FC = () => {
         try {
             const zip = await JSZip.loadAsync(file);
 
+
             const data: Data = {
                 docs: []
             }
@@ -31,7 +32,7 @@ export const DocumentLoader: FC = () => {
             const docsCsv = zip.file("docs.csv");
             if(docsCsv){
                 const content = await docsCsv.async("string")
-                data.docs = Document.fromCsv(content)
+                data.docs = Document.fromCsv(content).map(d => d.asPlain())
             } 
 
         } catch (error) {

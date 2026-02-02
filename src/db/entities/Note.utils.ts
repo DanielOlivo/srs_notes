@@ -3,6 +3,7 @@ import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, NoteType, TextNot
 import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
 import type { IInterval } from "./interval";
+import { parse } from 'papaparse'
 
 export class BaseNote implements IBaseNote {
     @IsUUID()
@@ -48,6 +49,37 @@ export class BasicNote extends BaseNote implements IBasicNote {
         faker.location.city(),
     )
 
+    asPlain(): IBasicNote {
+        return {
+            id: this.id,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            front: this.front,
+            back: this.back,
+            kind: this.kind
+        }
+    }
+
+    toCsvRow(){
+        return `${this.id},"${this.front}","${this.back}",${this.createdAt},${this.updatedAt}`
+    }
+
+    static fromCsv(csv: string){
+        const data = parse(csv)
+        const records = data.data as string[][]
+        const notes = records.map(row => {
+            const [id, front, back, createdAtStr, updatedAtStr] = row
+            return new BasicNote(
+                id,
+                parseInt(createdAtStr),
+                parseInt(updatedAtStr),
+                front,
+                back
+            )
+        })
+        return notes
+    }
+
 }
 
 export class TextNote extends BaseNote implements ITextNote {
@@ -67,6 +99,36 @@ export class TextNote extends BaseNote implements ITextNote {
         Date.now(),
         faker.lorem.sentence(),
     )
+
+    asPlain(): ITextNote {
+        return {
+            id: this.id,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            text: this.text,
+            kind: this.kind
+        }
+    }
+
+    toCsvRow(){
+        return `${this.id},"${this.text}",${this.createdAt},${this.updatedAt}`
+    }
+
+    static fromCsv(csv: string){
+        const data = parse(csv)
+        const records = data.data as string[][]
+        const notes = records.map(row => {
+            const [id, text, createdAtStr, updatedAtStr] = row
+            return new TextNote(
+                id,
+                parseInt(createdAtStr),
+                parseInt(updatedAtStr),
+                text
+            )
+        })
+        return notes
+    }
+
 }
 
 export class Interval implements IInterval {
@@ -88,4 +150,28 @@ export class Interval implements IInterval {
         1000000,
         Date.now()
     )
+
+    asPlain = (): IInterval => ({
+        id: this.id,
+        noteId: this.noteId,
+        openDuration: this.openDuration,
+        openTimestamp: this.openTimestamp
+    })
+
+    toCsvRow = () => `${this.id},${this.noteId},${this.openDuration},${this.openTimestamp}`
+
+    static fromCsv(csv: string){
+        const data = parse(csv)
+        const records = data.data as string[][]
+        const notes = records.map(row => {
+            const [id, noteId, openDurationStr, openTimestampStr] = row
+            return new Interval(
+                id,
+                noteId,
+                parseInt(openDurationStr),
+                parseInt(openTimestampStr),
+            )
+        })
+        return notes
+    }
 }
