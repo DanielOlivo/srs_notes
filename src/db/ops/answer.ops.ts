@@ -1,5 +1,5 @@
 import type { IDBPDatabase } from "idb";
-import { storeName, type Answer } from "../entities/answer";
+import { storeName, type IAnswer } from "../entities/answer";
 import type { Db } from "../Db";
 import type { Tx } from "../LocalDb";
 import type { Ease } from "../../Game/Ease";
@@ -23,7 +23,7 @@ export class AnswerOps {
     }
 
     create = (noteId: string, ease: Ease) => (tx: Tx) => {
-        const answer: Answer = {
+        const answer: IAnswer = {
             id: v4(),
             noteId,
             answer: ease,

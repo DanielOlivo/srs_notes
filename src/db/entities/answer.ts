@@ -1,6 +1,6 @@
 import type { Ease } from "../../Game/Ease"
 
-export interface Answer {
+export interface IAnswer {
     id: string
     noteId: string
     answer: Ease
@@ -12,7 +12,7 @@ export const storeName = "answers"
 export interface AnswerDb {
     [storeName]: {
         key: string,
-        value: Answer
+        value: IAnswer
         indexes: {
             "by-noteId": string,
         }
