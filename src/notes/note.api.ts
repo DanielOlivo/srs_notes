@@ -2,7 +2,7 @@ import { api } from "../api";
 import type { AppStore } from "../app/store";
 import type { IDocument } from "../db/entities/document";
 import { type NoteData, type Note } from "../db/entities/Note";
-import type { Position } from "../db/entities/position";
+import type { IPosition } from "../db/entities/position";
 import { getDb } from "../db/LocalDb";
 import { NotImplemented } from "../utils/NotImplemented";
 import { 
@@ -55,7 +55,7 @@ export const noteApi = api.injectEndpoints({
             }
         }),
 
-        getNotePositions: builder.query<Position[], string[]>({
+        getNotePositions: builder.query<IPosition[], string[]>({
             queryFn: async(noteIds) => {
                 try {
                     const db = await getDb()
@@ -63,7 +63,7 @@ export const noteApi = api.injectEndpoints({
                     if(positions.some(pos => pos === undefined)){
                         throw new Error(`some positions are undefined`)
                     }
-                    return { data: positions as Position[] }
+                    return { data: positions as IPosition[] }
                 }
                 catch(error){
                     return {error}
@@ -184,7 +184,7 @@ export const {
 export type NoteApiData = {
     documents: IDocument[]
     notes: Note[]
-    positions: Position[]
+    positions: IPosition[]
     intervals: IInterval[]
 }
 

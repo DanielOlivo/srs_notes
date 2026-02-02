@@ -3,7 +3,7 @@ import { AsyncWrapper } from "../utils/components/AsyncWrapper";
 import type { IDocument } from "./entities/document";
 import { getDb } from "./LocalDb";
 import type { Note } from "./entities/Note";
-import type { Position } from "./entities/position";
+import type { IPosition } from "./entities/position";
 
 export const withIdb: Decorator = (Story, context) => {
     const { idb } = context.parameters
@@ -20,7 +20,7 @@ export const withIdb: Decorator = (Story, context) => {
 export type IdbParams = {
     documents: IDocument[],
     notes: Note[],
-    positions: Position[]
+    positions: IPosition[]
 }
 
 export async function proceedParams(params: IdbParams): Promise<void>{

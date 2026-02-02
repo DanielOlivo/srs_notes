@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Note } from './Note';
 import type { IBasicNote, ITextNote } from '../../../db/entities/Note';
 import type { IDocument } from '../../../db/entities/document';
-import type { Position } from '../../../db/entities/position';
+import type { IPosition } from '../../../db/entities/position';
 import type { StoreState } from '../../../app/store';
 
 const meta = {
@@ -33,7 +33,7 @@ const basicNote: IBasicNote = {
     back: "some back"
 }
 
-const basicNotePosition: Position = {
+const basicNotePosition: IPosition = {
     id: 2,
     noteId: basicNote.id,
     documentId: document.id,
@@ -49,7 +49,7 @@ const textNote: ITextNote = {
 }
 
 
-const textNotePosition: Position = {
+const textNotePosition: IPosition = {
     id: 1,
     noteId: textNote.id,
     documentId: document.id,

@@ -1,6 +1,6 @@
 import type { IVector2 } from "../../utils/Vector2"
 
-export interface Position {
+export interface IPosition {
     id: number
     noteId: string
     documentId: string
@@ -12,7 +12,7 @@ export const storeName = "positions"
 export interface PositionDb {
     [storeName]: {
         key: number,
-        value: Position
+        value: IPosition
         indexes: {
             "by-coord": [string, number, number] // [docId, x, y]
             "by-noteId": string

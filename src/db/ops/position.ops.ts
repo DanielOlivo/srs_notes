@@ -1,5 +1,5 @@
 import type { IDBPDatabase } from "idb";
-import { storeName, type Position } from "../entities/position"
+import { storeName, type IPosition } from "../entities/position"
 import type { Db } from "../Db";
 import type { IVector2 } from "../../utils/Vector2";
 import type { Tx } from "../LocalDb";
@@ -38,11 +38,11 @@ export class PositionOps {
             noteId,
             documentId,
             coord
-        } as Position
+        } as IPosition
         return tx.positionStore.add(position)
     }
 
-    update = (position: Position) => (tx: Tx) => {
+    update = (position: IPosition) => (tx: Tx) => {
         return tx.positionStore.put(position)
     }
 

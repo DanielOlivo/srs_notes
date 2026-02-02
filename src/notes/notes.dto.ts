@@ -1,5 +1,5 @@
 import type { Note, NoteData } from "../db/entities/Note"
-import type { Position } from "../db/entities/position"
+import type { IPosition } from "../db/entities/position"
 import type { Ease } from "../Game/Ease"
 
 
@@ -24,7 +24,7 @@ export interface CreateNote {
 
 export interface DocNotesDto {
     notes: Note[]
-    positions: Position[]
+    positions: IPosition[]
 }
 
 export interface AnswerReqDto {

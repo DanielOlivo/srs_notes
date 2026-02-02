@@ -3,7 +3,7 @@ import type { RootState, StoreState } from "../app/store";
 import type { IDocument } from "../db/entities/document";
 import type { NoteApiData } from "../notes/note.api";
 import type { Note, NoteData } from "../db/entities/Note";
-import type { Position } from "../db/entities/position";
+import type { IPosition } from "../db/entities/position";
 import type { IInterval } from "../db/entities/interval";
 import { faker } from "@faker-js/faker";
 
@@ -47,7 +47,7 @@ export class StoreStateUtility implements StoreState {
         const note = StoreStateUtility.getNote(data)
         const positions = this.noteApi.positions.filter(pos => pos.documentId === document.id)
         const maxY = Math.max(...positions.map(pos => pos.coord.y), 0)
-        const position: Position = {
+        const position: IPosition = {
             id: this.noteApi.positions.length + 1,
             noteId: note.id,
             documentId: document.id,
