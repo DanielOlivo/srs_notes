@@ -5,6 +5,7 @@ import type { IDocument } from './entities/document'
 import type { IBasicNote, ITextNote } from './entities/Note'
 import { BasicNote, Interval, TextNote } from './entities/Note.utils'
 import type { IInterval } from './entities/interval'
+import { Position, type IPosition } from './entities/position'
 
 const targetFiles = [
     "docs.csv",
@@ -21,6 +22,7 @@ type Data = {
     basicNotes: IBasicNote[]
     textNotes: ITextNote[]
     intervals: IInterval[]
+    positions: IPosition[]
 }
 
 export const proceedZip = async (file: File): Promise<Data> => {
@@ -48,7 +50,7 @@ export const proceedZip = async (file: File): Promise<Data> => {
         docs: Document.fromCsv(docCsvString).map(doc => doc.asPlain()),
         basicNotes: BasicNote.fromCsv(basicNotesCsvString).map(note => note.asPlain()),
         textNotes: TextNote.fromCsv(textNotesCsvString).map(note => note.asPlain()),
-        intervals: Interval.fromCsv(intervalsCsvString).map(interval => interval.asPlain())
-
+        intervals: Interval.fromCsv(intervalsCsvString).map(interval => interval.asPlain()),
+        positions: Position.fromCsv(positionsCsvString).map(pos => pos.asPlain())
     }
 }
