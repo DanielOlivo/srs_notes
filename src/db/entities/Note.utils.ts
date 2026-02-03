@@ -4,6 +4,7 @@ import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
 import type { IInterval } from "./interval";
 import { parse } from 'papaparse'
+import { getLocalDb, type Tx } from "../LocalDb";
 
 export class BaseNote implements IBaseNote {
     @IsUUID()
@@ -48,6 +49,25 @@ export class BasicNote extends BaseNote implements IBasicNote {
         faker.location.country(),
         faker.location.city(),
     )
+
+    static all = async() => {
+        const db = await getLocalDb()
+        const records = await db.getAll('basicNoteStore')
+        const notes = records.map(r => new BasicNote(
+            r.id,
+            r.createdAt,
+            r.updatedAt,
+            r.front,
+            r.back
+        ))
+        return notes
+    } 
+
+    static cleanTx = () => (tx: Tx) => {
+        return tx.basicNoteStore.clear()
+    }
+
+    static loadTx = (notes: IBasicNote[]) => notes.map(note => (tx: Tx) => tx.basicNoteStore.add(note))
 
     asPlain(): IBasicNote {
         return {
@@ -100,6 +120,25 @@ export class TextNote extends BaseNote implements ITextNote {
         faker.lorem.sentence(),
     )
 
+    static all = async () => {
+        const db = await getLocalDb()
+        const records = await db.getAll('textNoteStore')
+        const notes = records.map(r => new TextNote(
+            r.id,
+            r.createdAt,
+            r.updatedAt,
+            r.text
+        ))
+        return notes
+
+    }
+
+    static cleanTx = () => (tx: Tx) => {
+        return tx.textNoteStore.clear()
+    }
+
+    static loadTx = (notes: ITextNote[]) => notes.map(note => (tx: Tx) => tx.textNoteStore.add(note))
+
     asPlain(): ITextNote {
         return {
             id: this.id,
@@ -150,6 +189,24 @@ export class Interval implements IInterval {
         1000000,
         Date.now()
     )
+
+    static all = async () => {
+        const db = await getLocalDb()
+        const records = await db.getAll("intervals")
+        const intervals = records.map(r => new Interval(
+            r.id,
+            r.noteId,
+            r.openDuration,
+            r.openTimestamp
+        ))
+        return intervals
+    }
+
+    static cleanTx = () => (tx: Tx) => {
+        return tx.intervalStore.clear()
+    }
+
+    static loadTx = (intervals: IInterval[]) => intervals.map(interval => (tx: Tx) => tx.intervalStore.add(interval))
 
     asPlain = (): IInterval => ({
         id: this.id,

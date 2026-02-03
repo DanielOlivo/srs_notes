@@ -84,6 +84,18 @@ export function getTx(db: IDBPDatabase<Db>) {
 
 export type Tx = ReturnType<typeof getTx>
 
+export const withTx = async <T extends any[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) => {
+
+    const db = await getLocalDb()
+    const tx = getTx(db)
+
+    const results = await Promise.all([
+        ...fns.map(fn => fn(tx)),
+        tx.tx.done
+    ])
+
+    return results.slice(0, -1) as T
+}
 
 class DbOps {
 

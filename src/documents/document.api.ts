@@ -1,6 +1,10 @@
 import { api } from "../api";
+import type { Data } from "../db/csv";
+import { Document } from "../db/Document";
 import type { IDocument } from "../db/entities/document";
-import { getDb } from "../db/LocalDb";
+import { BasicNote, Interval, TextNote } from "../db/entities/Note.utils";
+import { Position } from "../db/entities/position";
+import { getDb, withTx } from "../db/LocalDb";
 import { seed } from "../db/seed";
 import { 
     type DocumentRenameRequestDto, 
@@ -49,11 +53,25 @@ export const documentApi = api.injectEndpoints({
             invalidatesTags: ["DocumentList"]
         }),
 
-        uploadDocument: builder.mutation<void, Blob>({
+        uploadDocument: builder.mutation<void, Data>({
             queryFn: async (data) => {
                 try{
-                    const db = await getDb();
-                    await db.uploadDocument(data);
+                    await withTx(
+                        Document.cleanTx(),
+                        BasicNote.cleanTx(),
+                        TextNote.cleanTx(),
+                        Interval.cleanTx(),
+                        Position.cleanTx()
+                    )
+
+                    await withTx(
+                        ...Document.loadTx(data.docs),
+                        ...BasicNote.loadTx(data.basicNotes),
+                        ...TextNote.loadTx(data.textNotes),
+                        ...Interval.loadTx(data.intervals),
+                        ...Position.loadTx(data.positions)
+                    )
+
                     return { data: undefined }
                 }
                 catch(error){

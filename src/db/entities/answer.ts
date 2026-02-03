@@ -1,4 +1,5 @@
 import { parse } from 'papaparse'
+import { getLocalDb } from '../LocalDb'
 
 export type Ease = 'Again' | 'Hard' | 'Good' | 'Easy'
 
@@ -32,6 +33,18 @@ export class Answer implements IAnswer {
         this.noteId = noteId
         this.answer = answer
         this.timestamp = timestamp
+    }
+
+    static all = async () => {
+        const db = await getLocalDb()
+        const records = await db.getAll("answers")
+        const answers = records.map(r => new Answer(
+            r.id,
+            r.noteId,
+            r.answer,
+            r.timestamp
+        ))
+        return answers
     }
 
     asPlain = (): IAnswer => ({

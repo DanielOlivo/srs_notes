@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsUUID } from "class-validator";
 import type { IDocument } from "./entities/document";
 import { v4 } from "uuid";
-import { getLocalDb } from "./LocalDb";
+import { getLocalDb, type Tx } from "./LocalDb";
 import { parse } from 'papaparse'
 
 export class Document implements IDocument {
@@ -43,6 +43,17 @@ export class Document implements IDocument {
         const records = await db.getAll("documents")
         const docs = records.map(r => new Document(r.name, r.type, r.id, r.createdAt))
         return docs
+    }
+
+    static cleanTx = () => (tx: Tx) => {
+        return tx.documentStore.clear()
+    }
+
+    static loadTx = (docs: IDocument[]) => docs.map(doc => (tx: Tx) => tx.documentStore.add(doc))
+
+    static async clean(){
+        const db = await getLocalDb()
+        await db.clear("documents")
     }
 
     toCsvRow() {

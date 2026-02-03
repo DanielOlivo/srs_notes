@@ -1,5 +1,6 @@
 import type { IVector2 } from "../../utils/Vector2"
 import { parse } from 'papaparse'
+import { getLocalDb, type Tx } from "../LocalDb"
 
 export interface IPosition {
     id: number
@@ -35,6 +36,24 @@ export class Position implements IPosition {
         this.documentId = documentId
         this.coord = coord
     }   
+
+    static all = async () => {
+        const db = await getLocalDb()
+        const records = await db.getAll("positions")
+        const positions = records.map(r => new Position(
+            r.id,
+            r.noteId,
+            r.documentId,
+            r.coord
+        ))
+        return positions
+    }
+
+    static cleanTx = () => (tx: Tx) => {
+        return tx.positionStore.clear()
+    }
+
+    static loadTx = (positions: IPosition[]) => positions.map(pos => (tx: Tx) => tx.positionStore.add(pos))
 
     asPlain = (): IPosition => ({
         id: this.id,
