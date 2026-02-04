@@ -1,6 +1,6 @@
+import type { Ease } from "../db/entities/answer"
 import type { Note, NoteData } from "../db/entities/Note"
 import type { IPosition } from "../db/entities/position"
-import type { Ease } from "../Game/Ease"
 
 
 export interface CreatebasicNoteDto {

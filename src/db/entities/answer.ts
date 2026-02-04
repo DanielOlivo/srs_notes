@@ -1,5 +1,6 @@
 import { parse } from 'papaparse'
-import { getLocalDb } from '../LocalDb'
+import { getLocalDb, type Tx } from '../LocalDb'
+import { v4 } from 'uuid'
 
 export type Ease = 'Again' | 'Hard' | 'Good' | 'Easy'
 
@@ -53,6 +54,14 @@ export class Answer implements IAnswer {
         answer: this.answer,
         timestamp: this.timestamp
     })
+
+    create = async () => {
+        const plain = this.asPlain()
+        const db = await getLocalDb()
+        await db.add("answers", plain)
+    }
+
+    createTx = () => (tx: Tx) => tx.answerStore.add(this.asPlain())
 
     toCsvRow = ():string => `${this.id},${this.noteId},${this.answer},${this.timestamp}`
 

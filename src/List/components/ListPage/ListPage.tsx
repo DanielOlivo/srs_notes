@@ -6,8 +6,12 @@ import { Controls } from "../Controls/Controls";
 import { useAppSelector } from "../../../app/hooks";
 import { /*selectEditMode, */ selectMode } from "../../list.selectors";
 import { NoteEdit } from "../../../notes/components/NoteEdit/NoteEdit";
+import { AnswerPanel } from "../AnswerPanel/AnswerPanel";
+import { useIncrementTime } from "../../incrTime";
 
 export const ListPage: FC = () => {
+
+    useIncrementTime()
 
     const { docId } = useParams<{docId: string}>() 
     // const editMode = useAppSelector(selectEditMode)
@@ -18,6 +22,7 @@ export const ListPage: FC = () => {
             // case 'none': return null
             case 'new': return <NoteEdit />
             case 'onUpdate': return <NoteEdit id={mode.noteId} />
+            case "onAnswer": return <AnswerPanel noteId={mode.noteId} />
             default: return null
         }
     }

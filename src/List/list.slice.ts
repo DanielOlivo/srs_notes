@@ -37,13 +37,15 @@ export interface ListState {
     // mode: "normal" | "review" | "edit"
     // editMode: EditMode
     mode: ListMode2
+    time: number
 }
 
 
 const initital: ListState = {
     // mode: "normal",
     // editMode: { kind: 'none' }
-    mode: { kind: 'none' }
+    mode: { kind: 'none' },
+    time: Date.now()
 }
 
 export const listSlice = createSlice({
@@ -55,6 +57,9 @@ export const listSlice = createSlice({
             state.mode = action.payload
         },
 
+        setTime: (state) => {
+            state.time = Date.now()
+        }
         // setEditMode: (state, action: PayloadAction<EditMode>) => {
         //     state.editMode = action.payload
         // },
@@ -64,6 +69,7 @@ export const listSlice = createSlice({
 export const { 
     setListMode,
     // setEditMode
+    setTime,
 } = listSlice.actions
 export const listReducer = listSlice.reducer
 

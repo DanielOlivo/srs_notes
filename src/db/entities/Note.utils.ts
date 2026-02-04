@@ -21,6 +21,15 @@ export class BaseNote implements IBaseNote {
         this.createdAt = createdAt
         this.updatedAt = updatedAt
     }
+
+    static getTx = (noteId: string) => async (tx: Tx) => {
+        const [basic, text] = await Promise.all([
+            BasicNote.getTx(noteId)(tx),
+            TextNote.getTx(noteId)(tx)
+        ])
+
+        return basic ?? text ?? null
+    }
 }
 
 export class BasicNote extends BaseNote implements IBasicNote {
@@ -68,6 +77,37 @@ export class BasicNote extends BaseNote implements IBasicNote {
     }
 
     static loadTx = (notes: IBasicNote[]) => notes.map(note => (tx: Tx) => tx.basicNoteStore.add(note))
+
+    static get = async (noteId: string) => {
+        const db = await getLocalDb()
+        const record = await db.get("basicNoteStore", noteId)
+        if(!record)
+            return null
+        return new BasicNote(
+            record.id,
+            record.createdAt,
+            record.updatedAt,
+            record.front,
+            record.back
+        )
+    }
+
+    static getTx = (noteId: string) => async (tx: Tx) => {
+        const record = await tx.basicNoteStore.get(noteId)
+        if(!record)
+            return null
+        return new BasicNote(
+            record.id,
+            record.createdAt,
+            record.updatedAt,
+            record.front,
+            record.back
+        )
+    }
+
+    removeTx = async (tx: Tx) => {
+        await tx.basicNoteStore.delete(this.id)
+    }
 
     asPlain(): IBasicNote {
         return {
@@ -139,6 +179,22 @@ export class TextNote extends BaseNote implements ITextNote {
 
     static loadTx = (notes: ITextNote[]) => notes.map(note => (tx: Tx) => tx.textNoteStore.add(note))
 
+    static getTx = (noteId: string) => async (tx: Tx) => {
+        const record = await tx.textNoteStore.get(noteId)
+        if(!record)
+            return null
+        return new TextNote(
+            record.id,
+            record.createdAt,
+            record.updatedAt,
+            record.text
+        )
+    }
+
+    removeTx = async (tx: Tx) => {
+        await tx.textNoteStore.delete(this.id)
+    }
+
     asPlain(): ITextNote {
         return {
             id: this.id,
@@ -207,6 +263,50 @@ export class Interval implements IInterval {
     }
 
     static loadTx = (intervals: IInterval[]) => intervals.map(interval => (tx: Tx) => tx.intervalStore.add(interval))
+
+    static getByNoteId = async (noteId: string) => {
+        const db = await getLocalDb()
+        const record = await db.getFromIndex("intervals", "by-noteId", noteId)
+        if(!record)
+            return null
+        return new Interval(
+            record.id,
+            record.noteId,
+            record.openDuration,
+            record.openTimestamp
+        )
+    }
+
+    static getByNoteIdTx = (noteId: string) => async(tx: Tx) => {
+        const record = await tx.intervalStore.index('by-noteId').get(noteId) // .index("by-noteId", noteId)
+        if(!record)
+            return null
+        return new Interval(
+            record.id,
+            record.noteId,
+            record.openDuration,
+            record.openTimestamp
+        )
+    }
+
+    addTx = () => (tx: Tx) => {
+        return tx.intervalStore.add(this.asPlain())
+    }
+
+    updateTx = (nextInterval: number) => (tx: Tx) => {
+        this.openDuration = nextInterval
+        this.openTimestamp = Date.now()
+        return tx.intervalStore.put(this.asPlain())
+    }
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete("intervals", this.id)
+    }
+
+    removeTx = () => async (tx: Tx): Promise<void> => {
+        await  tx.intervalStore.delete(this.id)
+    }
 
     asPlain = (): IInterval => ({
         id: this.id,

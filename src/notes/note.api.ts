@@ -2,8 +2,8 @@ import { api } from "../api";
 import type { AppStore } from "../app/store";
 import type { IDocument } from "../db/entities/document";
 import { type NoteData, type Note } from "../db/entities/Note";
-import type { IPosition } from "../db/entities/position";
-import { getDb } from "../db/LocalDb";
+import { Position, type IPosition } from "../db/entities/position";
+import { getDb, withTx, type Tx } from "../db/LocalDb";
 import { NotImplemented } from "../utils/NotImplemented";
 import { 
     type AnswerReqDto,
@@ -15,6 +15,10 @@ import {
 import { groupBy } from "../utils/groupBy";
 import type { IInterval } from "../db/entities/interval";
 import { documentApi } from "../documents/document.api";
+import { Answer } from "../db/entities/answer";
+import { v4 } from "uuid";
+import { BaseNote, BasicNote, Interval } from "../db/entities/Note.utils";
+import { getNextInterval } from "./updateInterval";
 
 export const noteApi = api.injectEndpoints({
     endpoints: builder => ({
@@ -136,8 +140,20 @@ export const noteApi = api.injectEndpoints({
         deleteNote: builder.mutation<void, string>({
             queryFn: async (id) => {
                 try {
-                    const db = await getDb()
-                    await db.deleteNote(id) 
+                    const [note, position, interval] = await withTx(
+                        BaseNote.getTx(id),
+                        Position.getByNoteIdTx(id),
+                        Interval.getByNoteIdTx(id) 
+                    )
+
+                    const dummyFn = async () => {}
+
+                    await withTx(
+                        note?.removeTx ?? dummyFn,
+                        position?.removeTx ?? dummyFn,
+                        interval?.removeTx() ?? dummyFn,
+                    )
+
                     return { data: undefined }
                 }
                 catch(error){
@@ -148,9 +164,29 @@ export const noteApi = api.injectEndpoints({
 
         answer: builder.mutation<void, AnswerReqDto>({
             queryFn: async ({noteId, ease}) => {
-                const db = await getDb()
-                const nextInterval = 10000000
-                db.answer(noteId, ease, nextInterval)
+                const answer = new Answer(v4(), noteId, ease, Date.now())
+
+                const interval = await Interval.getByNoteId(noteId)
+                const nextInterval = getNextInterval(interval?.openDuration, ease)
+                const updateInterval = (() => {
+                    if(!interval){
+                        const toCreate = new Interval(
+                            v4(),
+                            noteId,
+                            nextInterval,
+                            Date.now()
+                        )
+                        return toCreate.addTx()
+                    }
+                    return interval.updateTx(nextInterval)
+
+                })()
+                
+                await withTx(
+                    answer.createTx(),
+                    updateInterval
+                )
+
                 return { data: undefined }
             },
             invalidatesTags: (result, error, req) => [

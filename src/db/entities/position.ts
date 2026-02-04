@@ -55,6 +55,20 @@ export class Position implements IPosition {
 
     static loadTx = (positions: IPosition[]) => positions.map(pos => (tx: Tx) => tx.positionStore.add(pos))
 
+    removeTx = (tx: Tx) => tx.positionStore.delete(this.id)
+
+    static getByNoteIdTx = (noteId: string) => async (tx: Tx) => {
+        const record = await tx.positionStore.index("by-noteId").get(noteId)
+        if(!record)
+            return null
+        return new Position(
+            record.id,
+            record.noteId,
+            record.documentId,
+            record.coord
+        )
+    }
+
     asPlain = (): IPosition => ({
         id: this.id,
         noteId: this.noteId,
