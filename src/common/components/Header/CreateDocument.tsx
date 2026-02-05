@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import type { FC } from "react";
 import { useNavigate } from "react-router";
 
@@ -10,12 +11,14 @@ export const CreateDocument: FC = () => {
             <div className="flex-none">
                 <button
                     onClick={() => navigate(-1)}
-                >back</button> 
+                ><ArrowLeftIcon className="size-5" /> </button> 
             </div>
 
-            <div className="flex-1">
+            <div className="flex-none px-4">
                 <span>Create Document</span>
             </div> 
+
+            <div className="flex-1" />
         </>
     )    
 }

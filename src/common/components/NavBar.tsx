@@ -3,10 +3,12 @@ import { Link, useLocation, useParams } from "react-router";
 import { useLazyGetDocumentQuery } from "../../documents/document.api";
 import { CreateDocument } from "./Header/CreateDocument";
 import { DocList } from "./Header/DocList";
+import { OnDocument } from "./Header/OnDocument";
 
 const patterns = {
     docs: /\/docs\/?$/,
-    createDocument: /\/docs\/add$/
+    createDocument: /\/docs\/add$/,
+    onDoc: /\/docs\/[0-9a-zA-Z-]+$/
 }
 
 export const NavBar: FC = () => {
@@ -21,6 +23,8 @@ export const NavBar: FC = () => {
             return <DocList />
         if(pathname.match(patterns.createDocument))
             return <CreateDocument />
+        if(pathname.match(patterns.onDoc))
+            return <OnDocument />
         return null
     }, [pathname])
 
