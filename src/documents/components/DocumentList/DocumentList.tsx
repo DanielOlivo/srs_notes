@@ -21,8 +21,10 @@ export const DocumentList: FC = () => {
     }
 
     return (
-        <ul className="list">
-            {ids.map(id => <DocumentItem key={id} id={id} />)}
-        </ul>
+        <div className="w-full h-64 overflow-y-auto">
+            <ul className="list">
+                {ids.map(id => <DocumentItem key={id} id={id} />)}
+            </ul>
+        </div>
     );
 }

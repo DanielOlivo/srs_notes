@@ -51,6 +51,14 @@ export class Document implements IDocument {
 
     static loadTx = (docs: IDocument[]) => docs.map(doc => (tx: Tx) => tx.documentStore.add(doc))
 
+    static get = async(id: string) => {
+        const db = await getLocalDb()
+        const record = await db.get("documents", id)
+        if(!record) 
+            return null
+        return new Document(record.name, record.type, record.id, record.createdAt)
+    }
+
     static async clean(){
         const db = await getLocalDb()
         await db.clear("documents")

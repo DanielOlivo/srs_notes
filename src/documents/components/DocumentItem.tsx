@@ -53,7 +53,7 @@ export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
                     disabled={!onEdit}
                 /> */}
                 <p>
-                    <Link to={`/doc/${document.id}`}>{document.name}</Link>
+                    <Link to={`${document.id}`}>{document.name}</Link>
                 </p>
             </div>
 

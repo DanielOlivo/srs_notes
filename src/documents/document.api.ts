@@ -7,6 +7,7 @@ import { Position } from "../db/entities/position";
 import { getDb, withTx } from "../db/LocalDb";
 import { seed } from "../db/seed";
 import { 
+    type CreateDocumentRequestDto,
     type DocumentRenameRequestDto, 
     // type DocumentDto, 
     // type DocumentListDto 
@@ -35,8 +36,8 @@ export const documentApi = api.injectEndpoints({
         getDocument: builder.query<IDocument, string>({
             queryFn: async(docId) => {
                 try{
-                    const db = await getDb();
-                    return { data: await db.getDocumentById(docId) }
+                    const doc = await Document.get(docId)
+                    return { data: doc?.asPlain() }
                 }
                 catch(error){
                     return { error }
@@ -51,6 +52,12 @@ export const documentApi = api.injectEndpoints({
                 return { data: undefined }
             },
             invalidatesTags: ["DocumentList"]
+        }),
+
+        create: builder.mutation<void, CreateDocumentRequestDto>({
+            queryFn: async (req) => {
+                return { data: undefined }
+            }
         }),
 
         uploadDocument: builder.mutation<void, Data>({
@@ -120,10 +127,13 @@ export const documentApi = api.injectEndpoints({
 
 export const {
     useGetDocumentListQuery,
+
     useGetDocumentQuery,
+    useLazyGetDocumentQuery,
 
     useSeedMutation,
 
+    useCreateMutation,
     useUploadDocumentMutation,
     useRenameDocumentMutation,
     useDeleteDocumentMutation,
