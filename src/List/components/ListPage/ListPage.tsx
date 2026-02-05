@@ -8,6 +8,7 @@ import { /*selectEditMode, */ selectMode } from "../../list.selectors";
 import { NoteEdit } from "../../../notes/components/NoteEdit/NoteEdit";
 import { AnswerPanel } from "../AnswerPanel/AnswerPanel";
 import { useIncrementTime } from "../../incrTime";
+import { ModeSelector } from "../ModeSelector/ModeSelector";
 
 export const ListPage: FC = () => {
 
@@ -39,13 +40,14 @@ export const ListPage: FC = () => {
             </div>
 
             <div>
-                <Controls />
+                {/* <Controls /> */}
             </div>
 
             <div className="">
                 {/* <Outlet /> */}
                 {controls()}
             </div>
+            <ModeSelector />
         </div>
     )
 }
