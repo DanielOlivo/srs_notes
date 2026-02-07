@@ -43,12 +43,12 @@ export const ListItem: FC<ListItemProps> = ({id}) => {
                         </button>
 
                         <ul 
-                            className="dropdown dropdown-end menu w-24 rounded-box bg-neutral"
+                            className="dropdown dropdown-end menu w-28 rounded-box bg-base-200"
                             popover="auto"
                             id={`popover-${id}`}
                             style={{ positionAnchor: `--anchor-${id}`} as React.CSSProperties}
                         >
-                            <li><a className="hover:bg-accent">add above</a></li>
+                            <li><a>add above</a></li>
                             <li><Link to={`noteEdit/${id}`}>edit</Link></li>
                             <li><a>add below</a></li>
                         </ul>

@@ -5,17 +5,25 @@ import { CreateDocument } from "./Header/CreateDocument";
 import { DocList } from "./Header/DocList";
 import { OnDocument } from "./Header/OnDocument";
 import { OnNoteEdit } from "./Header/OnNoteEdit";
+import { Sidebar } from "./Sidebar/Sidebar";
 
 const patterns = {
     docs: /\/docs\/?$/,
     createDocument: /\/docs\/add$/,
     onDoc: /\/docs\/[0-9a-zA-Z-]+$/,
-    onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/
+    onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/,
+    onSettings: /\/settings$/,
+    onAbout: /\/about$/,
+}
+
+type Props = {
+    showSidebar: boolean
+    title: string
 }
 
 export const NavBar: FC = () => {
 
-    const { docId } = useParams<{docId: string}>()
+    const { docId, noteId } = useParams<{docId: string, noteId: string}>()
     const [getDoc, { data: doc } ] = useLazyGetDocumentQuery()
 
     const { pathname } = useLocation()   
@@ -32,6 +40,18 @@ export const NavBar: FC = () => {
         return null
     }, [pathname])
 
+    const props = useMemo((): Props => {
+        return {
+            showSidebar: pathname.match(patterns.onSettings) !== null,
+            title: (() => {
+                if(pathname.match(patterns.onSettings))
+                    return "Settings"
+                if(pathname.match(patterns.onAbout))
+                    return "About"
+                return "SRS Notes"
+            })()
+        }
+    }, [docId, noteId, pathname])
 
     useEffect(() => {
         if(docId)
@@ -40,6 +60,15 @@ export const NavBar: FC = () => {
 
     return (
         <div className="navbar bg-base-100 shadow-sm">
+
+            <div className="flex-none px-3">
+                <Sidebar />
+            </div>
+
+            <div className="flex-none px-3">
+                <span>{props.title}</span>
+            </div>
+
             {/* {!docId && <span>SRS Notes</span>}
             {docId && <Link to="..">Documents</Link>}
 
