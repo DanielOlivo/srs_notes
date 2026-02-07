@@ -1,22 +1,38 @@
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { useCreateMutation, useLazyGetDocumentQuery } from "../../document.api";
 import { type CreateDocumentRequestDto } from "../../document.dto";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useParams } from "react-router";
 
-export interface DocumentEditFormProps {
-    id?: string
-}
+// export interface DocumentEditFormProps {
+//     id?: string
+// }
 
-export const DocumentEditForm: FC<DocumentEditFormProps> = ({id}) => {
+export const DocumentEditForm: FC = () => {
 
+    const { docId: id } = useParams<{docId: string}>()
     const [getDoc, { data: doc}] = useLazyGetDocumentQuery()
     const [createDoc, ] = useCreateMutation()
+
 
     const {
         register,
         handleSubmit,
         reset
     } = useForm<CreateDocumentRequestDto>();
+
+    useEffect(() => {
+        if(id !== undefined){
+            getDoc(id).then((result) => {
+                if(result.data){
+                    reset({
+                        name: result.data.name,
+                        type: result.data.type
+                    })
+                }
+            })
+        }
+    }, [id]) 
 
     const onSubmit: SubmitHandler<CreateDocumentRequestDto> = (data) => {
         if(id === undefined){

@@ -17,10 +17,10 @@ export const Documents: FC = () => {
         <div className="w-full h-full flex flex-col justify-start items-stretch">
             <DocumentList />
             {/* <CleanAllButton /> */}
-            <SeedButton />
-            <TestButton />
-            <DocumentLoader />
-            <DumpButton />
+            {/* <SeedButton /> */}
+            {/* <TestButton /> */}
+            {/* <DocumentLoader /> */}
+            {/* <DumpButton /> */}
 
             <div className="fab">
                 <button

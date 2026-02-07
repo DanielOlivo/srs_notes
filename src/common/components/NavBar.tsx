@@ -1,11 +1,12 @@
 import { useEffect, useMemo, type FC } from "react";
-import { Link, useLocation, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { useLazyGetDocumentQuery } from "../../documents/document.api";
 import { CreateDocument } from "./Header/CreateDocument";
 import { DocList } from "./Header/DocList";
 import { OnDocument } from "./Header/OnDocument";
 import { OnNoteEdit } from "./Header/OnNoteEdit";
 import { Sidebar } from "./Sidebar/Sidebar";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const patterns = {
     docs: /\/docs\/?$/,
@@ -14,10 +15,12 @@ const patterns = {
     onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/,
     onSettings: /\/settings$/,
     onAbout: /\/about$/,
+    onDocEdit: /\/docs\/[0-9a-zA-Z-]+\/edit$/
 }
 
 type Props = {
     showSidebar: boolean
+    showBack: boolean
     title: string
 }
 
@@ -27,6 +30,7 @@ export const NavBar: FC = () => {
     const [getDoc, { data: doc } ] = useLazyGetDocumentQuery()
 
     const { pathname } = useLocation()   
+    const navigate = useNavigate()
 
     const content = useMemo(() => {
         if(pathname.match(patterns.onNoteEdit))
@@ -41,17 +45,44 @@ export const NavBar: FC = () => {
     }, [pathname])
 
     const props = useMemo((): Props => {
+        const showSidebar = (() => {
+            if(pathname.match(patterns.onAbout))
+                return true
+            if(pathname.match(patterns.onSettings))
+                return true
+            if(pathname.match(patterns.onDoc))
+                return true
+            if(pathname.match(patterns.docs))
+                return true
+            return false
+        })()
+
+        const showBack = (() => {
+            if([
+                patterns.onDocEdit, 
+                patterns.onNoteEdit
+            ].some(p => pathname.match(p)))
+                return true
+            return false
+        })()
+
+        const title = (() => {
+            if(pathname.match(patterns.onSettings))
+                return "Settings"
+            if(pathname.match(patterns.onAbout))
+                return "About"
+            if(pathname.match(patterns.onDoc))
+                return doc?.name ?? "Document"
+            return "SRS Notes"
+        })()
+
+
         return {
-            showSidebar: pathname.match(patterns.onSettings) !== null,
-            title: (() => {
-                if(pathname.match(patterns.onSettings))
-                    return "Settings"
-                if(pathname.match(patterns.onAbout))
-                    return "About"
-                return "SRS Notes"
-            })()
+            showSidebar,
+            title,
+            showBack
         }
-    }, [docId, noteId, pathname])
+    }, [docId, noteId, pathname, doc])
 
     useEffect(() => {
         if(docId)
@@ -62,7 +93,12 @@ export const NavBar: FC = () => {
         <div className="navbar bg-base-100 shadow-sm">
 
             <div className="flex-none px-3">
-                <Sidebar />
+                {props.showSidebar && <Sidebar />}
+                {props.showBack && (
+                    <button
+                        onClick={() => navigate(-1)}  
+                    ><ArrowLeftIcon className="size-6" /></button>
+                )}
             </div>
 
             <div className="flex-none px-3">
@@ -73,7 +109,7 @@ export const NavBar: FC = () => {
             {docId && <Link to="..">Documents</Link>}
 
             {doc && <span>{doc.name}</span>}  */}
-            {content}
+            {/* {content} */}
         </div>
     )
 }

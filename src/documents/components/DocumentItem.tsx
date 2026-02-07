@@ -1,6 +1,7 @@
 import { useRef, useState, type FC } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useDeleteDocumentMutation, useGetDocumentQuery, useRenameDocumentMutation } from "../document.api";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 
 export interface DocumentItemProps {
     id: string
@@ -14,6 +15,7 @@ export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [rename] = useRenameDocumentMutation(); 
     const [deleteDocument] = useDeleteDocumentMutation();
+    const navigate = useNavigate()
 
     const handleSave = () => {
         if(inputRef.current && document){
@@ -42,9 +44,9 @@ export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
 
     return (
         <li className="list-row">
-            <div className="max-w-16">
+            {/* <div className="max-w-16">
                 <p className="truncate">{document.id}</p>
-            </div>
+            </div> */}
 
             <div>
                 {/* <input
@@ -57,26 +59,49 @@ export const DocumentItem: FC<DocumentItemProps> = ({id}) => {
                 </p>
             </div>
 
+            <div className="list-col-grow" />
+
             <div>
+                <button
+                    popoverTarget={`popover-${id}`}
+                    style={{ anchorName: `--anchor-${id}`}}
+                >
+                    <EllipsisVerticalIcon className="size-5" />
+                </button>
+
+                <ul
+                    className="dropdown dropdown-end menu w-52 rounded-box bg-base-200 shadow-sm" 
+                    popover="auto"
+                    id={`popover-${id}`}
+                    style={{ positionAnchor: `--anchor-${id}`}}
+                >
+                    <li><a
+                        onClick={() => navigate(`${id}/edit`)} 
+                    >Edit</a></li>
+                    {/* <li><a>Delete</a></li> */}
+                </ul>
+            </div>
+
+            {/* <div>
                 <button 
                     className="btn" 
                     onClick={handleSave}
                 >Save</button>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
                 <button 
                     className="btn" 
                     onClick={handleCancel}
                 >Cancel</button>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
                 <button 
                     className="btn btn-warning"
                     onClick={handleDelete}
                 >Delete</button>
-            </div>
+            </div> */}
         </li>
     )
 }

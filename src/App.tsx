@@ -22,6 +22,7 @@ function App() {
             <Route path="add" element={<DocumentEditForm />} />
             <Route path=":docId" element={<ListPage />} />
             <Route path=":docId/noteEdit/:noteId" element={<NoteEdit />} />
+            <Route path=":docId/edit" element={<DocumentEditForm />} />
           </Route>
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
