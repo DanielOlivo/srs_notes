@@ -1,5 +1,7 @@
 import type { FC } from "react";
 import { Note } from "../../notes/components/Note/Note";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router";
 
 export interface ListItemProps {
     id: string
@@ -12,8 +14,37 @@ export interface ListItemProps {
  */
 export const ListItem: FC<ListItemProps> = ({id}) => {
     return (
-        <li className="w-full h-20 flex justify-center items-center">
-            <Note id={id} />
+        <li 
+            className="w-full h-20 
+                flex justify-between items-center 
+                border rounded-xl border-slate-300
+                my-2 py-1
+            "
+        >
+            <div className="grow">
+                <Note id={id} />
+            </div>
+
+            <div className="flex-none w-6">
+                <button
+                    popoverTarget={`popover-${id}`} 
+                    style={{ anchorName: `--anchor-${id}`} as React.CSSProperties}
+                >
+                    <EllipsisVerticalIcon className="size-5" />
+                </button>
+
+                <ul 
+                    className="dropdown dropdown-end menu w-24 rounded-box bg-neutral"
+                    popover="auto"
+                    id={`popover-${id}`}
+                    style={{ positionAnchor: `--anchor-${id}`} as React.CSSProperties}
+                >
+                    <li><a className="hover:bg-accent">add above</a></li>
+                    <li><Link to={`noteEdit/${id}`}>edit</Link></li>
+                    <li><a>add below</a></li>
+                </ul>
+
+            </div>
         </li>
     )
 }

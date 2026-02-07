@@ -97,10 +97,10 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     return (
         <div 
-            className="w-full h-full card"
+            className="w-full h-full flex justify-center items-center px-5"
             onClick={handleClick}
         >
-            <div className="card-body grid gap-2 grid-cols-2">
+            <div className="w-full h-full grid gap-2 grid-cols-[50%_50%]">
                 <div>
                     <span>{front}</span>
                 </div>

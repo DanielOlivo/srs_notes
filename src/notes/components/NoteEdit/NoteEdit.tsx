@@ -5,12 +5,15 @@ import { useLazyGetNoteQuery } from "../../note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
 import { useAppDispatch } from "../../../app/hooks";
 import { setListMode } from "../../../List/list.slice";
+import { useParams } from "react-router";
 
-export interface NoteEditProps {
-    id?: string
-}
+// export interface NoteEditProps {
+//     id?: string
+// }
 
-export const NoteEdit: FC<NoteEditProps> = ({id}) => {
+export const NoteEdit: FC = () => {
+
+    const { noteId: id } = useParams<{noteId: string}>()
 
     const dispatch = useAppDispatch()
     const [mode, setMode] = useState<NoteType | null>(id !== undefined ? null : 'basic')

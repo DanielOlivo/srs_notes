@@ -4,11 +4,13 @@ import { useLazyGetDocumentQuery } from "../../documents/document.api";
 import { CreateDocument } from "./Header/CreateDocument";
 import { DocList } from "./Header/DocList";
 import { OnDocument } from "./Header/OnDocument";
+import { OnNoteEdit } from "./Header/OnNoteEdit";
 
 const patterns = {
     docs: /\/docs\/?$/,
     createDocument: /\/docs\/add$/,
-    onDoc: /\/docs\/[0-9a-zA-Z-]+$/
+    onDoc: /\/docs\/[0-9a-zA-Z-]+$/,
+    onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/
 }
 
 export const NavBar: FC = () => {
@@ -19,6 +21,8 @@ export const NavBar: FC = () => {
     const { pathname } = useLocation()   
 
     const content = useMemo(() => {
+        if(pathname.match(patterns.onNoteEdit))
+            return <OnNoteEdit />
         if(pathname.match(patterns.docs))
             return <DocList />
         if(pathname.match(patterns.createDocument))
