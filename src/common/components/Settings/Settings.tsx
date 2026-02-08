@@ -1,6 +1,10 @@
-import type { FC } from "react";
+import { type FC } from "react";
+import { useDarkThemeSetter } from "../../../theme/useTheme";
 
 export const Settings: FC = () => {
+
+    const { setDark, isDark } = useDarkThemeSetter()
+
     return (
         <div className="grid grid-cols-[80%_20%]">
 
@@ -11,8 +15,10 @@ export const Settings: FC = () => {
             <div>
                 <input
                     type="checkbox"
-                    value="dark"
                     className="toggle theme-controller"
+                    value='dark'
+                    onChange={setDark}
+                    checked={isDark}
                 />
             </div>
 

@@ -4,12 +4,14 @@ import { api } from "../api";
 // import { GridApiUtils, type GridApiData } from "../grid/grid.api";
 import { handleNoteCache, type NoteApiData } from "../notes/note.api";
 import { listReducer } from "../List/list.slice";
+import themeReducer from "../theme/theme.slice"
 
 
 export const getStore = () => configureStore({
     reducer: {
         // gridReducer,
         listReducer, 
+        themeReducer,
         [api.reducerPath]: api.reducer
     },
     middleware: (getDefaultMiddleware) =>
@@ -41,6 +43,8 @@ export const getStoreWithState = ({noteApi }: StoreState) => {
     const store = configureStore({
         reducer: {
             // gridReducer,
+            listReducer,
+            themeReducer,
             [api.reducerPath]: api.reducer
         },
         middleware: (getDefaultMiddleware) =>
