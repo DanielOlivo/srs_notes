@@ -1,4 +1,4 @@
-import type { IVector2 } from "../../utils/Vector2"
+import { Vector2, type IVector2 } from "../../utils/Vector2"
 import { parse } from 'papaparse'
 import { getLocalDb, type Tx } from "../LocalDb"
 
@@ -28,13 +28,13 @@ export class Position implements IPosition {
     id: number
     noteId: string
     documentId: string
-    coord: IVector2
+    coord: Vector2
 
     constructor(id: number, noteId: string, documentId: string, coord: IVector2){
         this.id = id
         this.noteId = noteId
         this.documentId = documentId
-        this.coord = coord
+        this.coord = Vector2.from(coord)
     }   
 
     static all = async () => {
@@ -69,11 +69,42 @@ export class Position implements IPosition {
         )
     }
 
+    static getByDocIdTx = (docId: string) => async (tx: Tx) => {
+        const records = await tx.positionStore.index("by-docId").getAll(docId)
+        const positions = records.map(r => new Position(
+            r.id,
+            r.noteId,
+            r.documentId,
+            r.coord
+        ))
+        return positions
+    }
+
+    addTx = async (tx: Tx) => {
+        const {id, ...plain} = this.asPlain()
+        try{
+            const id = await tx.positionStore.add(plain as IPosition)
+            this.id = id
+        }
+        catch(error){
+            throw new Error(`Position ${this}; addTx failure: ${error}`)
+        }
+    }
+
+    updateTx = async (tx: Tx) => {
+        try{
+            await tx.positionStore.put(this.asPlain())
+        }
+        catch(error){
+            throw new Error(`Position ${this.toCsvRow()}; updateTx failure: ${error}`)
+        }
+    }
+
     asPlain = (): IPosition => ({
         id: this.id,
         noteId: this.noteId,
         documentId: this.documentId,
-        coord: this.coord
+        coord: this.coord.asPlain()
     })
 
     toCsvRow = () => `${this.id},${this.noteId},${this.documentId},${this.coord.x},${this.coord.y}`

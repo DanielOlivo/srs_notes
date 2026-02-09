@@ -7,6 +7,7 @@ import { selectMode } from "../list.selectors";
 
 export interface ListItemProps {
     id: string
+    idx: number
 }
 
 /**
@@ -14,7 +15,7 @@ export interface ListItemProps {
  * @param id - note id
  * @returns 
  */
-export const ListItem: FC<ListItemProps> = ({id}) => {
+export const ListItem: FC<ListItemProps> = ({id, idx}) => {
 
     const mode = useAppSelector(selectMode)
 
@@ -48,9 +49,9 @@ export const ListItem: FC<ListItemProps> = ({id}) => {
                             id={`popover-${id}`}
                             style={{ positionAnchor: `--anchor-${id}`} as React.CSSProperties}
                         >
-                            <li><a>add above</a></li>
+                            <li><Link to={`addNote/${idx}/0`}>add above</Link></li>
                             <li><Link to={`noteEdit/${id}`}>edit</Link></li>
-                            <li><a>add below</a></li>
+                            <li><Link to={`addNote/${idx + 1}/0`}>add below</Link></li>
                         </ul>
                     </>
                 }

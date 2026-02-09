@@ -21,7 +21,7 @@ export const List: FC<ListProps> = ({documentId, height}) => {
             style={style}
         >
             <ul className="w-full">
-                {noteIds && noteIds.map(id => <ListItem key={id} id={id} /> ) } 
+                {noteIds && noteIds.map((id, idx) => <ListItem key={id} id={id} idx={idx} /> ) } 
             </ul>
         </div>
     )

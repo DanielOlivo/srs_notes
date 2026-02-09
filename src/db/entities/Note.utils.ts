@@ -51,7 +51,7 @@ export class BasicNote extends BaseNote implements IBasicNote {
         this.kind = "basic"
     }
 
-    static random = (): IBasicNote => new BasicNote(
+    static random = () => new BasicNote(
         v4(),
         Date.now(),
         Date.now(),
@@ -105,6 +105,15 @@ export class BasicNote extends BaseNote implements IBasicNote {
         )
     }
 
+    addTx = async (tx: Tx) => {
+        try{
+            await tx.basicNoteStore.add(this.asPlain())
+        }
+        catch(error){
+            throw new Error(`BasicNote ${this.toCsvRow()}; addTx failure: ${error}`)
+        }
+    }
+
     removeTx = async (tx: Tx) => {
         await tx.basicNoteStore.delete(this.id)
     }
@@ -153,7 +162,7 @@ export class TextNote extends BaseNote implements ITextNote {
         this.kind = 'text'
     } 
 
-    static random = (): ITextNote => new TextNote(
+    static random = () => new TextNote(
         v4(),
         Date.now(),
         Date.now(),
@@ -189,6 +198,10 @@ export class TextNote extends BaseNote implements ITextNote {
             record.updatedAt,
             record.text
         )
+    }
+
+    addTx = async (tx: Tx) => {
+        await tx.textNoteStore.add(this.asPlain())
     }
 
     removeTx = async (tx: Tx) => {
@@ -289,8 +302,13 @@ export class Interval implements IInterval {
         )
     }
 
-    addTx = () => (tx: Tx) => {
-        return tx.intervalStore.add(this.asPlain())
+    addTx = async (tx: Tx) => {
+        try{
+            await tx.intervalStore.add(this.asPlain())
+        }
+        catch(error){
+            throw new Error(`Interval ${this}; addTx failure: ${error}`)
+        }
     }
 
     updateTx = (nextInterval: number) => (tx: Tx) => {

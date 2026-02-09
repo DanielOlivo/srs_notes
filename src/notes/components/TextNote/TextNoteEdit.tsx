@@ -2,15 +2,18 @@ import { useEffect, type FC } from "react";
 import { isTextNote, type TextNoteData } from "../../../db/entities/Note";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import type { IVector2 } from "../../../utils/Vector2";
 
 export interface TextNoteEditProps {
     id?: string
+    docId?: string
+    coord: IVector2
 }
 
-export const TextNoteEdit: FC<TextNoteEditProps> = ({id}) => {
+export const TextNoteEdit: FC<TextNoteEditProps> = ({id, docId, coord}) => {
 
-    const { docId } = useParams<{docId: string}>()
+    const navigate = useNavigate()
     const [getNote, { data: note }  ] = useLazyGetNoteQuery()
     const [createNote, {isLoading}] = useCreateNoteMutation();
     const [updateNote, ] = useUpdateNoteMutation()
@@ -27,8 +30,10 @@ export const TextNoteEdit: FC<TextNoteEditProps> = ({id}) => {
             updateNote( { id, data } )
         }
         else {
-            createNote( { data: {text: data.text, kind: 'text'}, docId } );
+            if(!docId) throw new Error("failed to get docId from url")
+            createNote( { data: {text: data.text, kind: 'text'}, docId, coord } );
         }
+        navigate(-1)
     }
 
     useEffect(() => {

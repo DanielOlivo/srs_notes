@@ -1,6 +1,7 @@
 import type { Ease } from "../db/entities/answer"
 import type { Note, NoteData } from "../db/entities/Note"
 import type { IPosition } from "../db/entities/position"
+import type { IVector2 } from "../utils/Vector2"
 
 
 export interface CreatebasicNoteDto {
@@ -20,6 +21,7 @@ export interface UpdateBasicNoteDto extends CreatebasicNoteDto {
 export interface CreateNote {
     data: NoteData
     docId: string
+    coord?: IVector2
 }
 
 export interface DocNotesDto {

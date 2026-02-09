@@ -13,6 +13,9 @@ import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./ent
 import { BasicNote, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
 import { NotImplemented } from "../utils/NotImplemented";
+import { Vector2, type IVector2 } from "../utils/Vector2";
+import { Document } from "./Document";
+import { Position } from "./entities/position";
 
 const dbName = "memoryGameDb";
 
@@ -202,6 +205,52 @@ class DbOps {
             ...positions.map(pos => this.noteOps.getById(pos.noteId))
         ) 
         return { notes, positions }
+    }
+
+    async createListNoteAtPos<T extends NoteData>(docId: string, data: T, coord: IVector2){
+        const [doc, positions] = await withTx(
+            Document.getTx(docId),
+            Position.getByDocIdTx(docId)
+        )
+
+        if(!doc) throw new Error(`document with id ${docId} not found`)
+
+        const id = v4()
+        const createdAt = Date.now()
+        const updatedAt = Date.now()
+        const note = (() => {
+            switch(data.kind){
+                case "basic": return new BasicNote(id, createdAt, updatedAt, data.front, data.back)
+                case "text": return new TextNote(id, createdAt, updatedAt, data.text)
+                default: throw new NotImplemented()
+            }
+        })()
+        const createNoteFn = (() => {
+            switch(note.kind){
+                case "basic": return note.addTx
+                case 'text': return note.addTx
+                default: throw new Error()
+            }
+        })()
+
+        const newPos = new Position(0, note.id, docId, new Vector2(0, coord.y))
+
+        for(const pos of positions){
+            if(pos.coord.y >= coord.y)
+                pos.coord = pos.coord.sum(new Vector2(0, 1))
+        }
+        positions.sort((a, b) => b.coord.y - a.coord.y)
+
+        // console.log(
+        //     "positions y updated", positions.map(p => p.coord.y),
+        //     "new pos y", newPos.coord.y
+        // )
+
+        await withTx(
+            createNoteFn,
+            ...positions.map(pos => pos.updateTx),
+            newPos.addTx
+        )
     }
 
     async createListNote<T extends NoteData>(docId: string, data: T){

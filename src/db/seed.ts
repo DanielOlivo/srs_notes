@@ -1,11 +1,11 @@
 import { v4 } from "uuid"
 import { Document } from "./Document"
 import { BasicNote, Interval, TextNote } from "./entities/Note.utils"
-import { getDb } from "./LocalDb"
+import { withTx } from "./LocalDb"
+import { Position } from "./entities/position"
 
 export const seed = async () => {
     console.log('seeding...')
-    const db = await getDb()
 
     const docs = [
         new Document("doc1", "list"),
@@ -13,29 +13,32 @@ export const seed = async () => {
         new Document("doc3", "list"),
     ]
 
-    await db.createDocument(docs[0])
-    await db.createDocument(docs[1])
-    await db.createDocument(docs[2])
-
     const doc1BasicNotes = Array.from({length: 10}, () => BasicNote.random())    
-    for(const [idx, note] of doc1BasicNotes.entries()){
-        try{
-            await db.createListNote(docs[0].id, note)
-            const interval = idx % 2 === 0 
-                ? new Interval(v4(), note.id, 10000, Date.now())
-                : new Interval(v4(), note.id, 900000000000, Date.now())
-            await db.addInterval(interval)
-        }
-        catch(error){
-            console.error(`failed to create note ${note}\n${error}`)
-            break
-        }
-    }
+    const intervals = doc1BasicNotes.map((note, idx) => new Interval(
+        v4(),
+        note.id,
+        idx % 2 === 0 ? 10000 : 9000000,
+        Date.now()
+    ))
+    const textNotes = Array.from({length: 10}, () => TextNote.random())
 
-    const docTextNotes = Array.from({length: 10}, () => TextNote.random())
-    for(const note of docTextNotes){
-        await db.createListNote(docs[0].id, note)
-    }
+    const doc1Positions = [
+        ...doc1BasicNotes,
+        ...textNotes
+        ].map((note, idx) => new Position(
+            0,
+            note.id,
+            docs[0].id,
+            {x: 0, y: idx}
+        ))
+
+    await withTx(
+        ...docs.map(doc => doc.addTx),
+        ...doc1BasicNotes.map(note => note.addTx),
+        ...textNotes.map(note => note.addTx),
+        ...doc1Positions.map(pos => pos.addTx),
+        ...intervals.map(interval => interval.addTx),
+    )
 
     console.log('..seeding done')
 }

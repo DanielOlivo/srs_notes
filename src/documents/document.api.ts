@@ -116,11 +116,13 @@ export const documentApi = api.injectEndpoints({
 
         deleteAllDocuments: builder.mutation<void, void>({
             queryFn: async () => {
+                console.log('cleaning...')
                 const db = await getDb();
                 await db.clear();
+                console.log('...done')
                 return { data: undefined }
             },
-            invalidatesTags: ["DocumentList"]
+            invalidatesTags: ["DocumentList", "DocumentNotes"]
         })
     })
 })

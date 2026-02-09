@@ -40,6 +40,12 @@ export const Sidebar: FC = () => {
                     navigate("/settings")
                     toggle()
                 }}>Settings</span></li>
+
+                <li><span onClick={() => {
+                    navigate("/dev")
+                    toggle()
+                }}>Development</span></li>
+
                 <li><span onClick={() => {
                     navigate("/about")
                     toggle()

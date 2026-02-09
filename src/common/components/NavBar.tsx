@@ -15,7 +15,9 @@ const patterns = {
     onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/,
     onSettings: /\/settings$/,
     onAbout: /\/about$/,
-    onDocEdit: /\/docs\/[0-9a-zA-Z-]+\/edit$/
+    onDocEdit: /\/docs\/[0-9a-zA-Z-]+\/edit$/,
+    onDev: /\/dev$/,
+    onAddNote: /\/addNote\/[0-9]+\/[0-9]+/
 }
 
 type Props = {
@@ -46,21 +48,33 @@ export const NavBar: FC = () => {
 
     const props = useMemo((): Props => {
         const showSidebar = (() => {
-            if(pathname.match(patterns.onAbout))
+            if([
+                patterns.onAbout,
+                patterns.onSettings,
+                patterns.onDoc,
+                patterns.docs,
+                patterns.onDev
+            ].some(p => pathname.match(p))){
                 return true
-            if(pathname.match(patterns.onSettings))
-                return true
-            if(pathname.match(patterns.onDoc))
-                return true
-            if(pathname.match(patterns.docs))
-                return true
+            }
+
+            // if(pathname.match(patterns.onAbout))
+            //     return true
+            // if(pathname.match(patterns.onSettings))
+            //     return true
+            // if(pathname.match(patterns.onDoc))
+            //     return true
+            // if(pathname.match(patterns.docs))
+            //     return true
+            
             return false
         })()
 
         const showBack = (() => {
             if([
                 patterns.onDocEdit, 
-                patterns.onNoteEdit
+                patterns.onNoteEdit,
+                patterns.onAddNote
             ].some(p => pathname.match(p)))
                 return true
             return false
@@ -73,6 +87,10 @@ export const NavBar: FC = () => {
                 return "About"
             if(pathname.match(patterns.onDoc))
                 return doc?.name ?? "Document"
+            if(pathname.match(patterns.onDocEdit))
+                return `Editing ${doc?.name ?? "..."}`
+            if(pathname.match(patterns.onAddNote))
+                return "Add Note"
             return "SRS Notes"
         })()
 

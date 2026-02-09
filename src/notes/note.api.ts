@@ -17,7 +17,7 @@ import type { IInterval } from "../db/entities/interval";
 import { documentApi } from "../documents/document.api";
 import { Answer } from "../db/entities/answer";
 import { v4 } from "uuid";
-import { BaseNote, BasicNote, Interval } from "../db/entities/Note.utils";
+import { BaseNote, Interval } from "../db/entities/Note.utils";
 import { getNextInterval } from "./updateInterval";
 
 export const noteApi = api.injectEndpoints({
@@ -26,16 +26,24 @@ export const noteApi = api.injectEndpoints({
         getDocNotes: builder.query<string[], string>({
             queryFn: async(docId, { dispatch }) => {
                 try{
-                    const db = await getDb()
-                    const { notes, positions } = await db.getAllDocNotes(docId)
+                    const [ positions ] = await withTx(
+                        Position.getByDocIdTx(docId)
+                    )
+                    positions.sort((a, b) => a.coord.y - b.coord.y)
+
+                    const notes = await withTx(
+                        ...positions.map(pos => BaseNote.getTx(pos.noteId))
+                    )
 
                     for(const note of notes){
-                        dispatch(
-                            noteApi.util.upsertQueryData("getNote", note!.id, note!)
-                        )
+                        if(note){
+                            dispatch(
+                                noteApi.util.upsertQueryData("getNote", note.id, note.asPlain())
+                            )
+                        }
                     }
 
-                    return { data: notes.map(note => note!.id) }
+                    return { data: positions.map(pos => pos.noteId) }
                 }
                 catch(error){
                     return { error }
@@ -94,9 +102,14 @@ export const noteApi = api.injectEndpoints({
         }),
 
         createNote: builder.mutation<void, CreateNote /*NoteData*/ >({
-            queryFn: async({data, docId}) => {
+            queryFn: async({data, docId, coord}) => {
                 const db = await getDb()
-                await db.createListNote(docId, data)
+                if(coord){
+                    await db.createListNoteAtPos(docId, data, coord)
+                }
+                else {
+                    await db.createListNote(docId, data)
+                }
                 return { data: undefined}
             },
             invalidatesTags: (result, error, req) => [

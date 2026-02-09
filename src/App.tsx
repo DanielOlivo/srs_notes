@@ -8,6 +8,7 @@ import { DocumentEditForm } from './documents/components/DocumentEditForm/Docume
 import { NoteEdit } from './notes/components/NoteEdit/NoteEdit';
 import { Settings } from './common/components/Settings/Settings';
 import { About } from './common/components/About/About';
+import { Development } from './common/components/Development/Development';
 
 function App() {
 
@@ -20,12 +21,15 @@ function App() {
           <Route path="docs">
             <Route index element={<Documents />} />
             <Route path="add" element={<DocumentEditForm />} />
+            {/* <Route path="add/:position" element={<DocumentEditForm />} /> */}
             <Route path=":docId" element={<ListPage />} />
             <Route path=":docId/noteEdit/:noteId" element={<NoteEdit />} />
+            <Route path=":docId/addNote/:posY/:posX" element={<NoteEdit />} />
             <Route path=":docId/edit" element={<DocumentEditForm />} />
           </Route>
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
+          <Route path="dev" element={<Development />} />
         </Route>
         {/* <Route path="doc/:docId" element={<ListPage />}> */}
           {/* <Route path="add" element={<NoteEdit />} /> */}

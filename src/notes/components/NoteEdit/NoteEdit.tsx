@@ -6,6 +6,7 @@ import { TextNoteEdit } from "../TextNote/TextNoteEdit";
 import { useAppDispatch } from "../../../app/hooks";
 import { setListMode } from "../../../List/list.slice";
 import { useParams } from "react-router";
+import type { IVector2 } from "../../../utils/Vector2";
 
 // export interface NoteEditProps {
 //     id?: string
@@ -13,7 +14,7 @@ import { useParams } from "react-router";
 
 export const NoteEdit: FC = () => {
 
-    const { noteId: id } = useParams<{noteId: string}>()
+    const { docId, noteId: id, posY, posX } = useParams<{docId: string, noteId: string, posX: string, posY: string}>()
 
     const dispatch = useAppDispatch()
     const [mode, setMode] = useState<NoteType | null>(id !== undefined ? null : 'basic')
@@ -23,12 +24,18 @@ export const NoteEdit: FC = () => {
 
     const noteTypes: NoteType[] = ['basic', 'text']
 
+    const coord: IVector2 = {
+        x: parseInt(posX ?? "0"),
+        y: parseInt(posY ?? "0")
+    }
+
+
     const getForm = (noteType: NoteType) => {
         switch(noteType){
             case "basic":
-                return <BasicNoteEdit id={id} />
+                return <BasicNoteEdit id={id} docId={docId} coord={coord} />
             case "text":
-                return <TextNoteEdit id={id} />
+                return <TextNoteEdit id={id} docId={docId} coord={coord} />
             default:
                 return <div>no form for this type</div>
         }

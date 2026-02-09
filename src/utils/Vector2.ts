@@ -5,25 +5,32 @@ export type IVector2 = {
 
 export class Vector2 implements IVector2 {
 
-    private _x: number;
-    private _y: number
+    x: number;
+    y: number
 
-    public get x() { return this._x; }
-    public get y() { return this._y}
+    // public get x() { return this._x; }
+    // public get y() { return this._y}
 
     private static  limit = Math.pow(2, 16)
 
     constructor(x: number, y: number){
-        this._x = x
-        this._y = y
+        // this._x = x
+        // this._y = y
+        this.x = x
+        this.y = y
 
         if(Math.abs(x) >= Vector2.limit || Math.abs(y) >= Vector2.limit){
             throw new Error("Coordinates out of range")
         }
     }
 
+    asPlain = (): IVector2 => ({
+        x: this.x,
+        y: this.y
+    })
+
     hash(): number {
-        return (Vector2.limit + this._x) << 16 | (Vector2.limit + this._y); 
+        return (Vector2.limit + this.x) << 16 | (Vector2.limit + this.y); 
     }
 
     static toKey(coord: IVector2): string {

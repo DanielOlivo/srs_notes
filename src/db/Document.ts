@@ -59,6 +59,19 @@ export class Document implements IDocument {
         return new Document(record.name, record.type, record.id, record.createdAt)
     }
 
+    static getTx = (id: string) => async (tx: Tx) => {
+        const record = await tx.documentStore.get(id)
+        if(!record) return null
+        return new Document(
+            record.name,
+            record.type,
+            record.id,
+            record.createdAt
+        )
+    }
+
+    addTx = (tx: Tx) => tx.documentStore.add(this.asPlain())
+
     static async clean(){
         const db = await getLocalDb()
         await db.clear("documents")
