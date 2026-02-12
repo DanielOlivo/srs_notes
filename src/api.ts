@@ -24,7 +24,8 @@ export const api = createApi({
         "DocumentList",
         "DocumentNotes",
         "Interval",
-        "GridList"
+        "GridList",
+        "ScrollPosition"
     ]
 });
 

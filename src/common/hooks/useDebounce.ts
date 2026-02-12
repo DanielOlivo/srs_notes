@@ -1,30 +1,29 @@
-import { useRef, useState } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 type Handler = () => void
 
 export const useDebounce = (delay: number) => {
 
-    const [_timeout, _setTimeout] = useState<NodeJS.Timeout | null>(null)
-    const fnRef = useRef<Handler | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     
-    const run = (fn: Handler) => {
-        if(_timeout === null){
-            const timeout = setTimeout(() => {
-                if(fnRef.current){
-                    run(fnRef.current)
-                }
-                else {
-                    _setTimeout(null)
-                    fnRef.current = null
-                }
-            }, delay)
-            _setTimeout(timeout)
+    const run = useCallback((fn: Handler) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+        }
+
+        timeoutRef.current = setTimeout(() => {
             fn()
+        }, delay)
+    }, [delay])
+
+    useEffect(() => {
+        // Clear the timeout when the component unmounts
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
         }
-        else{
-            fnRef.current = fn    
-        }
-    }
+    }, [])
 
     return { 
         run 

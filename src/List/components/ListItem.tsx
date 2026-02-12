@@ -8,6 +8,7 @@ import { selectMode } from "../list.selectors";
 export interface ListItemProps {
     id: string
     idx: number
+    refFn: (el: HTMLLIElement) => void
 }
 
 /**
@@ -15,7 +16,7 @@ export interface ListItemProps {
  * @param id - note id
  * @returns 
  */
-export const ListItem: FC<ListItemProps> = ({id, idx}) => {
+export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
 
     const mode = useAppSelector(selectMode)
 
@@ -28,6 +29,8 @@ export const ListItem: FC<ListItemProps> = ({id, idx}) => {
                 border rounded-xl border-slate-300
                 my-2 py-1
             "
+            data-id={id}
+            ref={refFn}
         >
             <div className="grow">
                 <Note id={id} />

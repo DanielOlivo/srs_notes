@@ -4,6 +4,7 @@ import { Document } from "../db/Document";
 import type { IDocument } from "../db/entities/document";
 import { BasicNote, Interval, TextNote } from "../db/entities/Note.utils";
 import { Position } from "../db/entities/position";
+import { ScrollPosition, type IScrollPosition } from "../db/entities/scrollPosition";
 import { getDb, withTx } from "../db/LocalDb";
 import { seed } from "../db/seed";
 import { 
@@ -123,6 +124,27 @@ export const documentApi = api.injectEndpoints({
                 return { data: undefined }
             },
             invalidatesTags: ["DocumentList", "DocumentNotes"]
+        }),
+
+        getDocumentScrollPosition: builder.query<string | null, string>({ 
+            queryFn: async(docId) => {
+                const pos = await ScrollPosition.get(docId)
+                return { data: pos?.noteId ?? null }
+            },
+            providesTags: (result, error, docId) => [
+                {type: "ScrollPosition" as const, id: docId}
+            ]
+        }),
+
+        setDocumentScrollPosition: builder.mutation<void, IScrollPosition>({
+            queryFn: async(data) => {
+                const pos = ScrollPosition.from(data)
+                await pos.update()
+                return { data: undefined }
+            },
+            invalidatesTags: (result, error, data) => [
+                {type: "ScrollPosition" as const, id: data.id}
+            ]
         })
     })
 })
@@ -141,4 +163,8 @@ export const {
     useDeleteDocumentMutation,
 
     useDeleteAllDocumentsMutation,
+
+    useGetDocumentScrollPositionQuery,
+    useLazyGetDocumentScrollPositionQuery,
+    useSetDocumentScrollPositionMutation
 } = documentApi;

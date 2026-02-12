@@ -76,6 +76,16 @@ export class ScrollPosition {
         }
     }
 
+    update = async () => {
+        try{
+            const db = await getLocalDb()
+            await db.put("scrollPositions", this.asPlain())
+        }
+        catch(error){
+            throw new Error(`Failed to update scroll position: ${error}`)
+        }
+    }
+
     updateTx = async (tx: Tx) => {
         try{
             const plain = this.asPlain()
