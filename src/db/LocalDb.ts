@@ -295,9 +295,10 @@ class DbOps {
     }
 
     async updateNote<T extends Note>(note: T): Promise<void> {
-        await this.withTx(
-            this.noteOps.update(note)
-        )
+        switch(note.kind){
+            case "basic": await BasicNote.from(note).update(); break;
+            case "text": await TextNote.from(note).update(); break;
+        }
     }
 
     async deleteNote(noteId: string, kind: Note['kind']){

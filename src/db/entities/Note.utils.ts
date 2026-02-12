@@ -51,6 +51,14 @@ export class BasicNote extends BaseNote implements IBasicNote {
         this.kind = "basic"
     }
 
+    static from = (note: IBasicNote) => new BasicNote(
+        note.id,
+        note.createdAt,
+        note.updatedAt,
+        note.front,
+        note.back
+    )
+
     static random = () => new BasicNote(
         v4(),
         Date.now(),
@@ -114,6 +122,11 @@ export class BasicNote extends BaseNote implements IBasicNote {
         }
     }
 
+    update = async () => {
+        const db = await getLocalDb()
+        await db.put("basicNoteStore", this.asPlain())
+    }
+
     removeTx = async (tx: Tx) => {
         await tx.basicNoteStore.delete(this.id)
     }
@@ -162,6 +175,14 @@ export class TextNote extends BaseNote implements ITextNote {
         this.kind = 'text'
     } 
 
+    static from = (note: ITextNote) => new TextNote(
+        note.id,
+        note.createdAt,
+        note.updatedAt,
+        note.text
+    )
+
+
     static random = () => new TextNote(
         v4(),
         Date.now(),
@@ -202,6 +223,11 @@ export class TextNote extends BaseNote implements ITextNote {
 
     addTx = async (tx: Tx) => {
         await tx.textNoteStore.add(this.asPlain())
+    }
+
+    update = async () => {
+        const db = await getLocalDb()
+        await db.put("textNoteStore", this.asPlain())
     }
 
     removeTx = async (tx: Tx) => {

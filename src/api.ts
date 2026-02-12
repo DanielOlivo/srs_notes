@@ -23,6 +23,7 @@ export const api = createApi({
     tagTypes: [
         "DocumentList",
         "DocumentNotes",
+        "Note",
         "Interval",
         "GridList",
         "ScrollPosition"

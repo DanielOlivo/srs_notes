@@ -27,7 +27,11 @@ export const TextNoteEdit: FC<TextNoteEditProps> = ({id, docId, coord}) => {
     const onSubmit: SubmitHandler<TextNoteData> = (data) => {
         if(!docId) throw new Error("failed to get docId from url")
         if(id !== undefined){
-            updateNote( { id, data } )
+            if(note && note.kind === 'text'){
+                const {..._note} = note
+                _note.text = data.text
+                updateNote( _note )
+            }
         }
         else {
             if(!docId) throw new Error("failed to get docId from url")

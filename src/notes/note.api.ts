@@ -64,7 +64,10 @@ export const noteApi = api.injectEndpoints({
                 catch(error){
                     return { error }
                 }
-            }
+            },
+            providesTags: (result, error, noteId) => [
+                { type: "Note", noteId }
+            ]
         }),
 
         getNotePositions: builder.query<IPosition[], string[]>({
@@ -130,24 +133,15 @@ export const noteApi = api.injectEndpoints({
         }),
 
 
-        updateNote: builder.mutation<void, UpdateNoteDto>({
-            queryFn: async (data) => {
+        updateNote: builder.mutation<void, Note>({
+            queryFn: async (note) => {
+                const db = await getDb()
+                await db.updateNote(note) 
                 return { data: undefined }
-            }
-        }),
-
-        updateBasicNote: builder.mutation<void, UpdateBasicNoteDto>({
-            queryFn: async (req) => {
-                try {
-                    const db = await getDb()
-                    // await db.updateNote()
-                    // throw new NotImplemented()
-                    return { data: undefined }
-                }
-                catch(error){
-                    return { error }
-                }
-            }
+            },
+            invalidatesTags: (result, error, req) => [
+                { type: "Note", noteId: req.id }
+            ]
         }),
 
         deleteNote: builder.mutation<void, string>({
@@ -221,7 +215,6 @@ export const {
     useUpdateNoteMutation,
 
     useCreateBasicNoteMutation,
-    useUpdateBasicNoteMutation,
 
     useGetIntervalQuery,
     // useDeleteBasicNoteMutation

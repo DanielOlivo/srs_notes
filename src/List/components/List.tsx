@@ -2,7 +2,6 @@ import { useMemo, type FC } from "react";
 import { ListItem } from "./ListItem";
 import { useGetDocNotesQuery } from "../../notes/note.api";
 import { useAutoScroll } from "../hooks/autoScroll";
-import { useDebounce } from "../../common/hooks/useDebounce";
 
 export interface ListProps {
     documentId: string
@@ -13,7 +12,7 @@ export const List: FC<ListProps> = ({documentId, height}) => {
 
     const { data: noteIds } = useGetDocNotesQuery(documentId)
 
-    const { containerRef, registerItem } = useAutoScroll(documentId, (id) => console.log(`${id} in the view!!`))
+    const { containerRef, registerItem } = useAutoScroll(documentId)
 
     const style: React.CSSProperties = useMemo(() => height ? ({
         maxHeight: `${height}px`
