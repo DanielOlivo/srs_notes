@@ -132,7 +132,6 @@ export const noteApi = api.injectEndpoints({
             }
         }),
 
-
         updateNote: builder.mutation<void, Note>({
             queryFn: async (note) => {
                 const db = await getDb()

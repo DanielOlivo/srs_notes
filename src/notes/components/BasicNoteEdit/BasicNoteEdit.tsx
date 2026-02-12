@@ -2,7 +2,7 @@ import { useEffect, type FC } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
 import { isBasicNote, type BasicNoteData } from "../../../db/entities/Note";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import type { IVector2 } from "../../../utils/Vector2";
 
 export interface BasicNoteEditProps {
@@ -29,7 +29,12 @@ export const BasicNoteEdit: FC<BasicNoteEditProps> = ({id, docId, coord}) => {
 
     const onSubmit: SubmitHandler<BasicNoteData> = (data) => {
         if(id !== undefined){
-            updateNote( { id, data } )
+            if(note && note.kind === 'basic'){
+                const {..._note} = note
+                _note.front = data.front
+                _note.back = data.back
+                updateNote( _note )
+            }
         }
         else {
             if(!docId) throw new Error("failed to get docId from url")
