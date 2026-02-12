@@ -124,6 +124,7 @@ export class BasicNote extends BaseNote implements IBasicNote {
 
     update = async () => {
         const db = await getLocalDb()
+        this.updatedAt = Date.now() 
         await db.put("basicNoteStore", this.asPlain())
     }
 
@@ -227,6 +228,7 @@ export class TextNote extends BaseNote implements ITextNote {
 
     update = async () => {
         const db = await getLocalDb()
+        this.updatedAt = Date.now() 
         await db.put("textNoteStore", this.asPlain())
     }
 
