@@ -34,7 +34,7 @@ function App() {
         {/* <Route path="doc/:docId" element={<ListPage />}> */}
           {/* <Route path="add" element={<NoteEdit />} /> */}
         {/* </Route> */}
-        <Route path="*" element={<Navigate to="./docs" />} />
+        <Route path="*" element={<Navigate to="./docs" replace/>} />
       </Routes>
     </div>
   );
