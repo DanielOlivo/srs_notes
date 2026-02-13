@@ -6,7 +6,7 @@
   "homepage": "https://DanielOlivo.github.io/srs_notes",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",

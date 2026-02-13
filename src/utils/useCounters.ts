@@ -110,21 +110,21 @@ export const CounterContext = createContext<Counters>({
     seed: () => {}
 })
 
-function toUnit16(n: number): number {
+export function toUnit16(n: number): number {
     return (n + 0x8000) & 0xffff;
 }
 
-function fromUnit16(n: number): number {
+export function fromUnit16(n: number): number {
     return (n & 0xffff) - 0x8000
 }
 
-function hashCoord(coord: Vector2){
+export function hashCoord(coord: Vector2){
     return (toUnit16(coord.x) << 16) | toUnit16(coord.y)
 }
 
-function unpackCoord(hash: number): Vector2 {
-    return new Vector2(
-        fromUnit16(hash >>> 16),
-        fromUnit16(hash)
-    )
-}
+// function unpackCoord(hash: number): Vector2 {
+//     return new Vector2(
+//         fromUnit16(hash >>> 16),
+//         fromUnit16(hash)
+//     )
+// }

@@ -1,16 +1,13 @@
 import { api } from "../api";
 import type { AppStore } from "../app/store";
 import type { IDocument } from "../db/entities/document";
-import { type NoteData, type Note } from "../db/entities/Note";
+import { type Note } from "../db/entities/Note";
 import { Position, type IPosition } from "../db/entities/position";
-import { getDb, withTx, type Tx } from "../db/LocalDb";
-import { NotImplemented } from "../utils/NotImplemented";
+import { getDb, withTx } from "../db/LocalDb";
 import { 
     type AnswerReqDto,
     type CreatebasicNoteDto, 
     type CreateNote, 
-    type UpdateBasicNoteDto, 
-    type UpdateNoteDto,
 } from "./notes.dto";
 import { groupBy } from "../utils/groupBy";
 import type { IInterval } from "../db/entities/interval";
@@ -121,7 +118,7 @@ export const noteApi = api.injectEndpoints({
         }),
 
         createBasicNote: builder.mutation<void, CreatebasicNoteDto>({
-            queryFn: async(dto) => {
+            queryFn: async() => {
                 try {
 
                     return { data: undefined }
@@ -173,20 +170,15 @@ export const noteApi = api.injectEndpoints({
                 const answer = new Answer(v4(), noteId, ease, Date.now())
 
                 const interval = await Interval.getByNoteId(noteId)
-                const nextInterval = getNextInterval(interval?.openDuration, ease)
                 const updateInterval = (() => {
-                    if(!interval){
-                        const toCreate = new Interval(
-                            v4(),
-                            noteId,
-                            nextInterval,
-                            Date.now()
-                        )
-                        return toCreate.addTx()
+                    if(interval){
+                        const nextInterval = getNextInterval(interval.openDuration, ease)
+                        return interval.updateTx(nextInterval)
                     }
-                    return interval.updateTx(nextInterval)
-
+                    const toCreate = new Interval(v4(), noteId, 30000, Date.now())
+                    return toCreate.addTx
                 })()
+
                 
                 await withTx(
                     answer.createTx(),

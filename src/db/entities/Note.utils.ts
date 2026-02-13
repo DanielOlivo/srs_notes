@@ -333,6 +333,7 @@ export class Interval implements IInterval {
     addTx = async (tx: Tx) => {
         try{
             await tx.intervalStore.add(this.asPlain())
+            return
         }
         catch(error){
             throw new Error(`Interval ${this}; addTx failure: ${error}`)
