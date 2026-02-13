@@ -9,35 +9,43 @@ import { setListMode, type ListMode2 } from "../../../List/list.slice"
 
 dayjs.extend(duration)
 
+const getBlurValue = (duration: number) => {
+    if(duration < 10000) return 0
+    if(duration < 20000) return 1
+    if(duration < 30000) return 2
+    return 3
+}
+
 export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
     const { data: interval, isError, isLoading } = useGetIntervalQuery(id)
-    const [isOpen, setIsOpen] = useState<boolean | null>(null)
+    const [isOpen, setIsOpen] = useState<number | null>(null) // number stands for blur
     const [remained, setReamined] = useState<string | null>(null)
 
     const currentMode = useAppSelector(selectMode)
     const currentTime = useAppSelector(selectTime)
 
-    const updateIsOpen = useEffectEvent((opened: boolean) => setIsOpen(opened))
+    const updateIsOpen = useEffectEvent((blurOrNull: number | null) => setIsOpen(blurOrNull))
     const updateRemained = useEffectEvent((remained: string | null) => setReamined(remained))
 
     const dispatch = useAppDispatch()    
 
     useEffect(() => {
         if(isError || isLoading){
-            updateIsOpen(true)
+            updateIsOpen(0)
         }
         else if(currentMode.kind !== 'onAnswer' && currentMode.kind !== 'onReview'){
-            updateIsOpen(true)
+            updateIsOpen(0)
         }
         else if(interval){
             const remained = interval.openTimestamp + interval.openDuration - currentTime
-            updateIsOpen(remained > 0)
+            updateIsOpen((remained > 0) ? getBlurValue(currentTime - interval.openTimestamp) : null)
         }
     }, [currentTime, currentMode, isError, isLoading, interval])
 
+    // it might be memo
     useEffect(() => {
-        if(!isOpen || !interval){
+        if(isOpen === null || !interval){
             updateRemained(null)
             return
         }
@@ -57,44 +65,6 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
         }
     } 
 
-    // useEffect(() => {
-    //     if(!isError && !isLoading && interval){
-    //         const closeTime = interval.openTimestamp + interval.openDuration
-    //         const opened = Date.now() < closeTime
-    //         // setIsOpen(opened)
-    //         updateIsOpen(opened)
-
-    //         const reaminedUpdater = () => {
-    //             const rem = Math.floor((closeTime - Date.now()))
-    //             if(rem < 0){
-    //                 if(intervalId) clearInterval(intervalId)
-    //                 setIntervalId(null)
-    //                 setIsOpen(false)
-    //                 setReamined(null)
-    //             }
-    //             else {
-    //                 const formatted = dayjs.duration(rem / 1000, 'seconds').format("HH:mm:ss")
-    //                 setReamined(formatted)
-    //             }
-    //         }
-
-    //         if(opened){
-    //             const id = setInterval(reaminedUpdater, 1000)
-    //             // setIntervalId(id)
-    //             updateIntervalId(id)
-    //         }
-
-    //         return () => {
-    //             if(intervalId){
-    //                 clearInterval(intervalId)
-    //                 setIntervalId(null)
-    //             }
-    //         }
-    //     }
-    // }, [interval, isError, isLoading])
-
-     
-
     return (
         <div 
             className="w-full h-full flex justify-center items-center px-5"
@@ -106,7 +76,9 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
                 </div>
 
                 <div>
-                    <span>{isOpen  ? back : "_______"}</span>
+                    <span
+                        style={{filter: isOpen === null ? "none" : `blur(${isOpen}px)`}} 
+                    >{isOpen !== null  ? back : "_______"}</span>
                 </div>
 
                 <div className="col-span-2 flex justify-center items-center">
