@@ -16,15 +16,17 @@ export const DocumentList: FC = () => {
         )
     }
 
-    if(ids.length === 0){
-        return <div>No documents</div>
-    }
-
     return (
         <div className="w-full h-full overflow-y-auto">
-            <ul className="list">
-                {ids.map(id => <DocumentItem key={id} id={id} />)}
-            </ul>
+            {ids.length > 0 ? (
+                <>
+                    <ul className="list">
+                        {ids.map(id => <DocumentItem key={id} id={id} />)}
+                    </ul>
+                </>
+            ) : (
+                <div>No documents</div>
+            )}
         </div>
     );
 }

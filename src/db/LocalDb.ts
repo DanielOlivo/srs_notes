@@ -17,6 +17,7 @@ import { Vector2, type IVector2 } from "../utils/Vector2";
 import { Document } from "./Document";
 import { Position } from "./entities/position";
 import { ScrollPosition } from "./entities/scrollPosition";
+import { DeletedDoc, storeName as deletedDocStoreName } from "./entities/deletedDoc"
 
 const dbName = "memoryGameDb";
 
@@ -31,6 +32,10 @@ const migrations = [
 
     (db: IDBPDatabase<Db>) => {
         ScrollPosition.createStore(db)
+    },
+
+    (db: IDBPDatabase<Db>) => {
+        DeletedDoc.createStore(db)
     }
 ]
 
@@ -61,6 +66,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         imageNoteStoreName,
         "answers", 
         intervalStoreName, 
+        deletedDocStoreName,
         "scrollPositions",
         "positions"], 
         "readwrite",
@@ -74,7 +80,7 @@ export function getTx(db: IDBPDatabase<Db>) {
     const positionStore = tx.objectStore("positions")
     const intervalStore = tx.objectStore(intervalStoreName)
     const scrollPositionStore = tx.objectStore("scrollPositions")
-
+    const deletedDocStore = tx.objectStore(deletedDocStoreName)
     // to remove
 
     return {
@@ -87,6 +93,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         answerStore,
         intervalStore,
         scrollPositionStore,
+        deletedDocStore,
         tx
     }
 

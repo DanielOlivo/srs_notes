@@ -8,6 +8,7 @@ import type { IInterval } from './entities/interval'
 import { Position, type IPosition } from './entities/position'
 import { Answer, type IAnswer } from './entities/answer'
 import { saveAs } from 'file-saver'
+import { DeletedDoc, type IDeletedDoc } from './entities/deletedDoc'
 
 const targetFiles = [
     "docs.csv",
@@ -16,7 +17,8 @@ const targetFiles = [
     "imageNote.csv",
     "positions.csv",
     "answers.csv",
-    "intervals.csv"
+    "intervals.csv",
+    "deletedDocs.csv"
 ]
 
 export type Data = {
@@ -26,6 +28,7 @@ export type Data = {
     intervals: IInterval[]
     positions: IPosition[]
     answers: IAnswer[]
+    deletedDocs: IDeletedDoc[]
 }
 
 export const proceedZip = async (file: File): Promise<Data> => {
@@ -44,7 +47,8 @@ export const proceedZip = async (file: File): Promise<Data> => {
         imageNotesCsvString,
         positionsCsvString,
         answersCsvString,
-        intervalsCsvString
+        intervalsCsvString,
+        deletedDocsCsvString
     ] = await Promise.all(
         targetFiles.map(file => containedFiles[file].async('string'))
     )
@@ -55,7 +59,8 @@ export const proceedZip = async (file: File): Promise<Data> => {
         textNotes: TextNote.fromCsv(textNotesCsvString).map(note => note.asPlain()),
         intervals: Interval.fromCsv(intervalsCsvString).map(interval => interval.asPlain()),
         positions: Position.fromCsv(positionsCsvString).map(pos => pos.asPlain()),
-        answers: Answer.fromCsv(answersCsvString).map(answer => answer.asPlain())
+        answers: Answer.fromCsv(answersCsvString).map(answer => answer.asPlain()),
+        deletedDocs: DeletedDoc.fromCsv(deletedDocsCsvString).map(doc => doc.asPlain())
     }
 }
 
@@ -89,6 +94,9 @@ export const toZip = async () => {
     const answerCsv = answers.map(a => a.toCsvRow()).join("\n")
     zip.file("answers.csv", answerCsv)
 
+    const deletedDocs = await DeletedDoc.all()
+    const deletedDocsCsv = deletedDocs.map(d => d.toCsvRow()).join("\n")
+    zip.file("deletedDocs.csv", deletedDocsCsv)
 
     // const imgFolder = zip.folder("img")
 

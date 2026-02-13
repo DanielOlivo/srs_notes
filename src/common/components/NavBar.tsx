@@ -1,15 +1,11 @@
 import { useEffect, useMemo, type FC } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useLazyGetDocumentQuery } from "../../documents/document.api";
-import { CreateDocument } from "./Header/CreateDocument";
-import { DocList } from "./Header/DocList";
-import { OnDocument } from "./Header/OnDocument";
-import { OnNoteEdit } from "./Header/OnNoteEdit";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const patterns = {
-    docs: /\/docs\/?$/,
+    docs: /\/docs$/,
     createDocument: /\/docs\/add$/,
     onDoc: /\/docs\/[0-9a-zA-Z-]+$/,
     onNoteEdit: /\/docs\/[0-9a-zA-Z-]+\/noteEdit\/[0-9a-zA-Z-]+$/,
@@ -34,18 +30,6 @@ export const NavBar: FC = () => {
     const { pathname } = useLocation()   
     const navigate = useNavigate()
 
-    const content = useMemo(() => {
-        if(pathname.match(patterns.onNoteEdit))
-            return <OnNoteEdit />
-        if(pathname.match(patterns.docs))
-            return <DocList />
-        if(pathname.match(patterns.createDocument))
-            return <CreateDocument />
-        if(pathname.match(patterns.onDoc))
-            return <OnDocument />
-        return null
-    }, [pathname])
-
     const props = useMemo((): Props => {
         const showSidebar = (() => {
             if([
@@ -57,30 +41,24 @@ export const NavBar: FC = () => {
             ].some(p => pathname.match(p))){
                 return true
             }
-
-            // if(pathname.match(patterns.onAbout))
-            //     return true
-            // if(pathname.match(patterns.onSettings))
-            //     return true
-            // if(pathname.match(patterns.onDoc))
-            //     return true
-            // if(pathname.match(patterns.docs))
-            //     return true
             
             return false
         })()
 
         const showBack = (() => {
             if([
+                patterns.createDocument,
                 patterns.onDocEdit, 
                 patterns.onNoteEdit,
-                patterns.onAddNote
+                patterns.onAddNote,
             ].some(p => pathname.match(p)))
                 return true
             return false
         })()
 
         const title = (() => {
+            if(pathname.match(patterns.createDocument))
+                return "Create new document"
             if(pathname.match(patterns.onSettings))
                 return "Settings"
             if(pathname.match(patterns.onAbout))

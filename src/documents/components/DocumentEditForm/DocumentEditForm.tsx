@@ -3,6 +3,7 @@ import { useCreateMutation, useLazyGetDocumentQuery } from "../../document.api";
 import { type CreateDocumentRequestDto } from "../../document.dto";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useParams } from "react-router";
+import { DeleteDocumentButton } from "../DeleteDocumentButton/DeleteDocumentButton";
 
 // export interface DocumentEditFormProps {
 //     id?: string
@@ -23,16 +24,18 @@ export const DocumentEditForm: FC = () => {
 
     useEffect(() => {
         if(id !== undefined){
-            getDoc(id).then((result) => {
-                if(result.data){
-                    reset({
-                        name: result.data.name,
-                        type: result.data.type
-                    })
-                }
+            getDoc(id)//.then((result) => {
+        }
+    }, [id, getDoc]) 
+
+    useEffect(() => {
+        if(doc){
+            reset({
+                name: doc.name,
+                type: doc.type
             })
         }
-    }, [id]) 
+    }, [doc, reset])
 
     const onSubmit: SubmitHandler<CreateDocumentRequestDto> = (data) => {
         if(id === undefined){
@@ -44,16 +47,17 @@ export const DocumentEditForm: FC = () => {
     return (
         <form 
             onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1"
+            className="grid grid-cols-1 gap-2"
         >
             <div>
                 <label className="select">
                     <span className="label">Type</span> 
                     <select
                         {...register("type", { required: true})} 
+                        disabled={id !== undefined}
                     >
-                        <option>List</option>
-                        <option disabled={true}>Grid</option>
+                        <option value="list">List</option>
+                        <option value="grid" disabled={true}>Grid</option>
                     </select>
                 </label> 
             </div>
@@ -69,7 +73,14 @@ export const DocumentEditForm: FC = () => {
             </div>
 
             <div>
-                <button type="submit">{id !== undefined ? "Update" : "Create"}</button>
+                <button 
+                    type="submit"
+                    className="btn btn-primary"
+                >{id !== undefined ? "Update" : "Create"}</button>
+            </div>
+
+            <div>
+                {id && <DeleteDocumentButton id={id} />}
             </div>
         </form>
     )

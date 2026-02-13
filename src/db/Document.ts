@@ -45,6 +45,8 @@ export class Document implements IDocument {
         return docs
     }
 
+    static allTx = (tx: Tx) => tx.documentStore.getAll()
+
     static cleanTx = () => (tx: Tx) => {
         return tx.documentStore.clear()
     }

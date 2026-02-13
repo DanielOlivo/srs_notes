@@ -1,6 +1,7 @@
 import { api } from "../api";
 import type { Data } from "../db/csv";
 import { Document } from "../db/Document";
+import { DeletedDoc } from "../db/entities/deletedDoc";
 import type { IDocument } from "../db/entities/document";
 import { BasicNote, Interval, TextNote } from "../db/entities/Note.utils";
 import { Position } from "../db/entities/position";
@@ -20,12 +21,19 @@ export const documentApi = api.injectEndpoints({
         getDocumentList: builder.query<string[], void>({
             queryFn: async () => {
                 try{
-                    const db = await getDb();
-                    const docs = await db.getDocumentList()
+                    const [docs, deleted] = await withTx(
+                        Document.allTx,
+                        DeletedDoc.allTx
+                    ) 
+                    const excluded = new Set(deleted.map(d => d.id))
                     for(const doc of docs){
                         documentApi.util.upsertQueryData('getDocument', doc.id, doc)
                     } 
-                    return { data: docs.map(doc => doc.id) }
+                    return { 
+                        data: docs
+                            .filter(doc => !excluded.has(doc.id))
+                            .map(doc => doc.id) 
+                        }
                 }
                 catch(error) {
                     return { error }
@@ -105,8 +113,10 @@ export const documentApi = api.injectEndpoints({
         deleteDocument: builder.mutation<void, string>({
             queryFn: async(id) => {
                 try{
-                    const db = await getDb();
-                    await db.removeDocument(id);
+                    // const db = await getDb();
+                    // await db.removeDocument(id);
+                    const deleted = new DeletedDoc(id, Date.now())
+                    await withTx(deleted.addTx)
                     return { data: undefined }
                 }
                 catch(error){
