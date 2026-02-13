@@ -26,8 +26,9 @@ export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
         <li 
             className="w-full h-20 
                 flex justify-between items-center 
-                border rounded-xl border-slate-300
+                rounded-lg 
                 my-2 py-1
+                shadow-lg
             "
             data-id={id}
             ref={refFn}

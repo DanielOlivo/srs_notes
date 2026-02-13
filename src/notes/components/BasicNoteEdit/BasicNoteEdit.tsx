@@ -61,29 +61,37 @@ export const BasicNoteEdit: FC<BasicNoteEditProps> = ({id, docId, coord}) => {
     }, [reset, note])
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-
-            <input
-                {...register("front", { 
-                    required: true,
-                    minLength: 1
-                })}
-                disabled={id !== undefined ? isLoading : false}
-                placeholder="front"
-            />
+        <form onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-2" 
+        >
+            <div>
+                <input
+                    {...register("front", { 
+                        required: true,
+                        minLength: 1
+                    })}
+                    disabled={id !== undefined ? isLoading : false}
+                    placeholder="front"
+                />
+            </div>
             
-            <input
-                {...register("back", { 
-                    required: true,
-                    minLength: 1
-                })}
-                placeholder="back"
-            />
+            <div>
+                <input
+                    {...register("back", { 
+                        required: true,
+                        minLength: 1
+                    })}
+                    placeholder="back"
+                />
+            </div>
 
-            <button 
-                type="submit"
-                disabled={isLoading}
-            >{id !== undefined ? "Update" : "Create"}</button>
+            <div>
+                <button 
+                    type="submit"
+                    disabled={isLoading}
+                    className="btn btn-accent"
+                >{id !== undefined ? "Update" : "Create"}</button>
+            </div>
 
         </form>
     )

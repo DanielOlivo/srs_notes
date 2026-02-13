@@ -57,20 +57,34 @@ export const TextNoteEdit: FC<TextNoteEditProps> = ({id, docId, coord}) => {
     }, [reset, note])
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-2 gap-2" 
+        >
+            <div className="col-span-2">
+                {/* <input
+                    type='text'
+                    {...register("text", {
+                        required: true,
+                        minLength: 1
+                    })}
+                /> */}
+                <textarea
+                    {...register("text", {
+                        required: true,
+                        minLength: 1
+                    })}
+                    className="textarea w-full"
+                    placeholder="Text"
+                />
+            </div>
 
-            <input
-                type='text'
-                {...register("text", {
-                    required: true,
-                    minLength: 1
-                })}
-            />
-
-            <button 
-                type="submit"
-                disabled={isLoading}
-            >{id !== undefined ? "Update" : "Create"}</button>
+            <div>
+                <button 
+                    type="submit"
+                    disabled={isLoading}
+                    className="btn btn-accent"
+                >{id !== undefined ? "Update" : "Create"}</button>
+            </div>
 
        </form> 
     )

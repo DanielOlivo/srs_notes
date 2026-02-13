@@ -50,15 +50,15 @@ export const NoteEdit: FC = () => {
     return (
         <div className="grid grid-cols-3">
 
-            <div className="col-span-2">
+            {/* <div className="col-span-2">
                 <h2>Note {id ? "Editing" : "Creating"}</h2>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
                 <button
                     onClick={() => dispatch(setListMode({kind: 'edit'}))} 
                 >Close</button>
-            </div>
+            </div> */}
 
             {!id && <div className="col-span-3 flex flex-row justify-between items-center">
                 {noteTypes.map(t => (

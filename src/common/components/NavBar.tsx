@@ -91,6 +91,8 @@ export const NavBar: FC = () => {
                 return `Editing ${doc?.name ?? "..."}`
             if(pathname.match(patterns.onAddNote))
                 return "Add Note"
+            if(pathname.match(patterns.onNoteEdit))
+                return "Edit note"
             return "SRS Notes"
         })()
 
