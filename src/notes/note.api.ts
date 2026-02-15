@@ -35,7 +35,7 @@ export const noteApi = api.injectEndpoints({
                     return { error }
                 }
             },
-            providesTags: (result, error, docId) => [
+            providesTags: (_result, _error, docId) => [
                 { type: "DocumentNotes", docId}
             ]
         }),
@@ -51,7 +51,7 @@ export const noteApi = api.injectEndpoints({
                     return { error }
                 }
             },
-            providesTags: (result, error, noteId) => [
+            providesTags: (_result, _error, noteId) => [
                 { type: "Note", noteId }
             ]
         }),
@@ -67,7 +67,7 @@ export const noteApi = api.injectEndpoints({
                     return { error, data: undefined }
                 }
             },
-            providesTags: (result, error, noteId) => [
+            providesTags: (_result, _error, noteId) => [
                 { type: "Interval", noteId }
             ]
         }),
@@ -83,7 +83,7 @@ export const noteApi = api.injectEndpoints({
                 }
                 return { data: undefined}
             },
-            invalidatesTags: (result, error, req) => [
+            invalidatesTags: (_result, _error, req) => [
                 { type: "DocumentNotes", docId: req.docId }
             ]
         }),
@@ -94,7 +94,7 @@ export const noteApi = api.injectEndpoints({
                 await db.updateNote(note) 
                 return { data: undefined }
             },
-            invalidatesTags: (result, error, req) => [
+            invalidatesTags: (_result, _error, req) => [
                 { type: "Note", noteId: req.id }
             ]
         }),
@@ -118,7 +118,7 @@ export const noteApi = api.injectEndpoints({
                 await db.answer(noteId, ease)
                 return { data: undefined }
             },
-            invalidatesTags: (result, error, req) => [
+            invalidatesTags: (_result, _error, req) => [
                 { type: "DocumentNotes", docId: req.noteId },
                 { type: "Interval", noteId: req.noteId }
             ]
