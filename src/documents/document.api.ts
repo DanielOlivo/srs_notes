@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import { api } from "../api";
 import type { Data } from "../db/csv";
 import { Document } from "../db/Document";
@@ -19,7 +20,7 @@ export const documentApi = api.injectEndpoints({
     endpoints: builder => ({
 
         getDocumentList: builder.query<string[], void>({
-            queryFn: async () => {
+            queryFn: async (_arg, { dispatch }) => {
                 try{
                     const [docs, deleted] = await withTx(
                         Document.allTx,
@@ -27,7 +28,7 @@ export const documentApi = api.injectEndpoints({
                     ) 
                     const excluded = new Set(deleted.map(d => d.id))
                     for(const doc of docs){
-                        documentApi.util.upsertQueryData('getDocument', doc.id, doc)
+                        dispatch(documentApi.util.upsertQueryData('getDocument', doc.id, doc))
                     } 
                     return { 
                         data: docs
@@ -65,8 +66,12 @@ export const documentApi = api.injectEndpoints({
 
         create: builder.mutation<void, CreateDocumentRequestDto>({
             queryFn: async (req) => {
+                const { name, type } = req
+                const doc = new Document(name, type, v4(), Date.now())
+                await withTx(doc.addTx) 
                 return { data: undefined }
-            }
+            },
+            invalidatesTags: ["DocumentList"]
         }),
 
         uploadDocument: builder.mutation<void, Data>({
@@ -122,7 +127,8 @@ export const documentApi = api.injectEndpoints({
                 catch(error){
                     return { error }
                 }
-            }
+            },
+            invalidatesTags: ["DocumentList"]
         }),
 
         deleteAllDocuments: builder.mutation<void, void>({

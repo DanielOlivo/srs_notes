@@ -23,9 +23,9 @@ export const DeleteDocumentButton: FC<DeleteDocumentButtonProps> = ({id}) => {
     return <button
         className="btn btn-error"
         disabled={disabled}
-        onClick={() => {
-            deleteDoc(id)
-            navigate("./doc")
+        onClick={async () => {
+            await deleteDoc(id)
+            navigate(-1)
         }}
     ><TrashIcon className="size-6 mr-2" />Delete</button>
 }

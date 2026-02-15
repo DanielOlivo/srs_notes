@@ -24,6 +24,7 @@ function App() {
             {/* <Route path="add/:position" element={<DocumentEditForm />} /> */}
             <Route path=":docId" element={<ListPage />} />
             <Route path=":docId/noteEdit/:noteId" element={<NoteEdit />} />
+            <Route path=":docId/addNote" element={<NoteEdit />} />
             <Route path=":docId/addNote/:posY/:posX" element={<NoteEdit />} />
             <Route path=":docId/edit" element={<DocumentEditForm />} />
           </Route>

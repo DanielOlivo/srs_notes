@@ -2,7 +2,7 @@ import { useEffect, type FC } from "react";
 import { useCreateMutation, useLazyGetDocumentQuery } from "../../document.api";
 import { type CreateDocumentRequestDto } from "../../document.dto";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { DeleteDocumentButton } from "../DeleteDocumentButton/DeleteDocumentButton";
 
 // export interface DocumentEditFormProps {
@@ -14,7 +14,7 @@ export const DocumentEditForm: FC = () => {
     const { docId: id } = useParams<{docId: string}>()
     const [getDoc, { data: doc}] = useLazyGetDocumentQuery()
     const [createDoc, ] = useCreateMutation()
-
+    const navigate = useNavigate()
 
     const {
         register,
@@ -40,8 +40,8 @@ export const DocumentEditForm: FC = () => {
     const onSubmit: SubmitHandler<CreateDocumentRequestDto> = (data) => {
         if(id === undefined){
             createDoc(data)
+            navigate(-1)
         }
-        throw new Error()
     }
 
     return (

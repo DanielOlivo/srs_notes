@@ -38,7 +38,7 @@ export const BasicNoteEdit: FC<BasicNoteEditProps> = ({id, docId, coord}) => {
         }
         else {
             if(!docId) throw new Error("failed to get docId from url")
-            createNote( { data, docId, coord } );
+            createNote( { data: {...data, kind: 'basic'}, docId, coord } );
         }
         navigate(-1)
     }

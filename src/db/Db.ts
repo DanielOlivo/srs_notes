@@ -6,12 +6,13 @@ import type { AnswerDb } from "./entities/answer";
 import type { IntervalDb } from "./entities/interval";
 import type { ScrollPositionDb } from "./entities/scrollPosition";
 import type { DeletedDocDb } from "./entities/deletedDoc";
+import type { DeletedNoteDb } from "./entities/deletedNote";
 
 export interface Db extends 
     DBSchema, DocumentDb, PositionDb,
     // NoteDb, 
     BasicNoteDb, TextNoteDb, ImageNoteDb,
     AnswerDb, IntervalDb,
-    DeletedDocDb,
+    DeletedDocDb, DeletedNoteDb,
     ScrollPositionDb
     {}

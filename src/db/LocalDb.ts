@@ -10,7 +10,7 @@ import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
 import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
-import { BasicNote, TextNote } from "./entities/Note.utils";
+import { BasicNote, Interval, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
 import { NotImplemented } from "../utils/NotImplemented";
 import { Vector2, type IVector2 } from "../utils/Vector2";
@@ -18,6 +18,7 @@ import { Document } from "./Document";
 import { Position } from "./entities/position";
 import { ScrollPosition } from "./entities/scrollPosition";
 import { DeletedDoc, storeName as deletedDocStoreName } from "./entities/deletedDoc"
+import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/deletedNote";
 
 const dbName = "memoryGameDb";
 
@@ -36,7 +37,12 @@ const migrations = [
 
     (db: IDBPDatabase<Db>) => {
         DeletedDoc.createStore(db)
-    }
+    },
+
+    (db: IDBPDatabase<Db>) => {
+        DeletedNote.createStore(db)
+    },
+
 ]
 
 export async function getLocalDb() {
@@ -67,6 +73,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         "answers", 
         intervalStoreName, 
         deletedDocStoreName,
+        deletedNoteStoreName,
         "scrollPositions",
         "positions"], 
         "readwrite",
@@ -81,6 +88,8 @@ export function getTx(db: IDBPDatabase<Db>) {
     const intervalStore = tx.objectStore(intervalStoreName)
     const scrollPositionStore = tx.objectStore("scrollPositions")
     const deletedDocStore = tx.objectStore(deletedDocStoreName)
+    const deletedNoteStore = tx.objectStore(deletedNoteStoreName)
+
     // to remove
 
     return {
@@ -94,6 +103,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         intervalStore,
         scrollPositionStore,
         deletedDocStore,
+        deletedNoteStore,
         tx
     }
 
@@ -268,14 +278,14 @@ class DbOps {
     }
 
     async createListNote<T extends NoteData>(docId: string, data: T){
-        const [doc] = await this.withTx(this.documentOps.getById(docId)) 
+        const [doc, positions] = await withTx(
+            Document.getTx(docId),
+            Position.getByDocIdTx(docId)
+        ) 
+
         if(!doc){
             throw new Error(`document with id ${docId} not found`)
         }
-
-        const [ positions ] = await this.withTx(
-            this.positionOps.getAllByDocId(docId)
-        )
 
         const maxY = positions.length === 0 ? 0 : Math.max(...positions.map(pos => pos.coord.y))
         const coord = {
@@ -295,9 +305,19 @@ class DbOps {
             }
         })()
 
-        await this.withTx(
-            this.noteOps.create(note),
-            this.positionOps.create(note.id, docId, coord)
+        const position = new Position(0, id, docId, coord)
+
+        const createIntervalOption = (() => {
+            switch(data.kind){
+                case 'basic': { return (new Interval(v4(), id, 30000, Date.now())).addTx }; 
+                default: return (async () => {})
+            }
+        })()
+
+        await withTx(
+            note.addTx,
+            position.addTx,
+            createIntervalOption
         )
     }
 

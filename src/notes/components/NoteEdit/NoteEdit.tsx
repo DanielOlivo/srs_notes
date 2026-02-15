@@ -5,8 +5,9 @@ import { useLazyGetNoteQuery } from "../../note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
 import { useAppDispatch } from "../../../app/hooks";
 import { setListMode } from "../../../List/list.slice";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import type { IVector2 } from "../../../utils/Vector2";
+import { DeleteNoteButton } from "../DeleteNoteButton/DeleteNoteButton";
 
 // export interface NoteEditProps {
 //     id?: string
@@ -14,6 +15,7 @@ import type { IVector2 } from "../../../utils/Vector2";
 
 export const NoteEdit: FC = () => {
 
+    const navigate = useNavigate()
     const { docId, noteId: id, posY, posX } = useParams<{docId: string, noteId: string, posX: string, posY: string}>()
 
     const dispatch = useAppDispatch()
@@ -48,37 +50,33 @@ export const NoteEdit: FC = () => {
     }, [id, getNote])
 
     return (
-        <div className="grid grid-cols-3">
+        <div className="flex flex-col items-center justify-start gap-3">
 
-            {/* <div className="col-span-2">
-                <h2>Note {id ? "Editing" : "Creating"}</h2>
-            </div> */}
+            {!id && (
+                <div className="join">
+                    {noteTypes.map(t => (
+                            <input 
+                                type="radio" 
+                                name="noteType" 
+                                className="join-item btn"
+                                aria-label={t}
+                                value={t}
+                                checked={mode === t}
+                                onChange={getChangeHandler(t)}
+                            />
+                    ))}
+                </div>
+            )}
 
-            {/* <div>
-                <button
-                    onClick={() => dispatch(setListMode({kind: 'edit'}))} 
-                >Close</button>
-            </div> */}
-
-            {!id && <div className="col-span-3 flex flex-row justify-between items-center">
-                {noteTypes.map(t => (
-                    <div key={t} className="flex flex-row justify-start items-center">
-                        <input 
-                            type="radio" 
-                            name="noteType" 
-                            value={t}
-                            checked={mode === t}
-                            onChange={getChangeHandler(t)}
-                        />
-                        <label>{t}</label>
-                    </div>
-                ))}
-            </div>}
-
-            <div className="col-span-3 h-11">
+            <div className="">
                 {getForm(mode ?? note?.kind ?? 'basic')}
             </div>
 
+            <div>
+                {id !== undefined && (
+                    <DeleteNoteButton id={id} onAfter={() => navigate(-1)} />
+                )}
+            </div>
         </div>
     )
 }

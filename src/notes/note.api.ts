@@ -16,6 +16,7 @@ import { Answer } from "../db/entities/answer";
 import { v4 } from "uuid";
 import { BaseNote, Interval } from "../db/entities/Note.utils";
 import { getNextInterval } from "./updateInterval";
+import { DeletedNote } from "../db/entities/deletedNote";
 
 export const noteApi = api.injectEndpoints({
     endpoints: builder => ({
@@ -23,10 +24,14 @@ export const noteApi = api.injectEndpoints({
         getDocNotes: builder.query<string[], string>({
             queryFn: async(docId, { dispatch }) => {
                 try{
-                    const [ positions ] = await withTx(
-                        Position.getByDocIdTx(docId)
+                    let [ positions, deleted ] = await withTx(
+                        Position.getByDocIdTx(docId),
+                        DeletedNote.allTx
                     )
-                    positions.sort((a, b) => a.coord.y - b.coord.y)
+                    const excluded = new Set(deleted.map(d => d.id))
+                    positions = positions
+                        .filter(pos => !excluded.has(pos.noteId))
+                        .sort((a, b) => a.coord.y - b.coord.y)
 
                     const notes = await withTx(
                         ...positions.map(pos => BaseNote.getTx(pos.noteId))
@@ -86,11 +91,8 @@ export const noteApi = api.injectEndpoints({
         getInterval: builder.query<IInterval, string>({
             queryFn: async(noteId) => {
                 try{
-                    const db = await getDb()
-                    // throw new Error("getInterval not implemented")
-                    const interval = await db.getIntervalByNoteId(noteId)
-                    if(!interval) throw new Error(`interval for note ${noteId} not found`)
-                    return { data: interval }
+                    const interval = await Interval.getByNoteId(noteId)
+                    return { data: interval?.asPlain() }
                 }
                 catch(error){
                     return { error, data: undefined }
@@ -143,26 +145,14 @@ export const noteApi = api.injectEndpoints({
         deleteNote: builder.mutation<void, string>({
             queryFn: async (id) => {
                 try {
-                    const [note, position, interval] = await withTx(
-                        BaseNote.getTx(id),
-                        Position.getByNoteIdTx(id),
-                        Interval.getByNoteIdTx(id) 
-                    )
-
-                    const dummyFn = async () => {}
-
-                    await withTx(
-                        note?.removeTx ?? dummyFn,
-                        position?.removeTx ?? dummyFn,
-                        interval?.removeTx() ?? dummyFn,
-                    )
-
+                    const record = new DeletedNote(id, Date.now())
+                    await withTx(record.addTx)
                     return { data: undefined }
                 }
                 catch(error){
                     return { error }
                 }
-            }
+            },
         }),
 
         answer: builder.mutation<void, AnswerReqDto>({
@@ -209,6 +199,7 @@ export const {
 
     useGetIntervalQuery,
     // useDeleteBasicNoteMutation
+    useDeleteNoteMutation,
 
     useAnswerMutation,
 } = noteApi;

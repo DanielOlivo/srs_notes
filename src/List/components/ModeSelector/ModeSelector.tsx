@@ -1,5 +1,5 @@
 import { useCallback, type FC } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { setListMode, type ListMode2 } from "../../list.slice";
 import { useAppDispatch } from "../../../app/hooks";
 
@@ -51,6 +51,13 @@ export const ModeSelector: FC = () => {
                     className="btn btn-lg btn-circle btn-info"
                     onClick={getClickHandler('edit')}
                 >E</button>
+            </div>
+
+            <div className="tooptip" data-tip="Add">
+                <Link
+                    className="btn btn-lg btn-circle btn-info"
+                    to={`addNote`}
+                >+</Link>
             </div>
         </div>
     )
