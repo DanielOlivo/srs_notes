@@ -33,6 +33,8 @@ export class Document implements IDocument {
         }
     }
 
+    static from =(doc: IDocument) => new Document(doc.name, doc.type, doc.id, doc.createdAt)
+
     private static async db () {
         const db = await getLocalDb()
         return db
@@ -45,7 +47,10 @@ export class Document implements IDocument {
         return docs
     }
 
-    static allTx = (tx: Tx) => tx.documentStore.getAll()
+    static allTx = async (tx: Tx) => {
+        const records = await tx.documentStore.getAll()
+        return records.map(Document.from)
+    }
 
     static cleanTx = () => (tx: Tx) => {
         return tx.documentStore.clear()
@@ -73,6 +78,8 @@ export class Document implements IDocument {
     }
 
     addTx = (tx: Tx) => tx.documentStore.add(this.asPlain())
+
+    updatetx = (tx: Tx) => tx.documentStore.put(this.asPlain())
 
     static async clean(){
         const db = await getLocalDb()

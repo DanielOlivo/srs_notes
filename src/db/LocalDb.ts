@@ -163,44 +163,52 @@ class DbOps {
 
     // documents
    async getDocumentList(): Promise<IDocument[]> {
-        const [docs] = await this.withTx(
-            this.documentOps.getAllDocuments()
-        )
-        return docs
+        const [docs, deleted] = await withTx(
+            Document.allTx,
+            DeletedDoc.allTx
+        ) 
+        const excluded = new Set(deleted.map(d => d.id))
+
+        return docs.filter(doc => !excluded.has(doc.id)).map(doc => doc.asPlain())
     }
 
     async getDocumentById(id: string): Promise<IDocument | undefined>{
-        try{
-            const [doc] = await this.withTx(
-                this.documentOps.getById(id)
-            )
-            return doc
-        } catch(error){
-            console.error(error)
-            return undefined
-        }
+        const doc = await Document.get(id)
+        return doc?.asPlain()
     }
 
     async getDocumentByName(name: string): Promise<IDocument | undefined>{
         return await this.db.getFromIndex("documents", "by-name", name);
     }
 
-    async createDocument(document: IDocument){
-        await this.withTx(
-            this.documentOps.createDocument(document)
+    async createDocument(name: string, type: Document["type"]): Promise<string> {
+        const doc = new Document(name, type, v4(), Date.now())
+        await withTx(
+            doc.addTx
         )
+        return doc.id
     }
 
     async removeDocument(id: string): Promise<void> {
-        await this.withTx(
-            this.documentOps.deleteDocument(id)
-        )
+        const deleted = new DeletedDoc(id, Date.now())
+        await withTx(deleted.addTx)
     }
 
     async updateDocumentName(id: string, name: string): Promise<void> {
-        const [doc] = await this.withTx(this.documentOps.getById(id))
+        const doc = await Document.get(id)
         if(!doc) throw new Error(`document with id ${id} not found`)
-        await this.withTx(this.documentOps.updateName(doc, name))
+        doc.name = name
+        await withTx(doc.updatetx)
+    }
+
+    getScrollPosition = async (docId: string) => {
+        const pos = await ScrollPosition.get(docId)
+        return pos?.noteId
+    }
+
+    setScrollPosition = async(docId: string, noteId: string) => {
+        const pos = new ScrollPosition(docId, noteId)
+        await withTx(pos.updateTx)
     }
     
     async tryGetNoteById(id: string){
