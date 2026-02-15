@@ -1,5 +1,4 @@
 import { openDB, type IDBPDatabase } from "idb";
-import type { Ease } from "../Game/Ease";
 import type { IDocument } from "./entities/document";
 import type { Db } from "./Db";
 import { DocumentOps } from "./ops/document.ops";
@@ -10,7 +9,7 @@ import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
 import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
-import { BasicNote, Interval, TextNote } from "./entities/Note.utils";
+import { BaseNote, BasicNote, Interval, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
 import { NotImplemented } from "../utils/NotImplemented";
 import { Vector2, type IVector2 } from "../utils/Vector2";
@@ -19,6 +18,8 @@ import { Position } from "./entities/position";
 import { ScrollPosition } from "./entities/scrollPosition";
 import { DeletedDoc, storeName as deletedDocStoreName } from "./entities/deletedDoc"
 import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/deletedNote";
+import { Answer, type Ease } from "./entities/answer";
+import { getNextInterval } from "../notes/updateInterval";
 
 const dbName = "memoryGameDb";
 
@@ -208,7 +209,11 @@ class DbOps {
     }
 
     async getNoteById(id: string) {
-        const [ note ] = await this.withTx(this.noteOps.getById(id))
+        const [note] = await withTx(BaseNote.getTx(id))
+        if(note === null){
+            throw new Error("LocalDb.getNoteById: note is null")
+        }
+        // const [ note ] = await this.withTx(this.noteOps.getById(id))
         // if(!note) throw new Error(`note with id ${id} not found`)
         return note
     }
@@ -220,15 +225,25 @@ class DbOps {
         return positions
     } 
 
-    async getAllDocNotes(docId: string) {
-        const [ positions ] = await this.withTx(
-            this.positionOps.getAllByDocId(docId)
-        )
+    async getDocNotes(docId: string) {
+        try{
+            let [ positions, deleted ] = await withTx(
+                Position.getByDocIdTx(docId),
+                DeletedNote.allTx
+            )
+            const excluded = new Set(deleted.map(d => d.id))
+            positions = positions
+                .filter(pos => !excluded.has(pos.noteId))
+                .sort((a, b) => a.coord.y - b.coord.y)
 
-        const notes = await this.withTx(
-            ...positions.map(pos => this.noteOps.getById(pos.noteId))
-        ) 
-        return { notes, positions }
+            const notes = (await withTx(
+                ...positions.map(pos => BaseNote.getTx(pos.noteId))
+            )).filter(note => note !== null)
+            return notes.map(note => note.asPlain())
+        }
+        catch(error){
+            throw new Error(`LocalDb.getDocNotes failure: ${error}`)
+        }
     }
 
     async createListNoteAtPos<T extends NoteData>(docId: string, data: T, coord: IVector2){
@@ -328,16 +343,11 @@ class DbOps {
         }
     }
 
-    async deleteNote(noteId: string, kind: Note['kind']){
-        const [ position ] = await this.withTx(
-            this.positionOps.getbyNoteId(noteId)
-        )
-
-        if(!position) throw new Error(`note with id ${noteId} not found`)
+    async deleteNote(noteId: string){
+        const record = new DeletedNote(noteId, Date.now())
 
         await this.withTx(
-            this.noteOps.delete(noteId, kind),
-            this.positionOps.delete(position.id)
+            record.addTx
         )
     }
 
@@ -354,10 +364,10 @@ class DbOps {
     }
 
     async getIntervalByNoteId(noteId: string){
-        const [interval] = await this.withTx(
-            this.intervalOps.getByNoteId(noteId)
+        const [interval] = await withTx(
+            Interval.getByNoteIdTx(noteId)
         )
-        return interval
+        return interval?.asPlain()
     }
 
     async removeInterval(intervalId: string){
@@ -375,16 +385,28 @@ class DbOps {
         }
     }
 
-    async answer(noteId: string, answer: Ease, nextInterval: number){
-        const [ currentInterval ] = await this.withTx(
-            this.intervalOps.getByNoteId(noteId)
-        )
+    async answer(noteId: string, ease: Ease){
+        try{
+            const answer = new Answer(v4(), noteId, ease, Date.now())
+            const interval = await Interval.getByNoteId(noteId)
+            const updateInterval = (() => {
+                if(interval){
+                    const nextInterval = getNextInterval(interval, ease)
+                    return interval.updateTx(nextInterval)
+                }
+                const toCreate = new Interval(v4(), noteId, 30000, Date.now())
+                return toCreate.addTx
+            })()
 
-        await this.withTx(
-            this.answerOps.create(noteId, answer),
-            this.intervalOps.create(noteId, nextInterval),
-            currentInterval ? this.intervalOps.delete(currentInterval.id) : (_: Tx) => Promise.resolve()
-        )
+            await withTx(
+                answer.createTx(),
+                updateInterval
+            )
+
+        }
+        catch(error){
+            throw new Error(`LocalDb.answer failure: ${error}`)
+        }
     }
 
     async clear(){

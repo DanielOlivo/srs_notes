@@ -1,6 +1,5 @@
 import { parse } from 'papaparse'
 import { getLocalDb, type Tx } from '../LocalDb'
-import { v4 } from 'uuid'
 
 export type Ease = 'Again' | 'Hard' | 'Good' | 'Easy'
 
