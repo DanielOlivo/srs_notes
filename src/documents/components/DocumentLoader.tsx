@@ -1,11 +1,11 @@
 import { type FC, type ChangeEvent, useState } from "react";
-import { useUploadDocumentMutation } from "../document.api";
+// import { useUploadDocumentMutation } from "../document.api";
 import { proceedZip, type Data } from "../../db/csv";
-import { set } from "react-hook-form";
+// import { set } from "react-hook-form";
 
 
 export const DocumentLoader: FC = () => {
-    const [loadDocument, ] = useUploadDocumentMutation(); 
+    // const [loadDocument, ] = useUploadDocumentMutation(); 
     const [data, setData] = useState<Data | null>(null);
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,8 @@ export const DocumentLoader: FC = () => {
 
     const handleLoading = async () => {
         if(!data) return
-        await loadDocument(data)
+        // await loadDocument(data)
+        throw new Error("not implemented")
         setData(null)
     }
 
