@@ -23,17 +23,33 @@ export const AnswerPanel: FC<AnswerPanelProps> = ({noteId}) => {
     const answers: Ease[] = ["Again", "Hard", "Good", "Easy"]
 
     return (
-        <div className="grid grid-cols-4">
+        <div className="flex flex-col items-stretch justify-start gap-2">
 
-            <div className="col-span-4">
+            <div className="">
                 {note && isBasicNote(note) && <span>{note.back}</span>}
             </div>
 
-            {answers.map(a => (
-                <div key={a}>
-                    <button onClick={getAnswerHandler(a)}>{a}</button>
-                </div>
-            ))}
+            <div className="join grow grid grid-cols-4">
+                <button 
+                    onClick={getAnswerHandler("Again")}
+                    className="join-item btn btn-error"
+                >Again</button>
+
+                <button 
+                    onClick={getAnswerHandler("Hard")}
+                    className="join-item btn btn-warning" 
+                >Hard</button>
+
+                <button 
+                    onClick={getAnswerHandler("Good")}
+                    className="join-item btn btn-success"
+                >Good</button>
+                
+                <button 
+                    onClick={getAnswerHandler("Easy")}
+                    className="join-item btn btn-info"
+                >Easy</button>
+            </div>
 
         </div>
     )
