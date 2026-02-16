@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 interface AddNoteProps {
     idx: number
-    destination: "above" | "bottom"
+    destination: "above" | "below"
 }
 
 export const AddNote: FC<AddNoteProps> = ({idx, destination}) => {
@@ -14,7 +14,7 @@ export const AddNote: FC<AddNoteProps> = ({idx, destination}) => {
     return (
         <Link 
             to={target} 
-            className="flex flex-row items-center"
+            className="flex flex-row items-center text-secondary-content border rounded-4xl"
         >
             <PlusCircleIcon className="size-6" /> 
             {
