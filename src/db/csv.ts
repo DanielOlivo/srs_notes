@@ -1,4 +1,3 @@
-import { parse } from 'papaparse'
 import JSZip from 'jszip'
 import { Document } from './Document'
 import type { IDocument } from './entities/document'

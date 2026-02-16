@@ -35,6 +35,13 @@ export class Answer implements IAnswer {
         this.timestamp = timestamp
     }
 
+    static from = (answer: IAnswer) => new Answer(
+        answer.id,
+        answer.noteId,
+        answer.answer,
+        answer.timestamp
+    )
+
     static all = async () => {
         const db = await getLocalDb()
         const records = await db.getAll("answers")
@@ -60,7 +67,7 @@ export class Answer implements IAnswer {
         await db.add("answers", plain)
     }
 
-    createTx = () => (tx: Tx) => tx.answerStore.add(this.asPlain())
+    addTx = async (tx: Tx) => { await tx.answerStore.add(this.asPlain()) }
 
     toCsvRow = ():string => `${this.id},${this.noteId},${this.answer},${this.timestamp}`
 

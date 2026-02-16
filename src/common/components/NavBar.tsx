@@ -14,7 +14,8 @@ const patterns = {
     onDocEdit: /\/docs\/[0-9a-zA-Z-]+\/edit$/,
     onDev: /\/dev$/,
     onAddNote: /\/addNote\/[0-9]+\/[0-9]+/,
-    onAddNote2: /\/addNote$/
+    onAddNote2: /\/addNote$/,
+    onBackup: /\/backup$/,
 }
 
 type Props = {
@@ -38,7 +39,8 @@ export const NavBar: FC = () => {
                 patterns.onSettings,
                 patterns.onDoc,
                 patterns.docs,
-                patterns.onDev
+                patterns.onDev,
+                patterns.onBackup
             ].some(p => pathname.match(p))){
                 return true
             }

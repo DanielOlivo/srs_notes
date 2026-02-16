@@ -20,6 +20,7 @@ import { DeletedDoc, storeName as deletedDocStoreName } from "./entities/deleted
 import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/deletedNote";
 import { Answer, type Ease } from "./entities/answer";
 import { getNextInterval } from "../notes/updateInterval";
+import type { Data } from "./csv";
 
 const dbName = "memoryGameDb";
 
@@ -112,7 +113,7 @@ export function getTx(db: IDBPDatabase<Db>) {
 
 export type Tx = ReturnType<typeof getTx>
 
-export const withTx = async <T extends any[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) => {
+export const withTx = async <T extends unknown[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) => {
 
     const db = await getLocalDb()
     const tx = getTx(db)
@@ -129,17 +130,13 @@ class DbOps {
 
     private db: IDBPDatabase<Db>
     private positionOps: PositionOps
-    private documentOps: DocumentOps
     private noteOps: NoteOps    
-    private answerOps: AnswerOps
     private intervalOps: IntervalOps
 
     constructor(db: IDBPDatabase<Db>){
         this.db = db;
         this.positionOps = new PositionOps()
-        this.documentOps = new DocumentOps()
         this.noteOps = new NoteOps()    
-        this.answerOps = new AnswerOps()
         this.intervalOps = new IntervalOps()
     }
     
@@ -148,7 +145,7 @@ class DbOps {
         return tx
     }
 
-    async withTx<T extends any[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) {
+    async withTx<T extends unknown[]>(...fns: { [K in keyof T]: ((tx: Tx) => Promise<T[K]>)} ) {
 
         // const tx = this.setTx()
         const tx = getTx(this.db)
@@ -407,7 +404,7 @@ class DbOps {
             })()
 
             await withTx(
-                answer.createTx(),
+                answer.addTx,
                 updateInterval
             )
 
@@ -415,6 +412,29 @@ class DbOps {
         catch(error){
             throw new Error(`LocalDb.answer failure: ${error}`)
         }
+    }
+
+    uploadBackup = async (data: Data) => {
+        const docFns = data.docs.map(Document.from).map(doc => doc.addTx)
+        const basicNoteFns = data.basicNotes.map(BasicNote.from).map(note => note.addTx)
+        const textNoteFns = data.textNotes.map(TextNote.from).map(note => note.addTx)
+        const positionFns = data.positions.map(Position.from).map(pos => pos.addTx)
+        const intervalFns = data.intervals.map(Interval.from).map(int => int.addTx)
+        const deletedDocFns = data.deletedDocs.map(DeletedDoc.from).map(ddoc => ddoc.addTx)
+        const answerFns = data.answers.map(Answer.from).map(answer => answer.addTx)
+        
+
+        await withTx(
+            ...docFns,
+            ...basicNoteFns,
+            ...textNoteFns,
+
+            ...positionFns,
+            ...deletedDocFns,
+
+            ...answerFns,
+            ...intervalFns,
+        )
     }
 
     async clear(){

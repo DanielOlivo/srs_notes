@@ -280,6 +280,13 @@ export class Interval implements IInterval {
         this.openTimestamp = openTimestamp
     }
 
+    static from = (interval: IInterval) => new Interval(
+        interval.id,
+        interval.noteId,
+        interval.openDuration,
+        interval.openTimestamp
+    )
+
     static randomForNote = (noteId: string) => new Interval(
         v4(),
         noteId,

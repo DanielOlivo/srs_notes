@@ -1,4 +1,5 @@
 import { api } from "../api";
+import { type Data } from "../db/csv";
 import type { IDocument } from "../db/entities/document";
 import { type IScrollPosition } from "../db/entities/scrollPosition";
 import { getDb } from "../db/LocalDb";
@@ -115,6 +116,18 @@ export const documentApi = api.injectEndpoints({
             invalidatesTags: (_result, _error, data) => [
                 {type: "ScrollPosition" as const, id: data.id}
             ]
+        }),
+
+        restoreFromBackup: builder.mutation<void, Data>({
+            queryFn: async(data) => {
+                const db = await getDb() 
+                await db.clear()
+                await db.uploadBackup(data)
+                return { data: undefined }
+            },
+            invalidatesTags: [
+                "DocumentList",
+            ]
         })
     })
 })
@@ -132,6 +145,8 @@ export const {
     useDeleteDocumentMutation,
 
     useDeleteAllDocumentsMutation,
+
+    useRestoreFromBackupMutation,
 
     useGetDocumentScrollPositionQuery,
     useLazyGetDocumentScrollPositionQuery,

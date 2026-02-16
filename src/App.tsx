@@ -9,6 +9,7 @@ import { NoteEdit } from './notes/components/NoteEdit/NoteEdit';
 import { Settings } from './common/components/Settings/Settings';
 import { About } from './common/components/About/About';
 import { Development } from './common/components/Development/Development';
+import { BackupPage } from './common/components/BackupPage/BackupPage';
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
           <Route path="dev" element={<Development />} />
+          <Route path="backup" element={<BackupPage />} />
         </Route>
         {/* <Route path="doc/:docId" element={<ListPage />}> */}
           {/* <Route path="add" element={<NoteEdit />} /> */}

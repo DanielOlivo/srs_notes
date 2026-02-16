@@ -36,10 +36,16 @@ export const Sidebar: FC = () => {
                         }}
                     >Documents</span>
                 </li>
+
                 <li><span onClick={() => {
                     navigate("/settings")
                     toggle()
                 }}>Settings</span></li>
+
+                <li><span onClick={() => {
+                    navigate("/backup")
+                    toggle()
+                }}>Backup</span></li>
 
                 <li><span onClick={() => {
                     navigate("/dev")

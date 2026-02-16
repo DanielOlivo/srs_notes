@@ -37,6 +37,13 @@ export class Position implements IPosition {
         this.coord = Vector2.from(coord)
     }   
 
+    static from = (pos: IPosition) => new Position(
+        pos.id,
+        pos.noteId,
+        pos.documentId,
+        pos.coord
+    )
+
     static all = async () => {
         const db = await getLocalDb()
         const records = await db.getAll("positions")
