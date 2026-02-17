@@ -1,7 +1,5 @@
 import type { FC } from "react";
 import { Note } from "../../notes/components/Note/Note";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router";
 import { useAppSelector } from "../../app/hooks";
 import { selectMode } from "../list.selectors";
 import { AddNote } from "./AddNote/AddNote";
@@ -20,6 +18,9 @@ export interface ListItemProps {
  */
 export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
 
+    const mode = useAppSelector(selectMode)
+    const controlsDisabled = mode.kind === 'onAnswer'
+
     return (
         <li 
             className="w-full
@@ -33,8 +34,8 @@ export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
             ref={refFn}
         >
             <div className="flex flex-row justify-end items-center gap-2">
-                <EditNoteButton noteId={id} />
-                <AddNote idx={idx} destination='above' /> 
+                <EditNoteButton noteId={id} disabled={controlsDisabled} />
+                <AddNote idx={idx} destination='above' disabled={controlsDisabled} /> 
             </div>
 
             <div className="grow">
@@ -42,7 +43,7 @@ export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
             </div>
 
             <div className="flex flex-row justify-end items-center">
-                <AddNote idx={idx} destination='below' /> 
+                <AddNote idx={idx} destination='below' disabled={controlsDisabled} /> 
             </div>
         </li>
     )

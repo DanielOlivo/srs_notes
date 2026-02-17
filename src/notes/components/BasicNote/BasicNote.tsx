@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
 import { selectMode, selectTime } from "../../../List/list.selectors"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { setListMode, type ListMode2 } from "../../../List/list.slice"
+import { setListMode, type ListMode } from "../../../List/list.slice"
 
 dayjs.extend(duration)
 
@@ -33,56 +33,50 @@ export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
     useEffect(() => {
         if(isError || isLoading){
             updateIsOpen(0)
+            updateRemained(null)
         }
-        else if(currentMode.kind !== 'onAnswer' && currentMode.kind !== 'onReview'){
+        else if(currentMode.kind === 'showAll'){
             updateIsOpen(0)
+            updateRemained(null)
         }
         else if(interval){
             const remained = interval.openTimestamp + interval.openDuration - currentTime
-            updateIsOpen((remained > 0) ? getBlurValue(currentTime - interval.openTimestamp) : null)
+            if(remained > 0){
+                const formatted = dayjs.duration(remained / 1000, 'seconds').format("HH:mm:ss")
+                updateIsOpen(getBlurValue(Date.now() - interval.openTimestamp))
+                updateRemained(formatted)
+            }
+            else {
+                updateIsOpen(null)
+                updateRemained(null)
+            }
         }
     }, [currentTime, currentMode, isError, isLoading, interval])
 
-    // it might be memo
-    useEffect(() => {
-        if(isOpen === null || !interval){
-            updateRemained(null)
-            return
-        }
-        const remained = interval.openTimestamp + interval.openDuration - currentTime
-        const formatted = dayjs.duration(remained / 1000, 'seconds').format("HH:mm:ss")
-        updateRemained(formatted)
-
-    }, [isOpen, currentTime, interval]) 
-
     const handleClick = () => {
-        switch(currentMode.kind){
-            case 'edit': case 'onUpdate': case 'new':
-                dispatch(setListMode({kind: 'onUpdate', noteId: id}))
-                break
-            case 'onReview':
-                dispatch(setListMode({kind: 'onAnswer', noteId: id}))
-        }
+        if(currentMode.kind === 'onAnswer') return
+        dispatch(setListMode({kind: 'onAnswer', noteId: id}))
     } 
 
     return (
         <div 
             className="w-full h-full flex justify-center items-center px-5"
-            onClick={handleClick}
         >
             <div className="w-full h-full grid gap-2 grid-cols-[50%_50%]">
                 <div>
                     <span>{front}</span>
                 </div>
 
-                <div>
+                <div
+                    onClick={handleClick} 
+                >
                     <span
                         style={{filter: isOpen === null ? "none" : `blur(${isOpen}px)`}} 
                     >{isOpen !== null  ? back : "_______"}</span>
                 </div>
 
                 <div className="col-span-2 flex justify-center items-center">
-                    {remained && currentMode.kind === 'onReview' && <span>{remained}</span>}
+                    {remained && <span>{remained}</span>}
                 </div>
             </div>
         </div>

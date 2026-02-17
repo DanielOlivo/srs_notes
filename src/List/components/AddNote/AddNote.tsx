@@ -5,9 +5,10 @@ import { Link } from "react-router";
 interface AddNoteProps {
     idx: number
     destination: "above" | "below"
+    disabled: boolean
 }
 
-export const AddNote: FC<AddNoteProps> = ({idx, destination}) => {
+export const AddNote: FC<AddNoteProps> = ({idx, destination, disabled}) => {
 
     const target = `addNote/${destination === 'above' ? idx : idx + 1}/0`
 
@@ -15,6 +16,7 @@ export const AddNote: FC<AddNoteProps> = ({idx, destination}) => {
         <Link 
             to={target} 
             className="flex flex-row items-center text-secondary-content border rounded-4xl"
+            style={{pointerEvents: disabled ? "none" : "auto"}}
         >
             <PlusCircleIcon className="size-6" /> 
             {
