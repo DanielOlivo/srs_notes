@@ -1,4 +1,4 @@
-import { type FC, type ChangeEvent, useState } from "react";
+import { type FC, type ChangeEvent, useState, useRef } from "react";
 // import { useUploadDocumentMutation } from "../document.api";
 import { proceedZip, type Data } from "../../db/csv";
 import { useRestoreFromBackupMutation } from "../document.api";
@@ -6,9 +6,10 @@ import { useRestoreFromBackupMutation } from "../document.api";
 
 
 export const DocumentLoader: FC = () => {
-    // const [loadDocument, ] = useUploadDocumentMutation(); 
     const [restore, ] = useRestoreFromBackupMutation()
     const [data, setData] = useState<Data | null>(null);
+
+    const saveNonserializableRef = useRef<(() => Promise<void>) | null>(null)
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -19,19 +20,20 @@ export const DocumentLoader: FC = () => {
         }
 
         try {
-            const data = await proceedZip(file)
+            const { data, saveImageNotes } = await proceedZip(file)
             setData(data)
+            saveNonserializableRef.current = saveImageNotes
         } catch (error) {
             console.error("Failed to upload document:", error);
-            // Handle errors, e.g., show an error message to the user.
         }
     };
 
     const handleLoading = async () => {
         if(!data) return
-        // await loadDocument(data)
         await restore(data)
+        await saveNonserializableRef.current?.()
         setData(null)
+        saveNonserializableRef.current = null
     }
 
     return (

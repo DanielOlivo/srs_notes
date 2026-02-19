@@ -9,7 +9,7 @@ import { NoteOps } from "./ops/Note.ops";
 import { AnswerOps } from "./ops/answer.ops";
 import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
-import { BaseNote, BasicNote, Interval, TextNote } from "./entities/Note.utils";
+import { BaseNote, BasicNote, ImageNote, Interval, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
 import { NotImplemented } from "../utils/NotImplemented";
 import { Vector2, type IVector2 } from "../utils/Vector2";
@@ -21,6 +21,7 @@ import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/delet
 import { Answer, type Ease } from "./entities/answer";
 import { getNextInterval } from "../notes/updateInterval";
 import type { Data } from "./csv";
+// import { ImageNote } from "./entities/ImageNote";
 
 const dbName = "memoryGameDb";
 
@@ -214,12 +215,7 @@ class DbOps {
     }
 
     async getNoteById(id: string) {
-        const [note] = await withTx(BaseNote.getTx(id))
-        if(note === null){
-            throw new Error("LocalDb.getNoteById: note is null")
-        }
-        // const [ note ] = await this.withTx(this.noteOps.getById(id))
-        // if(!note) throw new Error(`note with id ${id} not found`)
+        const [ note ] = await withTx(BaseNote.getTx(id))
         return note
     }
 
@@ -232,17 +228,19 @@ class DbOps {
 
     async getDocNotes(docId: string) {
         try{
-            let [ positions, deleted ] = await withTx(
+            const [ positions, deleted ] = await withTx(
                 Position.getByDocIdTx(docId),
                 DeletedNote.allTx
             )
             const excluded = new Set(deleted.map(d => d.id))
-            positions = positions
-                .filter(pos => !excluded.has(pos.noteId))
-                .sort((a, b) => a.coord.y - b.coord.y)
+            positions.sort((a, b) => a.coord.y - b.coord.y)
+
+            // const doesHave = positions.some(pos => excluded.has(pos.noteId))
 
             const notes = (await withTx(
-                ...positions.map(pos => BaseNote.getTx(pos.noteId))
+                ...positions
+                .filter(pos => !excluded.has(pos.noteId))
+                .map(pos => BaseNote.getTx(pos.noteId))
             )).filter(note => note !== null)
             return notes.map(note => note.asPlain())
         }
@@ -266,6 +264,7 @@ class DbOps {
             switch(data.kind){
                 case "basic": return new BasicNote(id, createdAt, updatedAt, data.front, data.back)
                 case "text": return new TextNote(id, createdAt, updatedAt, data.text)
+                case "image": return new ImageNote(id, createdAt, updatedAt, data.name, data.data)
                 default: throw new NotImplemented()
             }
         })()
@@ -273,6 +272,7 @@ class DbOps {
             switch(note.kind){
                 case "basic": return note.addTx
                 case 'text': return note.addTx
+                case 'image': return note.addTx
                 default: throw new Error()
             }
         })()
@@ -285,11 +285,6 @@ class DbOps {
         }
         positions.sort((a, b) => b.coord.y - a.coord.y)
 
-        // console.log(
-        //     "positions y updated", positions.map(p => p.coord.y),
-        //     "new pos y", newPos.coord.y
-        // )
-
         await withTx(
             createNoteFn,
             ...positions.map(pos => pos.updateTx),
@@ -297,6 +292,7 @@ class DbOps {
         )
     }
 
+    // should be one
     async createListNote<T extends NoteData>(docId: string, data: T){
         const [doc, positions] = await withTx(
             Document.getTx(docId),
@@ -321,6 +317,7 @@ class DbOps {
             switch(data.kind){
                 case 'basic': return new BasicNote(id, created, updated, data.front, data.back)
                 case 'text': return new TextNote(id, created, updated, data.text)
+                case 'image': return new ImageNote(id, created, updated, data.name, data.data)
                 default: throw new NotImplemented()
             }
         })()

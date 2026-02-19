@@ -11,7 +11,7 @@ export const EditNoteButton: FC<EditNoteButtonProps> = ({noteId, disabled}) => {
 
     return <Link
         to={`noteEdit/${noteId}`}
-        className="text-secondary-content"
+        className="text-secondary"
         style={{
             pointerEvents: disabled ? "none" : "auto"
         }}

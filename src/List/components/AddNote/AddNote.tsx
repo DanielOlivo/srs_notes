@@ -15,7 +15,7 @@ export const AddNote: FC<AddNoteProps> = ({idx, destination, disabled}) => {
     return (
         <Link 
             to={target} 
-            className="flex flex-row items-center text-secondary-content border rounded-4xl"
+            className="flex flex-row items-center text-secondary border rounded-4xl"
             style={{pointerEvents: disabled ? "none" : "auto"}}
         >
             <PlusCircleIcon className="size-6" /> 

@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { useGetNoteQuery } from "../../note.api";
 import { BasicNote } from "../BasicNote/BasicNote";
-import { ImageNote } from "../ImageNote/ImageNote";
 import { TextNote } from "../TextNote/TextNote";
+import { ImageNoteComponent } from "../ImageNote/ImageNote";
 
 export interface NoteProps {
     id: string
@@ -25,7 +25,7 @@ export const Note: FC<NoteProps> = ({id}) => {
         case 'text':
             return <TextNote {...note} />
         case 'image':
-            return <ImageNote {...note} />
+            return <ImageNoteComponent {...note} />
         default: 
             return <div>Unknown note type</div>
     }

@@ -6,7 +6,8 @@ import { type IPosition } from "../db/entities/position";
 import { getDb } from "../db/LocalDb";
 import { 
     type AnswerReqDto,
-    type CreateNote, 
+    type CreateNote,
+    type DeleteNoteDto, 
 } from "./notes.dto";
 import { groupBy } from "../utils/groupBy";
 import type { IInterval } from "../db/entities/interval";
@@ -23,9 +24,18 @@ export const noteApi = api.injectEndpoints({
 
                     for(const note of notes){
                         if(note){
-                            dispatch(
-                                noteApi.util.upsertQueryData("getNote", note.id, note)
-                            )
+                            if(note.kind === 'image'){
+                                const { data, ...rest} = note
+                                dispatch(
+                                    noteApi.util.upsertQueryData("getNote", rest.id, rest)
+                                )
+
+                            }
+                            else {
+                                dispatch(
+                                    noteApi.util.upsertQueryData("getNote", note.id, note)
+                                )
+                            }
                         }
                     }
 
@@ -40,12 +50,17 @@ export const noteApi = api.injectEndpoints({
             ]
         }),
 
-        getNote: builder.query<Note, string>({
+        getNote: builder.query<Note | undefined, string>({
             queryFn: async(id) => {
                 try {
                     const db = await getDb()
                     const note = await db.getNoteById(id)
-                    return { data: note }
+                    
+                    if(note && note.kind === 'image'){
+                        const { data, ...rest} = note.asPlain()
+                        return { data: rest}
+                    }
+                    return { data: note?.asPlain() }
                 }
                 catch(error){
                     return { error }
@@ -99,17 +114,21 @@ export const noteApi = api.injectEndpoints({
             ]
         }),
 
-        deleteNote: builder.mutation<void, string>({
-            queryFn: async (id) => {
+        deleteNote: builder.mutation<void, DeleteNoteDto>({
+            queryFn: async ({noteId}) => {
                 try {
                     const db = await getDb()
-                    await db.deleteNote(id)
+                    await db.deleteNote(noteId)
                     return { data: undefined }
                 }
                 catch(error){
                     return { error }
                 }
             },
+            invalidatesTags: (_result, _error, req) => [
+                { type: "Note", noteId: req.noteId },
+                { type: "DocumentNotes", docId: req.docId }
+            ]
         }),
 
         answer: builder.mutation<void, AnswerReqDto>({

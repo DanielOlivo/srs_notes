@@ -1,16 +1,24 @@
-import { useEffect, useMemo, type FC } from "react";
-import type { IImageNote as ImageNoteRecord } from "../../../db/entities/Note";
+import { useEffect, useState, type FC } from "react";
+import type { IImageNote } from "../../../db/entities/ImageNote";
+import { withTx } from "../../../db/LocalDb";
+import { ImageNote } from "../../../db/entities/Note.utils";
 
-export const ImageNote: FC<ImageNoteRecord> = ({id, data}) => {
-    const src = useMemo(() => URL.createObjectURL(data), [data]);
+export const ImageNoteComponent: FC<Omit<IImageNote, "data">> = ({id}) => {
+
+    const [url, setUrl] = useState<string | null>(null)
 
     useEffect(() => {
-        return () => URL.revokeObjectURL(src)
-    }, [src])
+        withTx(ImageNote.getTx(id)).then(([image]) => {
+            if(image && image.data){
+                const url = URL.createObjectURL(image.data)
+                setUrl(url)
+            }
+        })
+    }, [id]);
 
     return (
-        <div className="w-full h-full flex justify-center items-center">
-            <img src={src} alt={id} className="object-contain"/>
+        <div className="w-full flex justify-center items-center max-h-[300px] overflow-hidden">
+            {url && <img src={url} alt={id} className="max-w-full object-contain"/>}
         </div>
     )
 }

@@ -3,6 +3,8 @@ import type { Note, NoteData } from "../db/entities/Note"
 import type { IPosition } from "../db/entities/position"
 import type { IVector2 } from "../utils/Vector2"
 
+type NoteId = { noteId: string }
+type DocId = { docId: string}
 
 export interface CreatebasicNoteDto {
     front: string     
@@ -23,6 +25,8 @@ export interface CreateNote {
     docId: string
     coord?: IVector2
 }
+
+export type DeleteNoteDto = NoteId & DocId
 
 export interface DocNotesDto {
     notes: Note[]

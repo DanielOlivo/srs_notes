@@ -1,3 +1,5 @@
+import type { IImageNote, ImageNoteData } from "./ImageNote"
+
 export type NoteType = "basic" | "text" | "image"
 
 export interface IBaseNote {
@@ -20,17 +22,8 @@ export interface TextNoteData {
 }
 export interface ITextNote extends IBaseNote, TextNoteData {}
 
-
-export interface ImageNoteData {
-    kind: 'image'
-    name: string
-    data: Blob
-}
-export interface IImageNote extends IBaseNote, ImageNoteData {}
-
-
 export type NoteData = BasicNoteData | TextNoteData | ImageNoteData
-export type Note = IBasicNote | ITextNote | IImageNote
+export type Note = IBasicNote | ITextNote | Omit<IImageNote, "data">
 
 export const storeName = "noteStore"
 
@@ -62,13 +55,6 @@ export interface TextNoteDb {
     [textNoteStoreName]: {
         key: string,
         value: ITextNote,
-    }
-}
-
-export interface ImageNoteDb {
-    [imageNoteStoreName]: {
-        key: string,
-        value: IImageNote,
     }
 }
 

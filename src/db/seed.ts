@@ -1,8 +1,9 @@
 import { v4 } from "uuid"
 import { Document } from "./Document"
-import { BasicNote, Interval, TextNote } from "./entities/Note.utils"
+import { BasicNote, ImageNote, Interval, TextNote } from "./entities/Note.utils"
 import { withTx } from "./LocalDb"
 import { Position } from "./entities/position"
+// import { ImageNote } from "./entities/ImageNote"
 
 export const seed = async () => {
     console.log('seeding...')
@@ -32,12 +33,27 @@ export const seed = async () => {
             {x: 0, y: idx}
         ))
 
+    const randomImages = await Promise.all(
+        Array.from({length: 3}, ImageNote.random)
+    )
+
+    const imageNotePositions = randomImages.map((ri, idx) => new Position(
+        0,
+        ri.id,
+        docs[1].id,
+        {x: 0, y: idx}
+    ))
+
     await withTx(
         ...docs.map(doc => doc.addTx),
         ...doc1BasicNotes.map(note => note.addTx),
         ...textNotes.map(note => note.addTx),
         ...doc1Positions.map(pos => pos.addTx),
         ...intervals.map(interval => interval.addTx),
+
+        // image
+        ...randomImages.map(i => i.addTx),
+        ...imageNotePositions.map(p => p.addTx)
     )
 
     console.log('..seeding done')
