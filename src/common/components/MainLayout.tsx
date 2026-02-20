@@ -14,8 +14,11 @@ export const MainLayout: FC = () => {
             <div className="absolute w-full top-0 left-0">
                 <NavBar />
             </div>
-            <div className="w-full h-full pt-11">
-                <Outlet />
+
+            <div className="w-full max-h-full flex flex-row justify-center items-center">
+                <div className="max-w-5xl max-h-full pt-11">
+                    <Outlet />
+                </div>
             </div>
 
             <div className="absolute overflow-hidden size-0">

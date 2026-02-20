@@ -14,7 +14,7 @@ import { BackupPage } from './common/components/BackupPage/BackupPage';
 function App() {
 
   return (
-    <div className='w-full h-full flex flex-col justify-start items-stretch p-0 m-0'>
+    <div className='w-full h-screen flex flex-col justify-start items-stretch p-0 m-0'>
       {/* <NavBar />  */}
       <Routes>
         <Route element={<MainLayout />}>

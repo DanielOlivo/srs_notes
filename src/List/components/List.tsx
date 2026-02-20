@@ -20,7 +20,7 @@ export const List: FC<ListProps> = ({documentId, height}) => {
 
     return (
         <div
-            className={`overflow-y-scroll w-full p-3`} 
+            className={`max-h-full overflow-y-scroll w-full p-3`} 
             style={style}
             ref={containerRef}
         >
