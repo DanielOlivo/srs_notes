@@ -3,6 +3,10 @@ import type { IDocument } from "./entities/document";
 import { v4 } from "uuid";
 import { getLocalDb, type Tx } from "./LocalDb";
 import { parse } from 'papaparse'
+import type { Db } from "./Db";
+import type { IDBPDatabase } from "idb";
+
+const storeName = "documents"
 
 export class Document implements IDocument {
 
@@ -22,6 +26,12 @@ export class Document implements IDocument {
         this.name = name
         this.type = type
         this.createdAt = createdAt ?? Date.now() 
+    }
+
+    static createStore = (db: IDBPDatabase<Db> ) => {
+        const store = db.createObjectStore(storeName, {keyPath: "id"})
+        store.createIndex("by-name", "name", {unique: false})
+        return store
     }
 
     asPlain(): IDocument {
@@ -80,6 +90,15 @@ export class Document implements IDocument {
     addTx = (tx: Tx) => tx.documentStore.add(this.asPlain())
 
     updatetx = (tx: Tx) => tx.documentStore.put(this.asPlain())
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('documents', this.id)
+    }
+
+    removeTx = async (tx: Tx) => {
+        await tx.documentStore.delete(this.id)
+    }
 
     static async clean(){
         const db = await getLocalDb()

@@ -1,5 +1,7 @@
 import { parse } from 'papaparse'
 import { getLocalDb, type Tx } from '../LocalDb'
+import type { IDBPDatabase } from 'idb'
+import type { Db } from '../Db'
 
 export type Ease = 'Again' | 'Hard' | 'Good' | 'Easy'
 
@@ -33,6 +35,12 @@ export class Answer implements IAnswer {
         this.noteId = noteId
         this.answer = answer
         this.timestamp = timestamp
+    }
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const store = db.createObjectStore(storeName, {keyPath: "id"})
+        store.createIndex("by-noteId", "noteId", {unique: false})
+        return store
     }
 
     static from = (answer: IAnswer) => new Answer(

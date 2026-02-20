@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Document } from "../Document";
-import { getDb } from "../LocalDb";
+import { getDb, withTx } from "../LocalDb";
 import { BasicNote, Interval, TextNote } from "../entities/Note.utils";
 
 export const TestButton: FC = () => {
@@ -139,7 +139,8 @@ const test = async () => {
 
 
         const interval = Interval.randomForNote(basic.id)
-        await db.addInterval(interval)
+        await withTx( interval.addTx )
+        // await db.addInterval(interval)
 
         {
             // get
@@ -151,25 +152,24 @@ const test = async () => {
 
         {
             // update
-            const newOpenDuration = Math.floor(Math.random() * 10000)
-            const newTimestamp = Date.now() + 100
-            await db.updateNoteInterval(basic.id, newOpenDuration, newTimestamp)
+            // const newOpenDuration = Math.floor(Math.random() * 10000)
+            // const newTimestamp = Date.now() + 100
+            // await db.updateNoteInterval(basic.id, newOpenDuration, newTimestamp)
 
-            const extracted = await db.getIntervalByNoteId(basic.id)
-            if(!extracted)
-                throw new Error('failed to get interval')
-            if(extracted.openDuration != newOpenDuration)
-                throw new Error("interval open duration was not updated")
-            if(extracted.openTimestamp != newTimestamp)
-                throw new Error("interval timestamp was not updated")
+            // const extracted = await db.getIntervalByNoteId(basic.id)
+            // if(!extracted)
+            //     throw new Error('failed to get interval')
+            // if(extracted.openDuration != newOpenDuration)
+            //     throw new Error("interval open duration was not updated")
+            // if(extracted.openTimestamp != newTimestamp)
+            //     throw new Error("interval timestamp was not updated")
         }
 
         {
             // delete
-            const saved = await db.getIntervalByNoteId(basic.id)
+            const saved = await Interval.getByNoteId(basic.id)
             if(saved)
-                await db.removeInterval(saved.id)
-            // await db.removeInterval(interval.id)
+                await saved.remove()
 
             const nonexisting = await db.getIntervalByNoteId(basic.id)
             if(nonexisting)

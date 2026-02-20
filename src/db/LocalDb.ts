@@ -1,13 +1,8 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { IDocument } from "./entities/document";
 import type { Db } from "./Db";
-import { DocumentOps } from "./ops/document.ops";
-import { PositionOps } from "./ops/position.ops";
 import type { Note, NoteData } from "./entities/Note";
-import { IntervalOps } from "./ops/interval.ops";
-import { NoteOps } from "./ops/Note.ops";
-import { AnswerOps } from "./ops/answer.ops";
-import { storeName as intervalStoreName, type IInterval } from "./entities/interval";
+import { storeName as intervalStoreName } from "./entities/interval";
 import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./entities/Note";
 import { BaseNote, BasicNote, ImageNote, Interval, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
@@ -21,7 +16,6 @@ import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/delet
 import { Answer, type Ease } from "./entities/answer";
 import { getNextInterval } from "../notes/updateInterval";
 import type { Data } from "./csv";
-// import { ImageNote } from "./entities/ImageNote";
 
 const dbName = "memoryGameDb";
 
@@ -29,11 +23,16 @@ type MigrationFn = (db: IDBPDatabase<Db>) => void
 
 const migrations: MigrationFn[] = [
     (db) => {
-        DocumentOps.createStore(db)
-        NoteOps.createStore(db)
-        PositionOps.createStore(db)
-        AnswerOps.createStore(db)
-        IntervalOps.createStore(db)
+        Document.createStore(db)
+        BasicNote.createStore(db)
+        TextNote.createStore(db)
+        ImageNote.createStore(db)
+
+        Position.createStore(db)
+
+        Answer.createStore(db)
+
+        Interval.createStore(db)
     },
 
     (db) => {
@@ -49,7 +48,6 @@ const migrations: MigrationFn[] = [
     },
     
     (db) => {
-        // remove docId-coord constraint from position store
         Position.deleteStore(db)
         Position.createStore(db)
     }
@@ -137,15 +135,9 @@ export const withTx = async <T extends unknown[]>(...fns: { [K in keyof T]: ((tx
 class DbOps {
 
     private db: IDBPDatabase<Db>
-    private positionOps: PositionOps
-    private noteOps: NoteOps    
-    private intervalOps: IntervalOps
 
     constructor(db: IDBPDatabase<Db>){
         this.db = db;
-        this.positionOps = new PositionOps()
-        this.noteOps = new NoteOps()    
-        this.intervalOps = new IntervalOps()
     }
     
     setTx() {
@@ -215,23 +207,11 @@ class DbOps {
         const pos = new ScrollPosition(docId, noteId)
         await withTx(pos.updateTx)
     }
-    
-    async tryGetNoteById(id: string){
-        const [ maybeNote ] = await this.withTx(this.noteOps.getById(id))
-        return maybeNote 
-    }
 
     async getNoteById(id: string) {
         const [ note ] = await withTx(BaseNote.getTx(id))
         return note
     }
-
-    async getNotePositions(noteIds: string[]){
-        const positions = await this.withTx(
-            ...noteIds.map(noteId => this.positionOps.getbyNoteId(noteId))
-        )
-        return positions
-    } 
 
     async getDocNotes(docId: string) {
         try{
@@ -356,38 +336,11 @@ class DbOps {
         )
     }
 
-    async deletePosition(positionId: number){
-        await this.withTx(
-            this.positionOps.delete(positionId)
-        )
-    }
-
-    async addInterval(interval: IInterval){
-        await this.withTx(
-            this.intervalOps.create(interval.noteId, interval.openDuration)
-        )
-    }
-
     async getIntervalByNoteId(noteId: string){
         const [interval] = await withTx(
             Interval.getByNoteIdTx(noteId)
         )
         return interval?.asPlain()
-    }
-
-    async removeInterval(intervalId: string){
-        await this.withTx(
-            this.intervalOps.delete(intervalId)
-        )
-    }
-
-    async updateNoteInterval(noteId: string, openDuration: number, openTimestamp: number){
-        const interval = await this.getIntervalByNoteId(noteId)
-        if(interval){
-            await this.withTx(
-                this.intervalOps.update(interval, openDuration, openTimestamp)
-            )
-        }
     }
 
     async answer(noteId: string, ease: Ease){

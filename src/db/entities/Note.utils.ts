@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, TextNoteData } from "./Note";
+import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName, type BasicNoteData, type IBaseNote, type IBasicNote, type ITextNote, type TextNoteData } from "./Note";
 import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
 import type { IInterval } from "./interval";
@@ -7,6 +7,8 @@ import { parse } from 'papaparse'
 import { getLocalDb, type Tx } from "../LocalDb";
 import { type IImageNote } from "./ImageNote";
 import type JSZip from "jszip";
+import type { IDBPDatabase } from "idb";
+import type { Db } from "../Db";
 
 export class BaseNote implements IBaseNote {
     @IsUUID()
@@ -51,6 +53,11 @@ export class BasicNote extends BaseNote implements IBasicNote {
         this.front = front
         this.back = back
         this.kind = "basic"
+    }
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const basicStore = db.createObjectStore(basicNoteStoreName, {keyPath: "id"})
+        return basicStore
     }
 
     static from = (note: IBasicNote) => new BasicNote(
@@ -178,6 +185,11 @@ export class TextNote extends BaseNote implements ITextNote {
         this.kind = 'text'
     } 
 
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const textStore = db.createObjectStore(textNoteStoreName, {keyPath: "id"})
+        return textStore
+    }
+
     static from = (note: ITextNote) => new TextNote(
         note.id,
         note.createdAt,
@@ -280,6 +292,12 @@ export class Interval implements IInterval {
         this.noteId = noteId
         this.openDuration = openDuration
         this.openTimestamp = openTimestamp
+    }
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const store = db.createObjectStore("intervals", {keyPath: "id"})
+        store.createIndex("by-noteId", "noteId", {unique: false})
+        return store
     }
 
     static from = (interval: IInterval) => new Interval(
@@ -401,6 +419,11 @@ export class ImageNote extends BaseNote implements IImageNote {
         this.name = name
         this.data = data
         this.kind = 'image'
+    }
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const imageStore = db.createObjectStore(imageNoteStoreName, {keyPath: "id"})
+        return imageStore
     }
 
     static from = (note: IImageNote): ImageNote => new ImageNote(
