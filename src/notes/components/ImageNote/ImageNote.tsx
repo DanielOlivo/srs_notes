@@ -18,7 +18,7 @@ export const ImageNoteComponent: FC<Omit<IImageNote, "data">> = ({id}) => {
 
     return (
         <div className="w-full flex justify-center items-center max-h-[300px] overflow-hidden">
-            {url && <img src={url} alt={id} className="max-w-full object-contain"/>}
+            {url && <img src={url} alt={id} className="max-w-full object-contain rounded-xl"/>}
         </div>
     )
 }

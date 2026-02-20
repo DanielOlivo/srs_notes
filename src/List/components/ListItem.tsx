@@ -26,9 +26,11 @@ export const ListItem: FC<ListItemProps> = ({id, idx, refFn}) => {
             className="w-full
                 flex flex-col
                 justify-start items-stretch
-                rounded-lg 
+                border-b
+                border-secondary
+                
                 my-2 p-1
-                shadow-lg
+                gap-2
             "
             data-id={id}
             ref={refFn}
