@@ -16,42 +16,9 @@ import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/delet
 import { Answer, type Ease } from "./entities/answer";
 import { getNextInterval } from "../notes/updateInterval";
 import type { Data } from "./csv";
+import { migrations } from "./entities/migration";
 
 const dbName = "memoryGameDb";
-
-type MigrationFn = (db: IDBPDatabase<Db>) => void
-
-const migrations: MigrationFn[] = [
-    (db) => {
-        Document.createStore(db)
-        BasicNote.createStore(db)
-        TextNote.createStore(db)
-        ImageNote.createStore(db)
-
-        Position.createStore(db)
-
-        Answer.createStore(db)
-
-        Interval.createStore(db)
-    },
-
-    (db) => {
-        ScrollPosition.createStore(db)
-    },
-
-    (db) => {
-        DeletedDoc.createStore(db)
-    },
-
-    (db) => {
-        DeletedNote.createStore(db)
-    },
-    
-    (db) => {
-        Position.deleteStore(db)
-        Position.createStore(db)
-    }
-]
 
 export async function getLocalDb() {
 
