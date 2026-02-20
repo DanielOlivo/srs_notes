@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, NoteType, TextNoteData } from "./Note";
+import type { BasicNoteData, IBaseNote, IBasicNote, ITextNote, TextNoteData } from "./Note";
 import { faker } from "@faker-js/faker";
 import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
 import type { IInterval } from "./interval";

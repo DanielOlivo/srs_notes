@@ -12,9 +12,9 @@ import { basicNoteStoreName, imageNoteStoreName, textNoteStoreName } from "./ent
 import { BaseNote, BasicNote, ImageNote, Interval, TextNote } from "./entities/Note.utils";
 import { v4 } from "uuid";
 import { NotImplemented } from "../utils/NotImplemented";
-import { Vector2, type IVector2 } from "../utils/Vector2";
+import { type IVector2 } from "../utils/Vector2";
 import { Document } from "./Document";
-import { Position } from "./entities/position";
+import { Position, Positions } from "./entities/position";
 import { ScrollPosition } from "./entities/scrollPosition";
 import { DeletedDoc, storeName as deletedDocStoreName } from "./entities/deletedDoc"
 import { DeletedNote, storeName as deletedNoteStoreName } from "./entities/deletedNote";
@@ -25,8 +25,10 @@ import type { Data } from "./csv";
 
 const dbName = "memoryGameDb";
 
-const migrations = [
-    (db: IDBPDatabase<Db>) => {
+type MigrationFn = (db: IDBPDatabase<Db>) => void
+
+const migrations: MigrationFn[] = [
+    (db) => {
         DocumentOps.createStore(db)
         NoteOps.createStore(db)
         PositionOps.createStore(db)
@@ -34,18 +36,23 @@ const migrations = [
         IntervalOps.createStore(db)
     },
 
-    (db: IDBPDatabase<Db>) => {
+    (db) => {
         ScrollPosition.createStore(db)
     },
 
-    (db: IDBPDatabase<Db>) => {
+    (db) => {
         DeletedDoc.createStore(db)
     },
 
-    (db: IDBPDatabase<Db>) => {
+    (db) => {
         DeletedNote.createStore(db)
     },
-
+    
+    (db) => {
+        // remove docId-coord constraint from position store
+        Position.deleteStore(db)
+        Position.createStore(db)
+    }
 ]
 
 export async function getLocalDb() {
@@ -249,65 +256,61 @@ class DbOps {
         }
     }
 
-    async createListNoteAtPos<T extends NoteData>(docId: string, data: T, coord: IVector2){
-        const [doc, positions] = await withTx(
-            Document.getTx(docId),
-            Position.getByDocIdTx(docId)
-        )
+    // async createListNoteAtPos<T extends NoteData>(docId: string, data: T, coord: IVector2){
+    //     const [doc, positions] = await withTx(
+    //         Document.getTx(docId),
+    //         Position.getByDocIdTx(docId)
+    //     )
 
-        if(!doc) throw new Error(`document with id ${docId} not found`)
+    //     if(!doc) throw new Error(`document with id ${docId} not found`)
 
-        const id = v4()
-        const createdAt = Date.now()
-        const updatedAt = Date.now()
-        const note = (() => {
-            switch(data.kind){
-                case "basic": return new BasicNote(id, createdAt, updatedAt, data.front, data.back)
-                case "text": return new TextNote(id, createdAt, updatedAt, data.text)
-                case "image": return new ImageNote(id, createdAt, updatedAt, data.name, data.data)
-                default: throw new NotImplemented()
-            }
-        })()
-        const createNoteFn = (() => {
-            switch(note.kind){
-                case "basic": return note.addTx
-                case 'text': return note.addTx
-                case 'image': return note.addTx
-                default: throw new Error()
-            }
-        })()
+    //     const id = v4()
+    //     const createdAt = Date.now()
+    //     const updatedAt = Date.now()
+    //     const note = (() => {
+    //         switch(data.kind){
+    //             case "basic": return new BasicNote(id, createdAt, updatedAt, data.front, data.back)
+    //             case "text": return new TextNote(id, createdAt, updatedAt, data.text)
+    //             case "image": return new ImageNote(id, createdAt, updatedAt, data.name, data.data)
+    //             default: throw new NotImplemented()
+    //         }
+    //     })()
+    //     const createNoteFn = (() => {
+    //         switch(note.kind){
+    //             case "basic": return note.addTx
+    //             case 'text': return note.addTx
+    //             case 'image': return note.addTx
+    //             default: throw new Error()
+    //         }
+    //     })()
 
-        const newPos = new Position(0, note.id, docId, new Vector2(0, coord.y))
+    //     const newPos = new Position(0, note.id, docId, new Vector2(0, coord.y))
 
-        for(const pos of positions){
-            if(pos.coord.y >= coord.y)
-                pos.coord = pos.coord.sum(new Vector2(0, 1))
-        }
-        positions.sort((a, b) => b.coord.y - a.coord.y)
+    //     for(const pos of positions){
+    //         if(pos.coord.y >= coord.y)
+    //             pos.coord = pos.coord.sum(new Vector2(0, 1))
+    //     }
+    //     positions.sort((a, b) => b.coord.y - a.coord.y)
 
-        await withTx(
-            createNoteFn,
-            ...positions.map(pos => pos.updateTx),
-            newPos.addTx
-        )
-    }
+    //     await withTx(
+    //         createNoteFn,
+    //         ...positions.map(pos => pos.updateTx),
+    //         newPos.addTx
+    //     )
+    // }
 
     // should be one
-    async createListNote<T extends NoteData>(docId: string, data: T){
+    async createListNote<T extends NoteData>(docId: string, data: T, coord?: IVector2){
         const [doc, positions] = await withTx(
             Document.getTx(docId),
-            Position.getByDocIdTx(docId)
+            // Position.getByDocIdTx(docId)
+            Positions.ofDocTx(docId)
         ) 
 
         if(!doc){
             throw new Error(`document with id ${docId} not found`)
         }
 
-        const maxY = positions.length === 0 ? 0 : Math.max(...positions.map(pos => pos.coord.y))
-        const coord = {
-            x: 0,
-            y: maxY + 1
-        }
 
         const id = v4()
         const created = Date.now()
@@ -322,7 +325,7 @@ class DbOps {
             }
         })()
 
-        const position = new Position(0, id, docId, coord)
+        const insertPositionFn = positions.insertTx(note.id, coord?.y)
 
         const createIntervalOption = (() => {
             switch(data.kind){
@@ -333,7 +336,7 @@ class DbOps {
 
         await withTx(
             note.addTx,
-            position.addTx,
+            ...insertPositionFn,
             createIntervalOption
         )
     }

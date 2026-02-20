@@ -25,7 +25,7 @@ export const noteApi = api.injectEndpoints({
                     for(const note of notes){
                         if(note){
                             if(note.kind === 'image'){
-                                const { data, ...rest} = note
+                                const { data: _, ...rest} = note
                                 dispatch(
                                     noteApi.util.upsertQueryData("getNote", rest.id, rest)
                                 )
@@ -57,7 +57,7 @@ export const noteApi = api.injectEndpoints({
                     const note = await db.getNoteById(id)
                     
                     if(note && note.kind === 'image'){
-                        const { data, ...rest} = note.asPlain()
+                        const { data: _, ...rest} = note.asPlain()
                         return { data: rest}
                     }
                     return { data: note?.asPlain() }
@@ -90,12 +90,7 @@ export const noteApi = api.injectEndpoints({
         createNote: builder.mutation<void, CreateNote /*NoteData*/ >({
             queryFn: async({data, docId, coord}) => {
                 const db = await getDb()
-                if(coord){
-                    await db.createListNoteAtPos(docId, data, coord)
-                }
-                else {
-                    await db.createListNote(docId, data)
-                }
+                await db.createListNote(docId, data, coord)
                 return { data: undefined}
             },
             invalidatesTags: (_result, _error, req) => [

@@ -3,8 +3,6 @@ import type { NoteType } from "../../noteTypes";
 import { BasicNoteEdit } from "../BasicNoteEdit/BasicNoteEdit";
 import { useLazyGetNoteQuery } from "../../note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
-import { useAppDispatch } from "../../../app/hooks";
-import { setListMode } from "../../../List/list.slice";
 import { useNavigate, useParams } from "react-router";
 import type { IVector2 } from "../../../utils/Vector2";
 import { DeleteNoteButton } from "../DeleteNoteButton/DeleteNoteButton";
@@ -19,7 +17,7 @@ export const NoteEdit: FC = () => {
     const navigate = useNavigate()
     const { docId, noteId: id, posY, posX } = useParams<{docId: string, noteId: string, posX: string, posY: string}>()
 
-    const dispatch = useAppDispatch()
+    // const dispatch = useAppDispatch()
     const [mode, setMode] = useState<NoteType | null>(id !== undefined ? null : 'basic')
     const [getNote, { data: note} ] = useLazyGetNoteQuery()
 

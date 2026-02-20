@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useCreateNoteMutation, useUpdateNoteMutation } from "../../note.api";
 import { ImageNote } from "../../../db/entities/Note.utils";
 
 export interface ImageNoteEditProps {
     id?: string
-    docId: string
+    docId?: string
     coord?: IVector2
 }
 
@@ -30,7 +30,7 @@ export const ImageNoteEdit: FC<ImageNoteEditProps> = ({id, docId, coord}) => {
     }
 
     const handleSubmit = async () => {
-        if(!blobRef.current) return
+        if(!blobRef.current || !docId) return
         if(noteRef.current?.kind === 'image'){
             const note = noteRef.current
             note.data = blobRef.current

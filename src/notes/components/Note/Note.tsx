@@ -13,7 +13,7 @@ export interface NoteProps {
  * @param id - note id 
  */
 export const Note: FC<NoteProps> = ({id}) => {
-    const { data: note, isLoading, isError } = useGetNoteQuery(id)  
+    const { data: note, isLoading: _, isError } = useGetNoteQuery(id)  
 
     if(isError || !note){
         return <div>Error occurred</div>

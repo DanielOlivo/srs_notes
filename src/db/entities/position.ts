@@ -1,6 +1,8 @@
 import { Vector2, type IVector2 } from "../../utils/Vector2"
 import { parse } from 'papaparse'
-import { getLocalDb, type Tx } from "../LocalDb"
+import { getLocalDb, withTx, type Tx } from "../LocalDb"
+import type { IDBPDatabase } from "idb"
+import type { Db } from "../Db"
 
 export interface IPosition {
     id: number
@@ -36,6 +38,19 @@ export class Position implements IPosition {
         this.documentId = documentId
         this.coord = Vector2.from(coord)
     }   
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const store = db.createObjectStore(storeName, {keyPath: "id", autoIncrement: true})
+        store.createIndex("by-coord", ["documentId", "coord.x", "coord.y"], {unique: false});
+        store.createIndex("by-ids", ["noteId", "documentId"], {unique: true});
+        store.createIndex("by-noteId", "noteId", {unique: false});
+        store.createIndex("by-docId", "documentId", {unique: false});
+        return store
+    }
+
+    static deleteStore = (db: IDBPDatabase<Db>) => {
+        db.deleteObjectStore(storeName)
+    }
 
     static from = (pos: IPosition) => new Position(
         pos.id,
@@ -88,7 +103,7 @@ export class Position implements IPosition {
     }
 
     addTx = async (tx: Tx) => {
-        const {id, ...plain} = this.asPlain()
+        const {id: _, ...plain} = this.asPlain()
         try{
             const id = await tx.positionStore.add(plain as IPosition)
             this.id = id
@@ -131,4 +146,46 @@ export class Position implements IPosition {
         return positions
     }
 
+}
+
+export class Positions {
+
+    positions: Position[]
+    docId: string
+
+    private constructor(docId: string, positions: IPosition[]){
+        this.positions = positions.map(Position.from)
+        this.docId = docId
+    }
+
+    static ofDoc = async (docId: string) => {
+        const [positions] = await withTx( Position.getByDocIdTx(docId) )
+        return new Positions(docId, positions)
+    }
+
+    static ofDocTx = (docId: string) =>  async (tx: Tx): Promise<Positions> => {
+        const records = await tx.positionStore.index('by-docId').getAll(docId)
+        return new Positions(docId, records)
+    }
+
+    /**
+     * 
+     * @param idx if missing, then to the end of the document
+     */
+    insertTx = (noteId: string, idx?: number): ((tx: Tx) => Promise<void>)[] => {
+        const y = idx === undefined ? this.positions.length : idx - 0.5
+        const coord = { x: 0, y }
+        const newPosition = new Position(0, noteId, this.docId, coord)
+        this.positions.push(newPosition)
+        this.positions.sort((a, b) => a.coord.y - b.coord.y)
+
+        this.positions.forEach((pos, i) => pos.coord.y = i)
+
+        return [
+            ...this.positions
+            .filter(pos => pos.id !== newPosition.id)
+            .map(pos => pos.updateTx),
+            newPosition.addTx
+        ]
+    }
 }
