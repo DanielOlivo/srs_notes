@@ -3,9 +3,9 @@
     themes: light --default, dark;
 }
 
-#root {
+/* #root {
     width: "100vh";
     height: "100vh";
-    padding: "0px";
-    margin: 0;
-}
+    padding: 0rem;
+    margin: 0rem;
+} */

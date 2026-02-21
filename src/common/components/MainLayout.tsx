@@ -10,7 +10,7 @@ export const MainLayout: FC = () => {
     const { isDark } = useTheme()
 
     return (
-        <div>
+        <div className="h-screen">
             <div className="absolute w-full top-0 left-0">
                 <NavBar />
             </div>

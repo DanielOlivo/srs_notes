@@ -4,7 +4,8 @@ import type { Db } from "../Db"
 
 export interface IScrollPosition {
     id: string // doc id
-    noteId: string // note id
+    // noteId: string // note id
+    idx: number
 }
 
 export interface ScrollPositionDb {
@@ -16,16 +17,19 @@ export interface ScrollPositionDb {
 
 export class ScrollPosition {
     id: string
-    noteId: string
+    // noteId: string
+    idx: number
 
-    constructor(id: string, noteId: string){
+    constructor(id: string, idx: number/*noteId: string*/){
         this.id = id
-        this.noteId = noteId
+        // this.noteId = noteId
+        this.idx = idx
     }
 
     static from = (pos: IScrollPosition) => new ScrollPosition(
         pos.id,
-        pos.noteId
+        // pos.noteId
+        pos.idx
     )
 
     static createStore = (db: IDBPDatabase<Db>) => {
@@ -36,11 +40,12 @@ export class ScrollPosition {
     asPlain(): IScrollPosition {
         return {
             id: this.id,
-            noteId: this.noteId
+            // noteId: this.noteId
+            idx: this.idx
         }
     } 
 
-    toCsvRow = () => `${this.id},${this.noteId}`  
+    toCsvRow = () => `${this.id},${this.idx}`  
 
     static all = async () => {
         try{

@@ -167,11 +167,11 @@ class DbOps {
 
     getScrollPosition = async (docId: string) => {
         const pos = await ScrollPosition.get(docId)
-        return pos?.noteId
+        return pos?.idx
     }
 
-    setScrollPosition = async(docId: string, noteId: string) => {
-        const pos = new ScrollPosition(docId, noteId)
+    setScrollPosition = async(docId: string, idx: number) => {
+        const pos = new ScrollPosition(docId, idx)
         await withTx(pos.updateTx)
     }
 

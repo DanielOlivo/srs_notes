@@ -96,11 +96,11 @@ export const documentApi = api.injectEndpoints({
             invalidatesTags: ["DocumentList", "DocumentNotes"]
         }),
 
-        getDocumentScrollPosition: builder.query<string | null, string>({ 
+        getDocumentScrollPosition: builder.query<number | null, string>({ 
             queryFn: async(docId) => {
                 const db = await getDb()
-                const noteId = await db.getScrollPosition(docId)
-                return { data: noteId ?? null }
+                const idx = await db.getScrollPosition(docId)
+                return { data: idx ?? null }
             },
             providesTags: (_result, _error, docId) => [
                 {type: "ScrollPosition" as const, id: docId}
@@ -108,9 +108,9 @@ export const documentApi = api.injectEndpoints({
         }),
 
         setDocumentScrollPosition: builder.mutation<void, IScrollPosition>({
-            queryFn: async({id, noteId}) => {
+            queryFn: async({id, idx}) => {
                 const db = await getDb()
-                await db.setScrollPosition(id, noteId)
+                await db.setScrollPosition(id, idx)
                 return { data: undefined }
             },
             invalidatesTags: (_result, _error, data) => [
