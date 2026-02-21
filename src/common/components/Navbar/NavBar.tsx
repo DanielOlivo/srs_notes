@@ -1,7 +1,7 @@
 import { useEffect, useMemo, type FC } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
-import { useLazyGetDocumentQuery } from "../../documents/document.api";
-import { Sidebar } from "./Sidebar/Sidebar";
+import { useLazyGetDocumentQuery } from "../../../documents/document.api";
+import { Sidebar } from "../Sidebar/Sidebar";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const patterns = {

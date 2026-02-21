@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 import './App.css'
 import { Documents } from './documents/Documents';
-import { NavBar } from './common/components/NavBar';
+import { NavBar } from './common/components/Navbar/NavBar';
 import { ListPage } from './List/components/ListPage/ListPage';
 import { MainLayout } from './common/components/MainLayout';
 import { DocumentEditForm } from './documents/components/DocumentEditForm/DocumentEditForm';
@@ -20,11 +20,9 @@ function App() {
       {/* <NavBar />  */}
       <Routes>
         <Route element={<MainLayout />}>
-        {/* <Route path="docs" element={<Documents />} /> */}
           <Route path="docs">
             <Route index element={<Documents />} />
             <Route path="add" element={<DocumentEditForm />} />
-            {/* <Route path="add/:position" element={<DocumentEditForm />} /> */}
             <Route path=":docId" element={<ListPage />} />
             <Route path=":docId/config" element={<DocumentConfig />} />
             <Route path=":docId/noteEdit/:noteId" element={<NoteEdit />} />
@@ -38,9 +36,6 @@ function App() {
           <Route path="dev" element={<Development />} />
           <Route path="backup" element={<BackupPage />} />
         </Route>
-        {/* <Route path="doc/:docId" element={<ListPage />}> */}
-          {/* <Route path="add" element={<NoteEdit />} /> */}
-        {/* </Route> */}
         <Route path="*" element={<Navigate to="./docs" replace/>} />
       </Routes>
     </div>

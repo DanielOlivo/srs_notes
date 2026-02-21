@@ -31,29 +31,29 @@ export const Sidebar: FC = () => {
                 <li>
                     <span
                         onClick={() => {
-                            navigate("/docs")
+                            navigate("/srs_notes/docs")
                             toggle()
                         }}
                     >Documents</span>
                 </li>
 
                 <li><span onClick={() => {
-                    navigate("/settings")
+                    navigate("/srs_notes/settings")
                     toggle()
                 }}>Settings</span></li>
 
                 <li><span onClick={() => {
-                    navigate("/backup")
+                    navigate("/srs_notes/backup")
                     toggle()
                 }}>Backup</span></li>
 
                 <li><span onClick={() => {
-                    navigate("/dev")
+                    navigate("/srs_notes/dev")
                     toggle()
                 }}>Development</span></li>
 
                 <li><span onClick={() => {
-                    navigate("/about")
+                    navigate("/srs_notes/about")
                     toggle()
                 }}>About</span></li>
             </ul>

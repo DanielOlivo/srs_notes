@@ -1,8 +1,6 @@
 import type { FC } from "react";
 import { Outlet } from "react-router";
-import { NavBar } from "./NavBar";
-import { useAppSelector } from "../../app/hooks";
-import { selectIsDark } from "../../theme/theme.selector";
+import { NavBar } from "./Navbar/NavBar";
 import { useTheme } from "../../theme/useTheme";
 
 export const MainLayout: FC = () => {
