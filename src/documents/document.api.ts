@@ -1,6 +1,7 @@
 import { api } from "../api";
 import { type Data } from "../db/csv";
 import type { IDocument } from "../db/entities/document";
+import type { IDocumentConfig } from "../db/entities/documentConfig";
 import { type IScrollPosition } from "../db/entities/scrollPosition";
 import { getDb } from "../db/LocalDb";
 import { seed } from "../db/seed";
@@ -61,6 +62,13 @@ export const documentApi = api.injectEndpoints({
                 }
             },
             providesTags: (_result, _error, docId) => [{type: "DocumentList" as const, id: docId}]
+        }),
+
+        getConfig: builder.query<IDocumentConfig, IDocId>({
+            queryFn: async (id) => {
+                const db = await getDb()
+                return { data: (await db.getDocumentConfig(id)).asPlain() }
+            }
         }),
 
         seed: builder.mutation<void, void>({
@@ -172,6 +180,8 @@ export const {
 
     useGetDocumentQuery,
     useLazyGetDocumentQuery,
+    useGetConfigQuery,
+    useLazyGetConfigQuery,
 
     useSeedMutation,
 

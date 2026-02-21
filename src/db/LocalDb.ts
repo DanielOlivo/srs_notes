@@ -18,6 +18,7 @@ import { getNextInterval } from "../notes/updateInterval";
 import type { Data } from "./csv";
 import { migrations } from "./entities/migration";
 import type { IDocId } from "../documents/document.defs";
+import { DocumentConfig } from "./entities/documentConfig";
 
 const dbName = "memoryGameDb";
 
@@ -183,6 +184,16 @@ class DbOps {
         await withTx(doc.updatetx)
     }
 
+    getDocumentConfig = async (id: IDocId) => {
+        const config = await DocumentConfig.get(id)
+        if(!config){
+            const newConfig = DocumentConfig.default(id)
+            await newConfig.add()
+            return newConfig
+        }
+        return config
+    }
+
     getScrollPosition = async (docId: string) => {
         const pos = await ScrollPosition.get(docId)
         return pos?.idx
@@ -220,49 +231,6 @@ class DbOps {
             throw new Error(`LocalDb.getDocNotes failure: ${error}`)
         }
     }
-
-    // async createListNoteAtPos<T extends NoteData>(docId: string, data: T, coord: IVector2){
-    //     const [doc, positions] = await withTx(
-    //         Document.getTx(docId),
-    //         Position.getByDocIdTx(docId)
-    //     )
-
-    //     if(!doc) throw new Error(`document with id ${docId} not found`)
-
-    //     const id = v4()
-    //     const createdAt = Date.now()
-    //     const updatedAt = Date.now()
-    //     const note = (() => {
-    //         switch(data.kind){
-    //             case "basic": return new BasicNote(id, createdAt, updatedAt, data.front, data.back)
-    //             case "text": return new TextNote(id, createdAt, updatedAt, data.text)
-    //             case "image": return new ImageNote(id, createdAt, updatedAt, data.name, data.data)
-    //             default: throw new NotImplemented()
-    //         }
-    //     })()
-    //     const createNoteFn = (() => {
-    //         switch(note.kind){
-    //             case "basic": return note.addTx
-    //             case 'text': return note.addTx
-    //             case 'image': return note.addTx
-    //             default: throw new Error()
-    //         }
-    //     })()
-
-    //     const newPos = new Position(0, note.id, docId, new Vector2(0, coord.y))
-
-    //     for(const pos of positions){
-    //         if(pos.coord.y >= coord.y)
-    //             pos.coord = pos.coord.sum(new Vector2(0, 1))
-    //     }
-    //     positions.sort((a, b) => b.coord.y - a.coord.y)
-
-    //     await withTx(
-    //         createNoteFn,
-    //         ...positions.map(pos => pos.updateTx),
-    //         newPos.addTx
-    //     )
-    // }
 
     // should be one
     async createListNote<T extends NoteData>(docId: string, data: T, coord?: IVector2){

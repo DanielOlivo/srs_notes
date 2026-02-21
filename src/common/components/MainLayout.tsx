@@ -16,7 +16,7 @@ export const MainLayout: FC = () => {
             </div>
 
             <div className="w-full max-h-full flex flex-row justify-center items-center">
-                <div className="max-w-5xl max-h-full pt-11">
+                <div className="max-w-5xl max-h-full pt-17">
                     <Outlet />
                 </div>
             </div>

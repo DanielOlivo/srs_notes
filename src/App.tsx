@@ -11,6 +11,7 @@ import { About } from './common/components/About/About';
 import { Development } from './common/components/Development/Development';
 import { BackupPage } from './common/components/BackupPage/BackupPage';
 import { TrashedDocumentList } from './documents/components/TrashedDocumentList/TrashedDocumentList';
+import { DocumentConfig } from './documents/components/DocumentConfig/DocumentConfig';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="add" element={<DocumentEditForm />} />
             {/* <Route path="add/:position" element={<DocumentEditForm />} /> */}
             <Route path=":docId" element={<ListPage />} />
+            <Route path=":docId/config" element={<DocumentConfig />} />
             <Route path=":docId/noteEdit/:noteId" element={<NoteEdit />} />
             <Route path=":docId/addNote" element={<NoteEdit />} />
             <Route path=":docId/addNote/:posY/:posX" element={<NoteEdit />} />

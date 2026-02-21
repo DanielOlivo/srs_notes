@@ -7,6 +7,7 @@ import { Answer } from "./answer"
 import { ScrollPosition } from "./scrollPosition"
 import { DeletedDoc } from "./deletedDoc"
 import { DeletedNote } from "./deletedNote"
+import { DocumentConfig } from "./documentConfig"
 
 type MigrationFn = (db: IDBPDatabase<Db>) => void
 
@@ -39,5 +40,8 @@ export const migrations: MigrationFn[] = [
     (db) => {
         Position.deleteStore(db)
         Position.createStore(db)
+    },
+    (db) => {
+        DocumentConfig.createStore(db)
     }
 ]

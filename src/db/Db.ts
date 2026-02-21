@@ -8,6 +8,7 @@ import type { ScrollPositionDb } from "./entities/scrollPosition";
 import type { DeletedDocDb } from "./entities/deletedDoc";
 import type { DeletedNoteDb } from "./entities/deletedNote";
 import type { ImageNoteDb } from "./entities/ImageNote";
+import type { DocumentConfigDb } from "./entities/documentConfig";
 
 export interface Db extends 
     DBSchema, DocumentDb, PositionDb,
@@ -15,5 +16,6 @@ export interface Db extends
     BasicNoteDb, TextNoteDb, ImageNoteDb,
     AnswerDb, IntervalDb,
     DeletedDocDb, DeletedNoteDb,
-    ScrollPositionDb
+    ScrollPositionDb,
+    DocumentConfigDb
     {}
