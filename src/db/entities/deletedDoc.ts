@@ -2,6 +2,7 @@ import type { IDBPDatabase } from "idb"
 import { getLocalDb, type Tx } from "../LocalDb"
 import type { Db } from "../Db"
 import { parse } from "papaparse"
+import type { IDocId } from "../../documents/document.defs"
 
 export interface IDeletedDoc {
     id: string
@@ -47,10 +48,21 @@ export class DeletedDoc implements IDeletedDoc {
 
     static allTx = (tx: Tx) => tx.deletedDocStore.getAll()
 
+    static get = async (docId: IDocId) => {
+        const db = await getLocalDb()
+        const record = await db.get("deletedDocs", docId)
+        return record ? DeletedDoc.from(record) : null
+    }
+
     static cleanTx = (tx: Tx) => { tx.deletedDocStore.clear() }
 
     addTx = async (tx: Tx) => {
         await tx.deletedDocStore.add(this.asPlain())
+    }
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('deletedDocs', this.id)
     }
 
     removeTx = async (tx: Tx) => {

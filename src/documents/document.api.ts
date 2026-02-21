@@ -4,6 +4,7 @@ import type { IDocument } from "../db/entities/document";
 import { type IScrollPosition } from "../db/entities/scrollPosition";
 import { getDb } from "../db/LocalDb";
 import { seed } from "../db/seed";
+import type { IDocId } from "./document.defs";
 import { 
     type CreateDocumentRequestDto,
     type DocumentRenameRequestDto, 
@@ -27,6 +28,25 @@ export const documentApi = api.injectEndpoints({
                 }
             },
             providesTags: ['DocumentList']
+        }),
+
+        getTrashedDocuments: builder.query<string[], void>({
+            queryFn: async (_arg, {dispatch}) => {
+                try{
+                    const db = await getDb()
+                    const docs = await db.getTrashedDocuments()
+                    for(const doc of docs){
+                        dispatch(
+                            documentApi.util.upsertQueryData('getDocument', doc.id, doc.asPlain())
+                        )
+                    }
+                    return { data: docs.map(doc => doc.id)}
+                }
+                catch(error){
+                    return { error }
+                }
+            },
+            providesTags: ['TrashedDocumentList']
         }),
 
         getDocument: builder.query<IDocument | undefined, string>({
@@ -84,7 +104,21 @@ export const documentApi = api.injectEndpoints({
                     return { error }
                 }
             },
-            invalidatesTags: ["DocumentList"]
+            invalidatesTags: ["DocumentList", "TrashedDocumentList"]
+        }),
+
+        restoreDocument: builder.mutation<void, IDocId>({
+            queryFn: async(id) => {
+                try{
+                    const db = await getDb();
+                    await db.restoreDocument(id);
+                    return { data: undefined }
+                }
+                catch(error){
+                    return { error }
+                }
+            },
+            invalidatesTags: ["DocumentList", "TrashedDocumentList"]
         }),
 
         deleteAllDocuments: builder.mutation<void, void>({
@@ -93,7 +127,7 @@ export const documentApi = api.injectEndpoints({
                 await db.clear();
                 return { data: undefined }
             },
-            invalidatesTags: ["DocumentList", "DocumentNotes"]
+            invalidatesTags: ["DocumentList", "DocumentNotes", "TrashedDocumentList"]
         }),
 
         getDocumentScrollPosition: builder.query<number | null, string>({ 
@@ -134,6 +168,7 @@ export const documentApi = api.injectEndpoints({
 
 export const {
     useGetDocumentListQuery,
+    useGetTrashedDocumentsQuery,
 
     useGetDocumentQuery,
     useLazyGetDocumentQuery,
@@ -142,8 +177,9 @@ export const {
 
     useCreateMutation,
     useRenameDocumentMutation,
-    useDeleteDocumentMutation,
 
+    useDeleteDocumentMutation,
+    useRestoreDocumentMutation,
     useDeleteAllDocumentsMutation,
 
     useRestoreFromBackupMutation,

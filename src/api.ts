@@ -22,6 +22,7 @@ export const api = createApi({
     }),
     tagTypes: [
         "DocumentList",
+        "TrashedDocumentList",
         "DocumentNotes",
         "Note",
         "Interval",

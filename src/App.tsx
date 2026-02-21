@@ -10,6 +10,7 @@ import { Settings } from './common/components/Settings/Settings';
 import { About } from './common/components/About/About';
 import { Development } from './common/components/Development/Development';
 import { BackupPage } from './common/components/BackupPage/BackupPage';
+import { TrashedDocumentList } from './documents/components/TrashedDocumentList/TrashedDocumentList';
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
             <Route path=":docId/addNote/:posY/:posX" element={<NoteEdit />} />
             <Route path=":docId/edit" element={<DocumentEditForm />} />
           </Route>
+          <Route path="docs/trash" element={<TrashedDocumentList />}/>
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
           <Route path="dev" element={<Development />} />

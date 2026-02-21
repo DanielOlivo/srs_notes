@@ -1,10 +1,12 @@
 import type { FC } from "react";
-import { useGetDocumentListQuery } from "../../document.api";
+import { useGetDocumentListQuery, useGetTrashedDocumentsQuery } from "../../document.api";
 import { DocumentItem } from "../DocumentItem";
+import { TrashLinkButton } from "../TrashLinkButton";
 
 export const DocumentList: FC = () => {
 
     const {data: ids, isError, isLoading} = useGetDocumentListQuery();
+    const { data: trashedIds } = useGetTrashedDocumentsQuery()
 
     if(isLoading){
         return <div>Loading document list...</div>
@@ -18,15 +20,13 @@ export const DocumentList: FC = () => {
 
     return (
         <div className="w-full h-full overflow-y-auto">
-            {ids.length > 0 ? (
-                <>
-                    <ul className="list">
-                        {ids.map(id => <DocumentItem key={id} id={id} />)}
-                    </ul>
-                </>
-            ) : (
-                <div>No documents</div>
-            )}
+            <ul className="list">
+                {ids.map(id => <DocumentItem key={id} id={id} />)}
+                {trashedIds !== undefined && trashedIds.length > 0 && (
+                    <li><TrashLinkButton /></li>
+                )}
+            </ul>
+            {ids?.length === 0 && <div>No documents</div>}
         </div>
     );
 }

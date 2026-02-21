@@ -17,6 +17,7 @@ import { Answer, type Ease } from "./entities/answer";
 import { getNextInterval } from "../notes/updateInterval";
 import type { Data } from "./csv";
 import { migrations } from "./entities/migration";
+import type { IDocId } from "../documents/document.defs";
 
 const dbName = "memoryGameDb";
 
@@ -136,6 +137,17 @@ class DbOps {
         return docs.filter(doc => !excluded.has(doc.id)).map(doc => doc.asPlain())
     }
 
+    getTrashedDocuments = async () => {
+        const [docs, deleted] = await withTx(
+            Document.allTx,
+            DeletedDoc.allTx 
+        )
+        const set = new Set(deleted.map(d => d.id))
+        return docs
+            .filter(doc => set.has(doc.id))
+            .map(Document.from)
+    }
+
     async getDocumentById(id: string): Promise<IDocument | undefined>{
         const doc = await Document.get(id)
         return doc?.asPlain()
@@ -156,6 +168,12 @@ class DbOps {
     async removeDocument(id: string): Promise<void> {
         const deleted = new DeletedDoc(id, Date.now())
         await withTx(deleted.addTx)
+    }
+
+    restoreDocument = async (id: IDocId): Promise<void> => {
+        const deleted = await DeletedDoc.get(id)
+        if(!deleted) throw new Error(`document with id ${id} not found`)
+        await deleted.remove()
     }
 
     async updateDocumentName(id: string, name: string): Promise<void> {
