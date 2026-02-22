@@ -27,6 +27,7 @@ export const Primary: Story = {
     },
     parameters: {
         redux: {
+            incrTime: true,
             cache: CacheData.create(cache => {
                 const interval = cache.createInterval("1" as INoteId, Date.now(), 1000 * 30)            
             })

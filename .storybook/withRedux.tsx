@@ -10,7 +10,8 @@ export const withRedux: Decorator = (Story, context) => {
       const store = redux ? getStoreWithState(redux as StoreState) : getStore()
       // const _styles = styles as React.CSSProperties ?? {}
 
-      setInterval(() => store.dispatch(setTime()), 1000)
+      if(redux.incrTime === true)
+        setInterval(() => store.dispatch(setTime()), 1000)
 
       return (
         <Provider store={store}>
