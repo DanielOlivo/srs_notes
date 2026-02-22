@@ -5,6 +5,7 @@ import { api } from "../api";
 import { handleNoteCache, type NoteApiData } from "../notes/note.api";
 import { listReducer } from "../List/list.slice";
 import themeReducer from "../theme/theme.slice"
+import { loadToStore, type ICacheData } from "../common/utils/cacheLoader";
 
 
 export const getStore = () => configureStore({
@@ -31,10 +32,11 @@ export type StoreState = {
     slices?: Partial<SlicesOnlyState>
     // gridApi?: GridApiData
     noteApi?: NoteApiData
+    cache?: ICacheData
 }
 
 
-export const getStoreWithState = ({noteApi }: StoreState) => {
+export const getStoreWithState = ({noteApi, cache }: StoreState) => {
 
     const initialState: SlicesOnlyState = {
         // gridReducer: slices?.gridReducer ?? gridInitialState,
@@ -60,6 +62,9 @@ export const getStoreWithState = ({noteApi }: StoreState) => {
     if(noteApi){
         handleNoteCache(noteApi, store)
     } 
+
+    if(cache)
+        loadToStore(cache, store)
 
     return store
 }
