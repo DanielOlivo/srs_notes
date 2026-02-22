@@ -10,12 +10,14 @@ import { saveAs } from 'file-saver'
 import { DeletedDoc, type IDeletedDoc } from './entities/deletedDoc'
 import type { IImageNote } from './entities/ImageNote'
 import { withTx } from './LocalDb'
+import { ClozeNote, type IClozeNote } from './entities/cloze'
 
 const targetFiles = [
     "docs.csv",
     "basicNotes.csv",
     "textNotes.csv",
     "imageNotes.csv",
+    "clozeNotes.csv",
     "positions.csv",
     "answers.csv",
     "intervals.csv",
@@ -33,6 +35,7 @@ export type Data = {
     answers: IAnswer[]
     deletedDocs: IDeletedDoc[]
     images: Omit<IImageNote, 'data'>[]
+    cloze: IClozeNote[]
 }
 
 export const proceedZip = async (file: File) => {
@@ -49,6 +52,7 @@ export const proceedZip = async (file: File) => {
         basicNotesCsvString,
         textNotesCsvString,
         imageNotesCsvString,
+        clozeNotesCsvString,
         positionsCsvString,
         answersCsvString,
         intervalsCsvString,
@@ -102,7 +106,8 @@ export const proceedZip = async (file: File) => {
         positions: Position.fromCsv(positionsCsvString).map(pos => pos.asPlain()),
         answers: Answer.fromCsv(answersCsvString).map(answer => answer.asPlain()),
         deletedDocs: DeletedDoc.fromCsv(deletedDocsCsvString).map(doc => doc.asPlain()),
-        images: ImageNote.fromCsv(imageNotesCsvString)
+        images: ImageNote.fromCsv(imageNotesCsvString),
+        cloze: ClozeNote.fromCsv(clozeNotesCsvString).map(note => note.asPlain())
     }
 
     return { data, blobs, saveImageNotes }
@@ -122,6 +127,11 @@ export const toZip = async () => {
     const textNotes = await TextNote.all()
     const textNoteCsv = textNotes.map(note => note.toCsvRow()).join("\n")
     zip.file("textNotes.csv", textNoteCsv)
+
+    const clozeNotes = await ClozeNote.all()
+    const clozeNoteCsv = clozeNotes.map(note => note.toCsvRow()).join("\n")
+    zip.file("clozeNotes.csv", clozeNoteCsv)
+
 
     // const imageNoteCsv = ""
     // zip.file("imageNotes.csv", imageNoteCsv)
