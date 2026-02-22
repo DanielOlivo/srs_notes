@@ -1,8 +1,9 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { useGetIntervalQuery } from "../note.api";
 import type { INoteId } from "../note.defs";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { selectMode, selectTime } from "../../List/list.selectors";
+import { setListMode } from "../../List/list.slice";
 
 type Opened = {
     kind: "open"
@@ -28,6 +29,14 @@ export const useInterval = (noteId: INoteId) => {
     const currentTime = useAppSelector(selectTime) 
     const currentMode = useAppSelector(selectMode)
 
+    const dispatch = useAppDispatch()
+
+    const handleClick = useCallback(() => {
+            if(currentMode.kind === 'onAnswer') return
+            dispatch(setListMode({kind: 'onAnswer', noteId}))
+        }, [currentMode, noteId, dispatch]
+    )
+
     useEffect(() => {
         if(currentMode.kind === 'showAll'){
             updateState({kind: 'none'})
@@ -50,5 +59,5 @@ export const useInterval = (noteId: INoteId) => {
         
     }, [currentTime, interval, currentMode])  
 
-    return { state }
+    return { state, handleClick }
 }

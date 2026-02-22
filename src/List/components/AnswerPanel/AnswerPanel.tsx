@@ -17,7 +17,7 @@ export const AnswerPanel: FC<AnswerPanelProps> = ({noteId}) => {
 
     const getAnswerHandler = (ease: Ease) => async () => {
         await sendAsnwer({ noteId, ease })
-        dispatch(setListMode({kind: "onReview"})) 
+        dispatch(setListMode({kind: "none"})) 
     }
 
     const answers: Ease[] = ["Again", "Hard", "Good", "Easy"]

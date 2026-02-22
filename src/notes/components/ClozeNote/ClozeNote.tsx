@@ -47,27 +47,25 @@ const parseText = (text: string) => {
 
 export const ClozeNote: FC<NoteIdProp & TextProp> = ({noteId, text}) => {
 
-    const { state } = useInterval(noteId)
+    const { state, handleClick } = useInterval(noteId)
     const segments = useMemo(() => parseText(text), [text])
     return (
-        <div>
-            <div>
-                {segments.map(seg => 
-                    seg.type === 'text'
-                    ? <span>{seg.value}</span>
-                    : state.kind === 'close' 
-                    ? 
-                    <span 
-                        className="text-blue-500 text-2xl"
-                    >...</span>
-                    : <span
-                        style={{
-                            filter: state.kind === 'open' ? `blur(${getBlurValue( state.passed )}px)` : undefined,
-                            color: "var(--color-blue-500)"
-                        }}
-                    >{seg.inner}</span>
-                )}
-            </div>
+        <div onClick={handleClick}>
+            {segments.map(seg => 
+                seg.type === 'text'
+                ? <span>{seg.value}</span>
+                : state.kind === 'close' 
+                ? 
+                <span 
+                    className="text-blue-500 text-2xl"
+                >...</span>
+                : <span
+                    style={{
+                        filter: state.kind === 'open' ? `blur(${getBlurValue( state.passed )}px)` : undefined,
+                        color: "var(--color-blue-500)"
+                    }}
+                >{seg.inner}</span>
+            )}
             {/* {state.kind === 'open' && <div>{state.passed}</div>} */}
         </div>
     );
