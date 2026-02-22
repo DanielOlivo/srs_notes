@@ -1,5 +1,10 @@
 import type { FC } from "react";
+import type { NoteIdProp } from "../../note.defs";
 
-export const ClozeNote: FC = () => {
-    return null;
+type TextProp = {
+    text: string 
+}
+
+export const ClozeNote: FC<NoteIdProp & TextProp> = ({noteId, text}) => {
+    return text;
 }
