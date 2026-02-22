@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useState } from "react"
-import { useAppDispatch } from "../app/hooks"
-import { setTime } from "./list.slice"
+import { useAppDispatch } from "../../app/hooks"
+import { setTime } from "../list.slice"
 
 export const useIncrementTime = () => {
 
