@@ -6,15 +6,9 @@ import duration from "dayjs/plugin/duration"
 import { selectMode, selectTime } from "../../../List/list.selectors"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
 import { setListMode, type ListMode } from "../../../List/list.slice"
+import { getBlurValue } from "../../utils/getBlurValue"
 
 dayjs.extend(duration)
-
-const getBlurValue = (duration: number) => {
-    if(duration < 10000) return 0
-    if(duration < 20000) return 1
-    if(duration < 30000) return 2
-    return 3
-}
 
 export const BasicNote: FC<BasicNoteRecord> = ({id, front, back}) => {
 
