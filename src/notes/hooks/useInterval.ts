@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 import { useGetIntervalQuery } from "../note.api";
 import type { INoteId } from "../note.defs";
 import { useAppSelector } from "../../app/hooks";
-import { selectTime } from "../../List/list.selectors";
+import { selectMode, selectTime } from "../../List/list.selectors";
 
 type Opened = {
     kind: "open"
@@ -26,8 +26,13 @@ export const useInterval = (noteId: INoteId) => {
     const updateState = useEffectEvent(setState)
 
     const currentTime = useAppSelector(selectTime) 
+    const currentMode = useAppSelector(selectMode)
 
     useEffect(() => {
+        if(currentMode.kind === 'showAll'){
+            updateState({kind: 'none'})
+            return
+        }
         if(!interval) return
 
         const { openTimestamp, openDuration } = interval
@@ -43,7 +48,7 @@ export const useInterval = (noteId: INoteId) => {
         
         updateState(currentState)
         
-    }, [currentTime, interval])  
+    }, [currentTime, interval, currentMode])  
 
     return { state }
 }

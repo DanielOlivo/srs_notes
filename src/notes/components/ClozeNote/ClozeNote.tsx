@@ -55,14 +55,14 @@ export const ClozeNote: FC<NoteIdProp & TextProp> = ({noteId, text}) => {
                 {segments.map(seg => 
                     seg.type === 'text'
                     ? <span>{seg.value}</span>
-                    : state.kind !== 'open' 
+                    : state.kind === 'close' 
                     ? 
                     <span 
                         className="text-blue-500 text-2xl"
                     >...</span>
                     : <span
                         style={{
-                            filter: `blur(${getBlurValue( state.passed )}px)`,
+                            filter: state.kind === 'open' ? `blur(${getBlurValue( state.passed )}px)` : undefined,
                             color: "var(--color-blue-500)"
                         }}
                     >{seg.inner}</span>

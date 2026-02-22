@@ -3,6 +3,8 @@ import { useGetNoteQuery } from "../../note.api";
 import { BasicNote } from "../BasicNote/BasicNote";
 import { TextNote } from "../TextNote/TextNote";
 import { ImageNoteComponent } from "../ImageNote/ImageNote";
+import { ClozeNote } from "../ClozeNote/ClozeNote";
+import type { INoteId } from "../../note.defs";
 
 export interface NoteProps {
     id: string
@@ -26,6 +28,8 @@ export const Note: FC<NoteProps> = ({id}) => {
             return <TextNote {...note} />
         case 'image':
             return <ImageNoteComponent {...note} />
+        case 'cloze':
+            return <ClozeNote {...{noteId: note.id as INoteId, ...note}} />
         default: 
             return <div>Unknown note type</div>
     }
