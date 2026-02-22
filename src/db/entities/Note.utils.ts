@@ -26,14 +26,14 @@ export class BaseNote implements IBaseNote {
         this.updatedAt = updatedAt
     }
 
-    static getTx = (noteId: string) => async (tx: Tx) => {
-        const [basic, text, image] = await Promise.all([
-            BasicNote.getTx(noteId)(tx),
-            TextNote.getTx(noteId)(tx),
-            ImageNote.getTx(noteId)(tx)
-        ])
-        return basic ?? text ?? image ?? null
-    }
+    // static getTx = (noteId: string) => async (tx: Tx) => {
+    //     const [basic, text, image] = await Promise.all([
+    //         BasicNote.getTx(noteId)(tx),
+    //         TextNote.getTx(noteId)(tx),
+    //         ImageNote.getTx(noteId)(tx)
+    //     ])
+    //     return basic ?? text ?? image ?? null
+    // }
 }
 
 export class BasicNote extends BaseNote implements IBasicNote {

@@ -205,8 +205,22 @@ class DbOps {
     }
 
     async getNoteById(id: string) {
-        const [ note ] = await withTx(BaseNote.getTx(id))
-        return note
+        // const [ note ] = await withTx(BaseNote.getTx(id))
+        const [basic, text, image] = await withTx(
+            BasicNote.getTx(id),
+            TextNote.getTx(id),
+            ImageNote.getTx(id)
+        )
+        return basic ?? text ?? image
+    }
+
+    getNoteByIdTx = (id: string) => async (tx: Tx) => {
+        const [basic, text, image] = await Promise.all([
+            BasicNote.getTx(id)(tx),
+            TextNote.getTx(id)(tx),
+            ImageNote.getTx(id)(tx)
+        ])
+        return basic ?? text ?? image
     }
 
     async getDocNotes(docId: string) {
@@ -223,7 +237,8 @@ class DbOps {
             const notes = (await withTx(
                 ...positions
                 .filter(pos => !excluded.has(pos.noteId))
-                .map(pos => BaseNote.getTx(pos.noteId))
+                // .map(pos => BaseNote.getTx(pos.noteId))
+                .map(pos => this.getNoteByIdTx(pos.noteId))
             )).filter(note => note !== null)
             return notes.map(note => note.asPlain())
         }
