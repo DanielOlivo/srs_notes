@@ -1,7 +1,7 @@
 import { type FC } from "react";
 import { useParams } from "react-router";
 import { List } from "../List";
-import { useIncrementTime } from "../../incrTime";
+import { useIncrementTime } from "../../hooks/incrTime";
 import { ModeSelector } from "../ModeSelector/ModeSelector";
 
 export const ListPage: FC = () => {
