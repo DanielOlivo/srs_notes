@@ -10,7 +10,7 @@ export const withRedux: Decorator = (Story, context) => {
       const store = redux ? getStoreWithState(redux as StoreState) : getStore()
       // const _styles = styles as React.CSSProperties ?? {}
 
-      if(redux.incrTime === true)
+      if(redux?.incrTime === true)
         setInterval(() => store.dispatch(setTime()), 1000)
 
       return (
