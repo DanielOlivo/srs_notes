@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router";
 import type { IVector2 } from "../../../utils/Vector2";
 import { DeleteNoteButton } from "../DeleteNoteButton/DeleteNoteButton";
 import { ImageNoteEdit } from "../ImageNote/ImageNoteEdit";
+import { ClozeNoteEdit } from "../ClozeNote/ClozeNoteEdit";
 
 // export interface NoteEditProps {
 //     id?: string
@@ -23,7 +24,7 @@ export const NoteEdit: FC = () => {
 
     const getChangeHandler = (noteType: NoteType) => () => setMode(noteType)
 
-    const noteTypes: NoteType[] = ['basic', 'text', 'image']
+    const noteTypes: NoteType[] = ['basic', 'text', 'image', 'cloze']
 
     const coord: IVector2 = {
         x: parseInt(posX ?? "0"),
@@ -39,6 +40,8 @@ export const NoteEdit: FC = () => {
                 return <TextNoteEdit id={id} docId={docId} coord={coord} />
             case "image":
                 return <ImageNoteEdit id={id} docId={docId} coord={coord} />
+            case 'cloze':
+                return <ClozeNoteEdit id={id} docId={docId} coord={coord} />
             default:
                 return <div>no form for this type</div>
         }
