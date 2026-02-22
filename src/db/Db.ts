@@ -9,11 +9,12 @@ import type { DeletedDocDb } from "./entities/deletedDoc";
 import type { DeletedNoteDb } from "./entities/deletedNote";
 import type { ImageNoteDb } from "./entities/ImageNote";
 import type { DocumentConfigDb } from "./entities/documentConfig";
+import type { ClozeNoteDb } from "./entities/cloze";
 
 export interface Db extends 
     DBSchema, DocumentDb, PositionDb,
     // NoteDb, 
-    BasicNoteDb, TextNoteDb, ImageNoteDb,
+    BasicNoteDb, TextNoteDb, ImageNoteDb, ClozeNoteDb,
     AnswerDb, IntervalDb,
     DeletedDocDb, DeletedNoteDb,
     ScrollPositionDb,

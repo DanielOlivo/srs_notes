@@ -19,6 +19,7 @@ import type { Data } from "./csv";
 import { migrations } from "./entities/migration";
 import type { IDocId } from "../documents/document.defs";
 import { DocumentConfig } from "./entities/documentConfig";
+import { ClozeNote, clozeNoteStoreName } from "./entities/cloze";
 
 const dbName = "memoryGameDb";
 
@@ -47,6 +48,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         basicNoteStoreName,
         textNoteStoreName,
         imageNoteStoreName,
+        clozeNoteStoreName,
         "answers", 
         intervalStoreName, 
         deletedDocStoreName,
@@ -60,6 +62,7 @@ export function getTx(db: IDBPDatabase<Db>) {
     const basicNoteStore = tx.objectStore(basicNoteStoreName)
     const textNoteStore = tx.objectStore(textNoteStoreName)
     const imageNoteStore = tx.objectStore(imageNoteStoreName)
+    const clozeNoteStore = tx.objectStore(clozeNoteStoreName)
     const answerStore = tx.objectStore("answers")
     const positionStore = tx.objectStore("positions")
     const intervalStore = tx.objectStore(intervalStoreName)
@@ -76,6 +79,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         basicNoteStore,
         textNoteStore,
         imageNoteStore,
+        clozeNoteStore,
         answerStore,
         intervalStore,
         scrollPositionStore,
@@ -206,21 +210,23 @@ class DbOps {
 
     async getNoteById(id: string) {
         // const [ note ] = await withTx(BaseNote.getTx(id))
-        const [basic, text, image] = await withTx(
+        const [basic, text, image, cloze] = await withTx(
             BasicNote.getTx(id),
             TextNote.getTx(id),
-            ImageNote.getTx(id)
+            ImageNote.getTx(id),
+            ClozeNote.getTx(id)
         )
-        return basic ?? text ?? image
+        return basic ?? text ?? image ?? cloze
     }
 
     getNoteByIdTx = (id: string) => async (tx: Tx) => {
-        const [basic, text, image] = await Promise.all([
+        const [basic, text, image, cloze] = await Promise.all([
             BasicNote.getTx(id)(tx),
             TextNote.getTx(id)(tx),
-            ImageNote.getTx(id)(tx)
+            ImageNote.getTx(id)(tx),
+            ClozeNote.getTx(id)(tx)
         ])
-        return basic ?? text ?? image
+        return basic ?? text ?? image ?? cloze
     }
 
     async getDocNotes(docId: string) {
@@ -269,6 +275,7 @@ class DbOps {
                 case 'basic': return new BasicNote(id, created, updated, data.front, data.back)
                 case 'text': return new TextNote(id, created, updated, data.text)
                 case 'image': return new ImageNote(id, created, updated, data.name, data.data)
+                case 'cloze': return new ClozeNote(id, created, updated, data.text) 
                 default: throw new NotImplemented()
             }
         })()
@@ -277,7 +284,7 @@ class DbOps {
 
         const createIntervalOption = (() => {
             switch(data.kind){
-                case 'basic': { return (new Interval(v4(), id, 30000, Date.now())).addTx }; 
+                case 'basic': case 'cloze': { return (new Interval(v4(), id, 30000, Date.now())).addTx }; 
                 default: return (async () => {})
             }
         })()
@@ -293,6 +300,7 @@ class DbOps {
         switch(note.kind){
             case "basic": await BasicNote.from(note).update(); break;
             case "text": await TextNote.from(note).update(); break;
+            case 'cloze': await ClozeNote.from(note).update(); break;
         }
     }
 
@@ -343,12 +351,14 @@ class DbOps {
         const intervalFns = data.intervals.map(Interval.from).map(int => int.addTx)
         const deletedDocFns = data.deletedDocs.map(DeletedDoc.from).map(ddoc => ddoc.addTx)
         const answerFns = data.answers.map(Answer.from).map(answer => answer.addTx)
+        const clozeFns = data.cloze.map(ClozeNote.from).map(note => note.addTx)
         
 
         await withTx(
             ...docFns,
             ...basicNoteFns,
             ...textNoteFns,
+            ...clozeFns,
 
             ...positionFns,
             ...deletedDocFns,
