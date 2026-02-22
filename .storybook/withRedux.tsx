@@ -10,14 +10,7 @@ export const withRedux: Decorator = (Story, context) => {
 
       return (
         <Provider store={store}>
-          {/* <div style={{
-            ..._styles,
-            width: _styles.width ?? "50vh",
-            height: _styles.height ?? "50vh",
-          }}> */}
             <Story />
-
-          {/* </div> */}
         </Provider>
       )
 }
