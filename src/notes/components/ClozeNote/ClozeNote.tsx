@@ -62,12 +62,13 @@ export const ClozeNote: FC<NoteIdProp & TextProp> = ({noteId, text}) => {
                     >...</span>
                     : <span
                         style={{
-                            filter: `blur(${getBlurValue( state.passed )})`,
+                            filter: `blur(${getBlurValue( state.passed )}px)`,
                             color: "var(--color-blue-500)"
                         }}
                     >{seg.inner}</span>
                 )}
             </div>
+            {/* {state.kind === 'open' && <div>{state.passed}</div>} */}
         </div>
     );
 }
