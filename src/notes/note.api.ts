@@ -12,6 +12,7 @@ import {
 import { groupBy } from "../utils/groupBy";
 import type { IInterval } from "../db/entities/interval";
 import { documentApi } from "../documents/document.api";
+import { ImageOcclusion, type IImageOcclusionSerialized } from "../db/entities/imageOcclusion";
 
 export const noteApi = api.injectEndpoints({
     endpoints: builder => ({
@@ -23,20 +24,21 @@ export const noteApi = api.injectEndpoints({
                     const notes = await db.getDocNotes(docId)
 
                     for(const note of notes){
-                        if(note){
-                            if(note.kind === 'image'){
-                                const { data: _, ...rest} = note
-                                dispatch(
-                                    noteApi.util.upsertQueryData("getNote", rest.id, rest)
-                                )
 
-                            }
-                            else {
-                                dispatch(
-                                    noteApi.util.upsertQueryData("getNote", note.id, note)
-                                )
-                            }
-                        }
+                        const data = (() => {
+                            switch(note.kind){
+                                case 'imageOcclusion': return ImageOcclusion.from(note).serializable()
+                                case 'image': {
+                                    const { data: _, ...rest } = note
+                                    return rest
+                                }
+                                default: return note
+                        }})()
+
+                        dispatch(
+                            noteApi.util.upsertQueryData("getNote", data.id, data)
+                        )
+
                     }
 
                     return { data: notes.map(note => note.id) }
@@ -50,17 +52,26 @@ export const noteApi = api.injectEndpoints({
             ]
         }),
 
-        getNote: builder.query<Note | undefined, string>({
+        getNote: builder.query<Note | IImageOcclusionSerialized | undefined, string>({
             queryFn: async(id) => {
                 try {
                     const db = await getDb()
                     const note = await db.getNoteById(id)
                     
-                    if(note && note.kind === 'image'){
-                        const { data: _, ...rest} = note.asPlain()
-                        return { data: rest}
-                    }
-                    return { data: note?.asPlain() }
+                    if(!note) return { data: undefined }
+
+                    const data = (() => {
+                        switch(note.kind){
+                            case 'image': {
+                                const { data: _, ...rest } = note.asPlain()
+                                return rest
+                            }
+                            case 'imageOcclusion': return ImageOcclusion.from(note).serializable()
+                            default: return note.asPlain()
+                        }
+                    })()
+
+                    return { data }
                 }
                 catch(error){
                     return { error }

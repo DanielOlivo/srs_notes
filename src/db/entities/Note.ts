@@ -1,5 +1,6 @@
 import type { ClozeNoteData, IClozeNote } from "./cloze"
 import type { IImageNote, ImageNoteData } from "./ImageNote"
+import type { IImageOcclusionNote, ImageOcclusionData } from "./imageOcclusion"
 
 export type NoteType = "basic" | "text" | "image"
 
@@ -23,8 +24,19 @@ export interface TextNoteData {
 }
 export interface ITextNote extends IBaseNote, TextNoteData {}
 
-export type NoteData = BasicNoteData | TextNoteData | ImageNoteData | ClozeNoteData
-export type Note = IBasicNote | ITextNote | IClozeNote | Omit<IImageNote, "data">
+export type NoteData = 
+    BasicNoteData 
+    | TextNoteData 
+    | ImageNoteData 
+    | ClozeNoteData
+    | ImageOcclusionData
+
+export type Note = 
+    IBasicNote 
+    | ITextNote 
+    | IClozeNote 
+    | Omit<IImageNote, "data">
+    | IImageOcclusionNote
 
 export const storeName = "noteStore"
 

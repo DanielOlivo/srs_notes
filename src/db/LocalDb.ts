@@ -20,6 +20,7 @@ import { migrations } from "./entities/migration";
 import type { IDocId } from "../documents/document.defs";
 import { DocumentConfig } from "./entities/documentConfig";
 import { ClozeNote, clozeNoteStoreName } from "./entities/cloze";
+import { ImageOcclusion, imageOcclusionStoreName } from "./entities/imageOcclusion";
 
 const dbName = "memoryGameDb";
 
@@ -49,6 +50,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         textNoteStoreName,
         imageNoteStoreName,
         clozeNoteStoreName,
+        imageOcclusionStoreName,
         "answers", 
         intervalStoreName, 
         deletedDocStoreName,
@@ -63,6 +65,7 @@ export function getTx(db: IDBPDatabase<Db>) {
     const textNoteStore = tx.objectStore(textNoteStoreName)
     const imageNoteStore = tx.objectStore(imageNoteStoreName)
     const clozeNoteStore = tx.objectStore(clozeNoteStoreName)
+    const imageOcclusionStore = tx.objectStore(imageOcclusionStoreName)
     const answerStore = tx.objectStore("answers")
     const positionStore = tx.objectStore("positions")
     const intervalStore = tx.objectStore(intervalStoreName)
@@ -80,6 +83,7 @@ export function getTx(db: IDBPDatabase<Db>) {
         textNoteStore,
         imageNoteStore,
         clozeNoteStore,
+        imageOcclusionStore,
         answerStore,
         intervalStore,
         scrollPositionStore,
@@ -210,23 +214,26 @@ class DbOps {
 
     async getNoteById(id: string) {
         // const [ note ] = await withTx(BaseNote.getTx(id))
-        const [basic, text, image, cloze] = await withTx(
+        const [basic, text, image, cloze, occlusion] = await withTx(
             BasicNote.getTx(id),
             TextNote.getTx(id),
             ImageNote.getTx(id),
-            ClozeNote.getTx(id)
+            ClozeNote.getTx(id),
+            ImageOcclusion.getTx(id)
+            
         )
-        return basic ?? text ?? image ?? cloze
+        return basic ?? text ?? image ?? cloze ?? occlusion
     }
 
     getNoteByIdTx = (id: string) => async (tx: Tx) => {
-        const [basic, text, image, cloze] = await Promise.all([
+        const [basic, text, image, cloze, occlusion] = await Promise.all([
             BasicNote.getTx(id)(tx),
             TextNote.getTx(id)(tx),
             ImageNote.getTx(id)(tx),
-            ClozeNote.getTx(id)(tx)
+            ClozeNote.getTx(id)(tx),
+            ImageOcclusion.getTx(id)(tx)
         ])
-        return basic ?? text ?? image ?? cloze
+        return basic ?? text ?? image ?? cloze ?? occlusion
     }
 
     async getDocNotes(docId: string) {
@@ -276,6 +283,7 @@ class DbOps {
                 case 'text': return new TextNote(id, created, updated, data.text)
                 case 'image': return new ImageNote(id, created, updated, data.name, data.data)
                 case 'cloze': return new ClozeNote(id, created, updated, data.text) 
+                case 'imageOcclusion': return new ImageOcclusion(id, created, updated, data.blob, data.rects)
                 default: throw new NotImplemented()
             }
         })()
@@ -301,6 +309,7 @@ class DbOps {
             case "basic": await BasicNote.from(note).update(); break;
             case "text": await TextNote.from(note).update(); break;
             case 'cloze': await ClozeNote.from(note).update(); break;
+            case 'imageOcclusion': await ImageOcclusion.from(note).update(); break;
         }
     }
 
