@@ -1,13 +1,8 @@
+import type { Rect } from "../../common/entities/Rect"
 import { getLocalDb, type Tx } from "../LocalDb"
 import type { IBaseNote } from "./Note"
 import { BaseNote } from "./Note.utils"
 
-type Rect = {
-    left: number
-    top: number
-    width: number
-    height: number
-}
 
 export interface ImageOcclusionData {
     kind: "imageOcclusion"

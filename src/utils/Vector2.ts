@@ -24,6 +24,18 @@ export class Vector2 implements IVector2 {
         }
     }
 
+
+
+    static clientToPercent = (canvas: HTMLElement, clientX: number, clientY: number) => {
+
+        const clamp = (v: number, a = 0, b = 100) => Math.max(a, Math.min(b, v))
+
+        const rect = canvas.getBoundingClientRect()
+        const y = ((clientY - rect.top) / rect.height) * 100
+        const x = ((clientX - rect.left) / rect.width) * 100
+        return new Vector2(clamp(x), clamp(y))
+    }
+
     asPlain = (): IVector2 => ({
         x: this.x,
         y: this.y
