@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
 import { useNavigate } from "react-router";
-import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
+import { noteApi, useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { ImageOcclusion, type IImageOcclusionSerialized, type ImageOcclusionData } from "../../../db/entities/imageOcclusion";
 import { Drawer } from "../../../common/components/Drawer/Drawer";
 import type { IRect } from "../../../common/entities/Rect";
 import { UpdateButton } from "../../../common/components/UpdateButton/UpdateButton";
+import { useAppDispatch } from "../../../app/hooks";
 
 export interface ImageOcclusionNoteEditProps {
     id?: string
@@ -26,6 +27,8 @@ export const ImageOcclusionNoteEdit: FC<ImageOcclusionNoteEditProps> = ({id, doc
 
     const [isLoading, setIsLoading] = useState(true)
 
+    const dispatch = useAppDispatch()
+
     const updateImage = (blob: Blob) => {
         blobRef.current = blob
         setUrl(URL.createObjectURL(blob))
@@ -41,6 +44,9 @@ export const ImageOcclusionNoteEdit: FC<ImageOcclusionNoteEditProps> = ({id, doc
                 if(blobRef.current)
                     note.blob = blobRef.current
                 await note.update()
+                dispatch(noteApi.util.invalidateTags([
+                    { type: 'Note', id: note.id}
+                ])) 
             } else if(blobRef.current){
                 const note = ImageOcclusion.with(blobRef.current, rects)
                 // add position
