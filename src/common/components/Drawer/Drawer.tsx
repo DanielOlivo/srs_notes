@@ -1,29 +1,38 @@
-import { useEffect, type FC } from "react";
+import { useEffect, useEffectEvent, useMemo, useState, type FC } from "react";
 import { RectComponent } from "./Rect";
 import { DrawerContext, useDrawerFns } from "./drawerContext";
-import type { Rect } from "../../entities/Rect";
+import type { IRect } from "../../entities/Rect";
 import { DrawableRect } from "./DrawableRect";
 
 type DrawerProps = {
     src: string,
-    rects: Rect[],
-    onChange?: (rects: Rect[]) => void
+    rects: IRect[],
+    onChange?: (rects: IRect[]) => void
 }
 
 export const Drawer: FC<DrawerProps> = ({src, rects, onChange}) => {
     
-    const { state, containerRef, ...hooks } = useDrawerFns(src, rects)   
+    // const { state, containerRef, ...hooks } = useDrawerFns(src, rects)   
+    const drawerFns = useDrawerFns(src, rects)
+    const { containerRef} = drawerFns
+    // const [onInit, setOnInit] = useState(true)
+    const contextValue = useMemo(() => {
+        const { state: _, containerRef: _cr, ...rest} = drawerFns
+        return rest
+    }, [drawerFns])
     const { 
         canvasHandlers: { onMouseDown, onMouseMove, onMouseUp },
         selectors: { selectRects }
-    } = hooks
+    } = contextValue
+
+    // const setOnInitEffect = useEffectEvent(() => setOnInit(false))
 
     useEffect(() => {
-        onChange?.(Object.values(state.data.rects))
-    }, [state.data.rects, onChange])
+        onChange?.(Object.values(drawerFns.state.data.rects))
+    }, [drawerFns.state.data.rects])
 
     return (
-        <DrawerContext.Provider value={hooks}>
+        <DrawerContext.Provider value={contextValue}>
             <div 
                 className="relative w-full h-full"
                 ref={containerRef}

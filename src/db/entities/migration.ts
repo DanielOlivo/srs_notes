@@ -9,6 +9,7 @@ import { DeletedDoc } from "./deletedDoc"
 import { DeletedNote } from "./deletedNote"
 import { DocumentConfig } from "./documentConfig"
 import { ClozeNote } from "./cloze"
+import { ImageOcclusion } from "./imageOcclusion"
 
 type MigrationFn = (db: IDBPDatabase<Db>) => void
 
@@ -47,5 +48,8 @@ export const migrations: MigrationFn[] = [
     },
     (db) => {
         ClozeNote.createStore(db)
+    },
+    (db) => {
+        ImageOcclusion.createStore(db)
     }
 ]

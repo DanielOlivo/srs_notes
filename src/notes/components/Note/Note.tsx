@@ -5,6 +5,7 @@ import { TextNote } from "../TextNote/TextNote";
 import { ImageNoteComponent } from "../ImageNote/ImageNote";
 import { ClozeNote } from "../ClozeNote/ClozeNote";
 import type { INoteId } from "../../note.defs";
+import { ImageOcclusionNote } from "../ImageOccluzsionNote/ImageOcclusionNote";
 
 export interface NoteProps {
     id: string
@@ -30,6 +31,8 @@ export const Note: FC<NoteProps> = ({id}) => {
             return <ImageNoteComponent {...note} />
         case 'cloze':
             return <ClozeNote {...{noteId: note.id as INoteId, ...note}} />
+        case 'imageOcclusion':
+            return <ImageOcclusionNote {...note} />
         default: 
             return <div>Unknown note type</div>
     }

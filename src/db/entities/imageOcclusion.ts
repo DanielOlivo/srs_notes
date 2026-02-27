@@ -1,13 +1,17 @@
-import type { Rect } from "../../common/entities/Rect"
+import { v4 } from "uuid"
+import { Rect, type IRect } from "../../common/entities/Rect"
 import { getLocalDb, type Tx } from "../LocalDb"
 import type { IBaseNote } from "./Note"
 import { BaseNote } from "./Note.utils"
+import { faker } from "@faker-js/faker"
+import type { Db } from "../Db"
+import type { IDBPDatabase } from "idb"
 
 
 export interface ImageOcclusionData {
     kind: "imageOcclusion"
     blob: Blob
-    rects: Rect[]
+    rects: IRect[]
 }
 
 
@@ -27,13 +31,18 @@ export interface imageOcclusionDb {
 export class ImageOcclusion extends BaseNote implements IImageOcclusionNote {
     kind: IImageOcclusionNote["kind"]
     blob: Blob
-    rects: Rect[]
+    rects: IRect[]
 
-    constructor(id: string, createdAt: number, updatedAt: number, blob: Blob, rects: Rect[]){
+    constructor(id: string, createdAt: number, updatedAt: number, blob: Blob, rects: IRect[]){
         super(id, createdAt, updatedAt)
         this.blob = blob
         this.rects = rects
         this.kind = "imageOcclusion"
+    }
+
+    static createStore = (db: IDBPDatabase<Db>) => {
+        const store = db.createObjectStore(imageOcclusionStoreName, {keyPath: "id"})
+        return store
     }
 
     static from = (record: IImageOcclusionNote) => new ImageOcclusion(
@@ -43,6 +52,23 @@ export class ImageOcclusion extends BaseNote implements IImageOcclusionNote {
         record.blob,
         record.rects
     )
+
+    static with = (blob: Blob, rects: IRect[]) => new ImageOcclusion(
+        v4(),
+        Date.now(),
+        Date.now(),
+        blob,
+        rects
+    )
+
+    static random = async () => {
+        // const url = faker.image.url()
+        const url = "vite.svg"
+        const response = await fetch(url)
+        const blob = await response.blob()
+        const randomRect = Rect.random()
+        return ImageOcclusion.with(blob, [ randomRect ])
+    }
 
     asPlain = (): IImageOcclusionNote => {
         return {
@@ -61,9 +87,20 @@ export class ImageOcclusion extends BaseNote implements IImageOcclusionNote {
         return { url, ...rest}
     }
 
+    static get = async (id: string) => {
+        const db = await getLocalDb()
+        const record = await db.get(imageOcclusionStoreName, id)
+        return record ? ImageOcclusion.from(record) : null
+    }
+
     static getTx = (id: string) => async (tx: Tx) => {
         const record = await tx.imageOcclusionStore.get(id)
         return record ? ImageOcclusion.from(record) : null
+    }
+
+    add = async () => {
+        const db = await getLocalDb()
+        await db.add(imageOcclusionStoreName, this.asPlain())
     }
 
     addTx = async (tx: Tx) => {
@@ -72,10 +109,12 @@ export class ImageOcclusion extends BaseNote implements IImageOcclusionNote {
 
     update = async () => {
         const db = await getLocalDb()
+        this.updatedAt = Date.now()
         await db.put(imageOcclusionStoreName, this.asPlain())
     }
 
     updateTx = async (tx: Tx) => {
+        this.updatedAt = Date.now()
         await tx.imageOcclusionStore.put(this.asPlain())
     }
 

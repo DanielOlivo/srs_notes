@@ -1,6 +1,6 @@
 import { v4 } from "uuid"
 import type { IVector2 } from "../../../utils/Vector2"
-import type { Rect } from "../../entities/Rect"
+import type { IRect } from "../../entities/Rect"
 import type { CSSProperties } from "react"
 
 /*
@@ -16,7 +16,7 @@ type Mode = "idle" | "edit"
 
 type DrawerData = { 
     data: {
-        rects: {[K: RectId]: Rect}
+        rects: {[K: RectId]: IRect}
         src: string
     }
 }
@@ -40,7 +40,7 @@ type Editing = { mode: Idle | OnDrawing | OnDragging }
 
 export type DrawerState = DrawerData & Editing
 
-export const getDefault = (src: string, rects: Rect[]): DrawerState => ({
+export const getDefault = (src: string, rects: IRect[]): DrawerState => ({
     data: {
         rects: Object.fromEntries(rects.map(r => [v4(), r])),
         src
@@ -81,7 +81,7 @@ export type Action =
 
 const clamp = (v: number, a = 0, b = 100) => Math.max(a, Math.min(b, v))
 
-export const rectToStyle = (r: Rect, color: string): CSSProperties => ({
+export const rectToStyle = (r: IRect, color: string): CSSProperties => ({
     position: 'absolute',
     left: `${r.left}%`,
     top: `${r.top}%`,
@@ -90,7 +90,7 @@ export const rectToStyle = (r: Rect, color: string): CSSProperties => ({
     backgroundColor: color
 })
     
-export const normalizeRectFromTwoPoints = (a: IVector2, b: IVector2): Rect => {
+export const normalizeRectFromTwoPoints = (a: IVector2, b: IVector2): IRect => {
     const left = Math.min(a.x, b.x)
     const top = Math.min(a.y, b.y)
     const right = Math.max(a.x, b.x)
@@ -100,7 +100,7 @@ export const normalizeRectFromTwoPoints = (a: IVector2, b: IVector2): Rect => {
 
 
 
-export const reducer = (state: DrawerState, action: Action): DrawerState => {
+export const reducer = (action: Action) => (state: DrawerState): DrawerState => {
 
     switch(state.mode.kind){
 
@@ -162,7 +162,7 @@ export const reducer = (state: DrawerState, action: Action): DrawerState => {
                 }
 
                 case 'stopDrawing':  {
-                    const newRect: Rect = {
+                    const newRect: IRect = {
                         left: Math.min(state.mode.start.x, state.mode.current.x),
                         top: Math.min(state.mode.start.y, state.mode.current.y),
                         width: Math.abs(state.mode.start.x - state.mode.current.x),

@@ -1,5 +1,7 @@
 import { useEffect, useEffectEvent, useMemo, useState, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
+import { useGetNoteQuery } from "../../note.api";
+import type { IImageOcclusionSerialized } from "../../../db/entities/imageOcclusion";
 
 type Rect = {
     topLeft: IVector2 // percentage
@@ -17,33 +19,39 @@ const rects: Rect[] = [
     }
 ]
 
-export const ImageOcclusionNote: FC = () => {
+interface ImageOcclusionProps {
+    id: string
+}
 
-    const [url, _setUrl] = useState<string | null>(null)
-    const setUrl = useEffectEvent(_setUrl)
+export const ImageOcclusionNote: FC<ImageOcclusionProps> = ({id}) => {
+
+    const {data: note, } = useGetNoteQuery(id)
+
+    const ioNote = useMemo(() => note && note.kind === 'imageOcclusion' ? note as IImageOcclusionSerialized : null, [note])
 
     useEffect(() => {
-        fetch("/image.png")
-            .then(res => res.blob())
-            .then(blob => setUrl(URL.createObjectURL(blob)))
-    }, [])
+        return () => {
+            if(ioNote?.url) 
+                URL.revokeObjectURL(ioNote.url)
+        }
+    }, [ioNote])
 
-    const rectStyles = useMemo(() => rects.map((rect): React.CSSProperties => ({
+    const rectStyles = useMemo(() => ioNote ? ioNote.rects.map((rect): React.CSSProperties => ({
         position: 'absolute',
         // backgroundColor: "orange",
         backdropFilter: `blur(3px)`,
         // maskImage: `linear-gradient(to bottom, black 0% 50%, transparent 50% 100%)`,
-        left: `${rect.topLeft.x * 100}%`,
-        top: `${rect.topLeft.y * 100}%`,
-        width: `${(rect.bottomRight.x - rect.topLeft.x) * 100}%`,
-        height: `${(rect.bottomRight.y - rect.topLeft.y) * 100}%`,
-    })), [])
+        left: `${rect.left}%`,
+        top: `${rect.top}%`,
+        width: `${(rect.width)}%`,
+        height: `${(rect.height)}%`,
+    })) : [], [ioNote])
 
-    if(!url) return null
+    if(!ioNote) return null
 
     return (
         <div className="size-48 relative">
-            <img src={url} className="w-full object-contain"/>
+            <img src={ioNote?.url ?? ""} className="w-full object-contain"/>
 
             {rectStyles.map((rectStyle) => (
                 <div 
