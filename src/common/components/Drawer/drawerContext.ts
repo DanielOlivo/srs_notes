@@ -19,13 +19,8 @@ export const useDrawerFns = (src: string, rects: IRect[]) => {
 
     const setStateEffect = useEffectEvent(setState)
 
-    const [isFirst, setIsFirst] = useState(true)
-
     useEffect(() => {
-        // if(isFirst){
-            setStateEffect(getDefault(src, rects))
-        //     setIsFirst(false)
-        // }
+        setStateEffect(getDefault(src, rects))
     }, [src, rects]);
 
     const canvasOnMouseDown: Handler = useCallback((e) => {
@@ -69,46 +64,6 @@ export const useDrawerFns = (src: string, rects: IRect[]) => {
         onMouseMove: canvasOnMouseMove,
         onMouseUp: canvasOnMouseUp
     }), [canvasOnMouseDown, canvasOnMouseMove, canvasOnMouseUp])
-
-    // const canvasHandlers: {[K: string]: MouseEventHandler<HTMLDivElement>} = {
-
-    //     onMouseDown: (e) => {
-    //         if(!containerRef.current) return
-    //         const coord = getRelativePercentCoord(e, containerRef.current)
-    //         dispatch({ kind: 'startDrawing', coord })
-    //     },
-
-    //     onMouseMove: (e) => {
-    //         if(!containerRef.current) return
-    //         const coord = getRelativePercentCoord(e, containerRef.current)
-
-    //         switch(state.mode.kind){
-    //             case 'drawing': {
-    //                 dispatch({ kind: 'drawing', coord })
-    //                 break;
-    //             }
-    //             case 'dragging': {
-    //                 dispatch({ kind: 'drag', coord })
-    //                 break;
-    //             }
-    //         }
-    //     },
-
-    //     onMouseUp: (e) => {
-    //         if(!containerRef.current) return
-    //         switch(state.mode.kind){
-    //             case 'dragging': {
-    //                 dispatch({ kind: 'stopDrag' })
-    //                 break;
-    //             }
-    //             case 'drawing': {
-    //                 const coord = getRelativePercentCoord(e, containerRef.current)
-    //                 dispatch({ kind: 'stopDrawing', coord })
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
 
     const getRectHandlers = useCallback((id: string): {[K: string]: MouseEventHandler<HTMLDivElement>} => ({
         onMouseDown: e => {
