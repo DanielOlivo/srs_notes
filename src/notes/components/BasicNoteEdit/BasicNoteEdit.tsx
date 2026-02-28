@@ -1,6 +1,6 @@
 import { useEffect, type FC } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form"
-import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
+import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "@notes/note.api";
 import { isBasicNote, type BasicNoteData } from "../../../db/entities/Note";
 import { useNavigate } from "react-router";
 import type { IVector2 } from "../../../utils/Vector2";

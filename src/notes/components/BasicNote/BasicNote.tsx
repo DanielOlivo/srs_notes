@@ -1,11 +1,11 @@
 import { useEffect, useEffectEvent, useState, type FC } from "react"
 import type { IBasicNote as BasicNoteRecord } from "../../../db/entities/Note"
-import { useGetIntervalQuery } from "../../note.api"
+import { useGetIntervalQuery } from "@notes/note.api"
 import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
 import { selectMode, selectTime } from "../../../List/list.selectors"
 import { useAppDispatch, useAppSelector } from "../../../app/hooks"
-import { setListMode, type ListMode } from "../../../List/list.slice"
+import { setListMode } from "../../../List/list.slice"
 import { getBlurValue } from "../../utils/getBlurValue"
 
 dayjs.extend(duration)

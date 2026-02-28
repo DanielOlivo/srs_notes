@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo, useState, type FC } from "react";
+import { useEffect, useMemo, type FC } from "react";
 import { RectComponent } from "./Rect";
 import { DrawerContext, useDrawerFns } from "./drawerContext";
 import type { IRect } from "../../entities/Rect";

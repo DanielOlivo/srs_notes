@@ -1,7 +1,7 @@
 import { useRef, useState, type FC } from "react";
 import type { BasicNoteDto } from "../../notes/notes.dto";
 import { useForm } from "react-hook-form";
-import { useGetNoteQuery, useUpdateBasicNoteMutation } from "../../notes/note.api";
+import { useGetNoteQuery, useUpdateBasicNoteMutation } from "@notes/note.api";
 
 type Input = {
     front: string

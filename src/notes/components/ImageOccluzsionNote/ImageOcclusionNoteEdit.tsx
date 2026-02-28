@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
 import { useNavigate } from "react-router";
-import { noteApi, useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { ImageOcclusion, type IImageOcclusionSerialized, type ImageOcclusionData } from "../../../db/entities/imageOcclusion";
+import { noteApi, useCreateNoteMutation } from "../../note.api";
+import { ImageOcclusion } from "../../../db/entities/imageOcclusion";
 import { Drawer } from "../../../common/components/Drawer/Drawer";
 import type { IRect } from "../../../common/entities/Rect";
 import { UpdateButton } from "../../../common/components/UpdateButton/UpdateButton";

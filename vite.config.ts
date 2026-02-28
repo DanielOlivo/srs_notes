@@ -14,6 +14,11 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 export default defineConfig({
   base: "/srs_notes/",
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@notes": path.resolve(__dirname, "./src/notes")
+    }
+  },
   test: {
     projects: [{
       extends: true,

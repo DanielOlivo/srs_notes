@@ -26,8 +26,12 @@
 
     /* Decorators */
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
 
+    "baseUrl": ".",
+    "paths": {
+      "@notes/*": ["src/notes/*"],
+    }
   },
   "include": ["src"]
 }

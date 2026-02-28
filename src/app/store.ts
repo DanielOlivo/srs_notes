@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 // import gridReducer, { initialState as gridInitialState } from '../grid/grid.slice'
 import { api } from "../api";
 // import { GridApiUtils, type GridApiData } from "../grid/grid.api";
-import { handleNoteCache, type NoteApiData } from "../notes/note.api";
+import { handleNoteCache, type NoteApiData } from "@notes/note.api";
 import { listReducer } from "../List/list.slice";
 import themeReducer from "../theme/theme.slice"
 import { loadToStore, type ICacheData } from "../common/utils/cacheLoader";

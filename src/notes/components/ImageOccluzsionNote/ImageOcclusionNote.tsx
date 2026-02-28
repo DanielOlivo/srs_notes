@@ -1,28 +1,12 @@
-import { useEffect, useEffectEvent, useMemo, useState, type FC } from "react";
-import type { IVector2 } from "../../../utils/Vector2";
-import { useGetIntervalQuery, useGetNoteQuery } from "../../note.api";
+import { useEffect, useMemo, type FC } from "react";
+import { useGetNoteQuery } from "@notes/note.api";
 import type { IImageOcclusionSerialized } from "../../../db/entities/imageOcclusion";
 import { useInterval } from "../../hooks/useInterval";
 import { getBlurValue } from "../../utils/getBlurValue";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { selectMode } from "../../../List/list.selectors";
 import { setListMode } from "../../../List/list.slice";
-
-type Rect = {
-    topLeft: IVector2 // percentage
-    bottomRight: IVector2 // percentage
-}
-
-const rects: Rect[] = [
-    {
-        topLeft: {x: 0.1, y: 0.1},
-        bottomRight: {x: 0.3, y: 0.9}
-    },
-    {
-        topLeft: {x: 0.4, y:0.1},
-        bottomRight: {x: 1.0, y: 0.9}
-    }
-]
+import type { INoteId } from "../../note.defs";
 
 interface ImageOcclusionProps {
     id: string
@@ -31,7 +15,7 @@ interface ImageOcclusionProps {
 export const ImageOcclusionNote: FC<ImageOcclusionProps> = ({id}) => {
 
     const {data: note, } = useGetNoteQuery(id)
-    const { state: interval } = useInterval(id)
+    const { state: interval } = useInterval(id as INoteId)
     const currentMode = useAppSelector(selectMode)
     const dispatch = useAppDispatch()
 

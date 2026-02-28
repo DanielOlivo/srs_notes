@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useDeleteNoteMutation } from "../../note.api";
+import { useDeleteNoteMutation } from "@notes/note.api";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useParams } from "react-router";
 

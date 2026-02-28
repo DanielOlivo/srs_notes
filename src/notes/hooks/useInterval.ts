@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useEffectEvent, useState } from "react";
-import { useGetIntervalQuery } from "../note.api";
+import { useGetIntervalQuery } from "@notes/note.api";
 import type { INoteId } from "../note.defs";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { selectMode, selectTime } from "../../List/list.selectors";

@@ -1,6 +1,6 @@
 import { useMemo, type FC } from "react";
 import { ListItem } from "./ListItem";
-import { useGetDocNotesQuery } from "../../notes/note.api";
+import { useGetDocNotesQuery } from "@notes/note.api";
 import { useAutoScroll } from "../hooks/autoScroll";
 import { Virtuoso } from "react-virtuoso";
 import { useGetDocumentScrollPositionQuery, useSetDocumentScrollPositionMutation } from "../../documents/document.api";

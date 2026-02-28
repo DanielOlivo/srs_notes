@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import type { RootState, StoreState } from "../app/store";
 import type { IDocument } from "../db/entities/document";
-import type { NoteApiData } from "../notes/note.api";
+import type { NoteApiData } from "@notes/note.api";
 import type { Note, NoteData } from "../db/entities/Note";
 import type { IPosition } from "../db/entities/position";
 import type { IInterval } from "../db/entities/interval";

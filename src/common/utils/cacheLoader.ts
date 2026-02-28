@@ -8,7 +8,7 @@ import type { Note, NoteData } from "../../db/entities/Note";
 import type { IPosition } from "../../db/entities/position";
 import { documentApi } from "../../documents/document.api";
 import { DocId, type IDocId } from "../../documents/document.defs";
-import { noteApi } from "../../notes/note.api";
+import { noteApi } from "@notes/note.api";
 import type { INoteId } from "../../notes/note.defs";
 
 export interface ICacheData {

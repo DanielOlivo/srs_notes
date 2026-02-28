@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
 import { useNavigate } from "react-router";
-import { useCreateNoteMutation, useUpdateNoteMutation } from "../../note.api";
+import { useCreateNoteMutation, useUpdateNoteMutation } from "@notes/note.api";
 import { ImageNote } from "../../../db/entities/Note.utils";
 
 export interface ImageNoteEditProps {
