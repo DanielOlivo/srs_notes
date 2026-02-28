@@ -45,7 +45,7 @@ export const ImageOcclusionNoteEdit: FC<ImageOcclusionNoteEditProps> = ({id, doc
                     note.blob = blobRef.current
                 await note.update()
                 dispatch(noteApi.util.invalidateTags([
-                    { type: 'Note', id: note.id}
+                    { type: 'Note', id: note.id},
                 ])) 
             } else if(blobRef.current){
                 const note = ImageOcclusion.with(blobRef.current, rects)

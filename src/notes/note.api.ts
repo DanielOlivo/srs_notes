@@ -78,7 +78,7 @@ export const noteApi = api.injectEndpoints({
                 }
             },
             providesTags: (_result, _error, noteId) => [
-                { type: "Note", noteId }
+                { type: "Note", id: noteId }
             ]
         }),
 
