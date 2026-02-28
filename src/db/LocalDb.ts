@@ -21,6 +21,7 @@ import type { IDocId } from "../documents/document.defs";
 import { DocumentConfig } from "./entities/documentConfig";
 import { ClozeNote, clozeNoteStoreName } from "./entities/cloze";
 import { ImageOcclusion, imageOcclusionStoreName } from "./entities/imageOcclusion";
+import type { INoteId } from "@notes/note.defs";
 
 const dbName = "memoryGameDb";
 
@@ -166,8 +167,8 @@ class DbOps {
         return await this.db.getFromIndex("documents", "by-name", name);
     }
 
-    async createDocument(name: string, type: Document["type"]): Promise<string> {
-        const doc = new Document(name, type, v4(), Date.now())
+    async createDocument(name: string, type: Document["type"], docId?: IDocId): Promise<string> {
+        const doc = new Document(name, type, docId ?? v4(), Date.now())
         await withTx(
             doc.addTx
         )
@@ -261,7 +262,7 @@ class DbOps {
     }
 
     // should be one
-    async createListNote<T extends NoteData>(docId: string, data: T, coord?: IVector2){
+    async createListNote<T extends NoteData>(docId: string, data: T, coord?: IVector2, noteId?: INoteId){
         const [doc, positions] = await withTx(
             Document.getTx(docId),
             // Position.getByDocIdTx(docId)
@@ -273,7 +274,7 @@ class DbOps {
         }
 
 
-        const id = v4()
+        const id = noteId ?? v4()
         const created = Date.now()
         const updated = Date.now()
 
@@ -313,6 +314,22 @@ class DbOps {
             case 'cloze': await ClozeNote.from(note).update(); break;
             case 'imageOcclusion': await ImageOcclusion.from(note).update(); break;
         }
+    }
+
+    purgeNote = async (id: INoteId) => {
+        const [note, position, interval] = await withTx(
+            this.getNoteByIdTx(id),
+            Position.getByNoteIdTx(id),
+            Interval.getByNoteIdTx(id)
+        )
+                
+        const getDummy = () => async () => Promise.resolve()
+
+        await withTx(
+            note?.removeTx ?? getDummy(),
+            position?.removeTx ?? getDummy(),
+            interval?.removeTx ?? getDummy()
+        )
     }
 
     async deleteNote(noteId: string){

@@ -118,6 +118,15 @@ export class ImageOcclusion extends BaseNote implements IImageOcclusionNote {
         await tx.imageOcclusionStore.put(this.asPlain())
     }
 
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('imageOcclusionStore', this.id)
+    }
+
+    removeTx = async (tx: Tx) => {
+        await tx.imageOcclusionStore.delete(this.id)
+    }
+
     deleteTx = async (tx: Tx) => {
         await tx.imageOcclusionStore.delete(this.id)
     }

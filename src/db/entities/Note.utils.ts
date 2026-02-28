@@ -10,7 +10,7 @@ import type JSZip from "jszip";
 import type { IDBPDatabase } from "idb";
 import type { Db } from "../Db";
 
-export class BaseNote implements IBaseNote {
+export abstract class BaseNote implements IBaseNote {
     @IsUUID()
     id: string
 
@@ -34,6 +34,8 @@ export class BaseNote implements IBaseNote {
     //     ])
     //     return basic ?? text ?? image ?? null
     // }
+
+    abstract removeTx (tx: Tx): Promise<void>
 }
 
 export class BasicNote extends BaseNote implements IBasicNote {
@@ -135,6 +137,11 @@ export class BasicNote extends BaseNote implements IBasicNote {
         const db = await getLocalDb()
         this.updatedAt = Date.now() 
         await db.put("basicNoteStore", this.asPlain())
+    }
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('basicNoteStore', this.id)
     }
 
     removeTx = async (tx: Tx) => {
@@ -244,6 +251,11 @@ export class TextNote extends BaseNote implements ITextNote {
         const db = await getLocalDb()
         this.updatedAt = Date.now() 
         await db.put("textNoteStore", this.asPlain())
+    }
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('textNoteStore', this.id)
     }
 
     removeTx = async (tx: Tx) => {
@@ -358,12 +370,12 @@ export class Interval implements IInterval {
     }
 
     addTx = async (tx: Tx) => {
+        const plained = this.asPlain()
         try{
-            await tx.intervalStore.add(this.asPlain())
-            return
+            await tx.intervalStore.add(plained)
         }
         catch(error){
-            throw new Error(`Interval ${this}; addTx failure: ${error}`)
+            throw new Error(`Interval ${plained}; addTx failure: ${error}`)
         }
     }
 
@@ -378,7 +390,7 @@ export class Interval implements IInterval {
         await db.delete("intervals", this.id)
     }
 
-    removeTx = () => async (tx: Tx): Promise<void> => {
+    removeTx = async (tx: Tx): Promise<void> => {
         await  tx.intervalStore.delete(this.id)
     }
 
@@ -481,6 +493,15 @@ export class ImageNote extends BaseNote implements IImageNote {
 
     updateTx = async(tx: Tx) => {
         await tx.imageNoteStore.put(this.asPlain())
+    }
+
+    remove = async () => {
+        const db = await getLocalDb()
+        await db.delete('imageNoteStore', this.id)
+    }
+
+    removeTx = async (tx: Tx) => {
+        await tx.imageNoteStore.delete(this.id)
     }
 
     toCsvRow = () => `${this.id},"${this.name}",${this.createdAt},${this.updatedAt}`

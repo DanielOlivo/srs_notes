@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { StoreStateUtility } from '../../../utils/StoreState';
 import { BasicNote as BasicNoteUtils } from '../../../db/entities/Note.utils';
 import { BasicNote } from './BasicNote';
-import type { IBasicNote } from '../../../db/entities/Note';
+import { BasicNote as BasicNoteEntity } from '../../../db/entities/Note.utils';
+import { getDb } from '@db/LocalDb';
+import type { BasicNoteData, IBasicNote } from '@db/entities/Note';
+import type { INoteId } from '@notes/note.defs';
+import type { IDocId } from 'src/documents/document.defs';
 
 const meta = {
   title: 'Notes/BasicNote',
@@ -24,16 +28,28 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const apiState = new StoreStateUtility()
-const doc = apiState.addDocument('doc', 'list')
-const { note } = apiState.addNote(doc, BasicNoteUtils.random())
-apiState.addInterval(note, { openDuration: 10000, openTimestamp: Date.now()})
-
 export const Opened: Story = {
-  args: {
-    ...note as IBasicNote
+  render: (_args, data ) => {
+    return <BasicNote {...(data.loaded as IBasicNote)} />
   },
-  parameters: {
-    redux: apiState
-  } ,
+  loaders: [
+    async () => {
+      const db = await getDb()
+      const docId = "basicNoteDocIdOpened"
+      const note = BasicNoteEntity.random()
+      const data: BasicNoteData = {
+        kind: 'basic',
+        front: note.front,
+        back: note.back
+      }
+      note.id = "basicNote-primary"
+      const existingDoc = await db.getDocumentById(docId)
+      if(!existingDoc){
+        await db.createDocument('doc', 'list', docId as IDocId)
+      }
+      await db.purgeNote(note.id as INoteId)
+      await db.createListNote(docId, data, undefined, note.id as INoteId)
+      return note.asPlain()
+    }
+  ]
 }
