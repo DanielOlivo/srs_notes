@@ -30,7 +30,13 @@
 
     "baseUrl": ".",
     "paths": {
+      "@app/*": ["src/app/*"],
+      "@common/*": ["src/common/*"],
+      "@db/*": ["src/db/*"],
       "@notes/*": ["src/notes/*"],
+      "@list/*": ["src/List/*"],
+      "@utils/*": ["src/utils/*"],
+      "@theme/*": ["src/theme/*"],
     }
   },
   "include": ["src"]

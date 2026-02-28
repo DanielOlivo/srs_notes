@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { useGetIntervalQuery } from "@notes/note.api";
-import type { INoteId } from "../note.defs";
+import type { INoteId } from "@notes/note.defs";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { selectMode, selectTime } from "../../List/list.selectors";
-import { setListMode } from "../../List/list.slice";
+import { selectMode, selectTime } from "@list/list.selectors";
+import { setListMode } from "@list/list.slice";
 
 type Opened = {
     kind: "open"

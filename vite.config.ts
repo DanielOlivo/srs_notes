@@ -16,7 +16,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "@notes": path.resolve(__dirname, "./src/notes")
+      "@app": path.resolve(__dirname, "./src/app"),
+      "@common": path.resolve(__dirname, "./src/common"),
+      "@notes": path.resolve(__dirname, "./src/notes"),
+      "@db": path.resolve(__dirname, "./src/db"),
+      "@list": path.resolve(__dirname, "./src/List"),
+      "@utils": path.resolve(__dirname, "./src/utils"),
+      "@theme": path.resolve(__dirname, "./src/theme"),
     }
   },
   test: {

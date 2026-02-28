@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { seed } from "../../db/seed";
+import { seed } from "@db/seed";
 
 
 export const SeedButton: FC = () => {

@@ -1,9 +1,9 @@
 import { useEffect, type FC } from "react";
-import { isTextNote, type TextNoteData } from "../../../db/entities/Note";
+import { isTextNote, type TextNoteData } from "@db/entities/Note";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useCreateNoteMutation, useLazyGetNoteQuery, useUpdateNoteMutation } from "../../note.api";
-import { useNavigate, useParams } from "react-router";
-import type { IVector2 } from "../../../utils/Vector2";
+import { useNavigate } from "react-router";
+import type { IVector2 } from "@utils/Vector2";
 
 export interface TextNoteEditProps {
     id?: string

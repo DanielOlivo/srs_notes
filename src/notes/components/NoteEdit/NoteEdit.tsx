@@ -1,10 +1,10 @@
 import { useEffect, useState, type FC } from "react";
-import type { NoteType } from "../../noteTypes";
+import type { NoteType } from "@notes/noteTypes";
 import { BasicNoteEdit } from "../BasicNoteEdit/BasicNoteEdit";
 import { useLazyGetNoteQuery } from "@notes/note.api";
 import { TextNoteEdit } from "../TextNote/TextNoteEdit";
 import { useNavigate, useParams } from "react-router";
-import type { IVector2 } from "../../../utils/Vector2";
+import type { IVector2 } from "@utils/Vector2";
 import { DeleteNoteButton } from "../DeleteNoteButton/DeleteNoteButton";
 import { ImageNoteEdit } from "../ImageNote/ImageNoteEdit";
 import { ClozeNoteEdit } from "../ClozeNote/ClozeNoteEdit";

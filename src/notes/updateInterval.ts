@@ -1,5 +1,5 @@
-import type { Ease } from "../db/entities/answer"
-import type { IInterval } from "../db/entities/interval"
+import type { Ease } from "@db/entities/answer"
+import type { IInterval } from "@db/entities/interval"
 
 export const getNextInterval = (interval: IInterval | undefined, ease: Ease): number => {
     const defaultValue = 30 * 1000

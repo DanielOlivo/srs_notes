@@ -1,9 +1,9 @@
 import { api } from "../api";
-import type { AppStore } from "../app/store";
-import type { IDocument } from "../db/entities/document";
-import { type Note } from "../db/entities/Note";
-import { type IPosition } from "../db/entities/position";
-import { getDb } from "../db/LocalDb";
+import type { AppStore } from "@app/store";
+import type { IDocument } from "@db/entities/document";
+import { type Note } from "@db/entities/Note";
+import { type IPosition } from "@db/entities/position";
+import { getDb } from "@db/LocalDb";
 import { 
     type AnswerReqDto,
     type CreateNote,

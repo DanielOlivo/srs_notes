@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { getDb } from "../../db/LocalDb";
+import { getDb } from "@db/LocalDb";
 
 export const ClearAllButton: FC = () => {
 
