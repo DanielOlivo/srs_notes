@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { StoreStateUtility } from '../../../utils/StoreState';
-import { BasicNote as BasicNoteUtils } from '../../../db/entities/Note.utils';
 import { BasicNote } from './BasicNote';
-import { BasicNote as BasicNoteEntity } from '../../../db/entities/Note.utils';
+import { BasicNote as BasicNoteEntity, Interval } from '@db/entities/Note.utils';
 import { getDb } from '@db/LocalDb';
 import type { BasicNoteData, IBasicNote } from '@db/entities/Note';
 import type { INoteId } from '@notes/note.defs';
@@ -22,15 +20,18 @@ const meta = {
     back: "back",
     createdAt: 0,
     updatedAt: 0
-  }
+  },
+  render: (_args, data) => <BasicNote {...(data.loaded as IBasicNote)} />
 } satisfies Meta<typeof BasicNote>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Opened: Story = {
-  render: (_args, data ) => {
-    return <BasicNote {...(data.loaded as IBasicNote)} />
+  parameters: {
+    redux: {
+      incrTime: true
+    }
   },
   loaders: [
     async () => {
@@ -49,6 +50,39 @@ export const Opened: Story = {
       }
       await db.purgeNote(note.id as INoteId)
       await db.createListNote(docId, data, undefined, note.id as INoteId)
+      return note.asPlain()
+    }
+  ]
+}
+
+export const Closed: Story = {
+  parameters: {
+    redux: { incrTime: true }
+  },
+  loaders: [
+    async () => {
+      const db = await getDb()
+      const docId = "basicNoteDocIdClosed"
+      const note = BasicNoteEntity.random()
+      const data: BasicNoteData = {
+        kind: 'basic',
+        front: note.front,
+        back: note.back
+      }
+      note.id = "basicNote-closed"
+      const existingDoc = await db.getDocumentById(docId)
+      if(!existingDoc){
+        await db.createDocument('doc', 'list', docId as IDocId)
+      }
+      await db.purgeNote(note.id as INoteId)
+      await db.createListNote(docId, data, undefined, note.id as INoteId)
+
+      const interval = await Interval.getByNoteId(note.id)
+      if(interval){
+        interval.openTimestamp -= 80000
+        await interval.update()
+      }
+
       return note.asPlain()
     }
   ]

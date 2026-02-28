@@ -379,6 +379,11 @@ export class Interval implements IInterval {
         }
     }
 
+    update = async () => {
+        const db = await getLocalDb()
+        await db.put('intervals', this.asPlain())
+    }
+
     updateTx = (nextInterval: number) => (tx: Tx) => {
         this.openDuration = nextInterval
         this.openTimestamp = Date.now()
