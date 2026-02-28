@@ -1,13 +1,15 @@
 import { v4 } from "uuid"
 import { Document } from "./Document"
 import { BasicNote, ImageNote, Interval, TextNote } from "./entities/Note.utils"
-import { withTx } from "./LocalDb"
+import { getDb, withTx } from "./LocalDb"
 import { Position } from "./entities/position"
 import { ImageOcclusion } from "./entities/imageOcclusion"
 // import { ImageNote } from "./entities/ImageNote"
 
 export const seed = async () => {
     console.log('seeding...')
+
+    const db = await getDb()
 
     const docs = [
         new Document("doc1", "list"),
@@ -45,13 +47,6 @@ export const seed = async () => {
         {x: 0, y: idx}
     ))
 
-    const ioNote = await ImageOcclusion.random()
-    const ioPosition = new Position(
-        0, 
-        ioNote.id,
-        docs[2].id,
-        {x: 0, y: 0}
-    )
 
     await withTx(
         ...docs.map(doc => doc.addTx),
@@ -64,10 +59,18 @@ export const seed = async () => {
         ...randomImages.map(i => i.addTx),
         ...imageNotePositions.map(p => p.addTx),
 
-        // doc3, image occlusion
-        ioNote.addTx,
-        ioPosition.addTx
     )
+
+    const ioNote = await ImageOcclusion.random()
+    await db.createListNote(
+        docs[2].id,
+        {
+            kind: 'imageOcclusion',
+            blob: ioNote.blob,
+            rects: ioNote.rects
+        }
+    )
+
 
     console.log('..seeding done')
 }

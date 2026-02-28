@@ -292,7 +292,9 @@ class DbOps {
 
         const createIntervalOption = (() => {
             switch(data.kind){
-                case 'basic': case 'cloze': { return (new Interval(v4(), id, 30000, Date.now())).addTx }; 
+                case 'basic': 
+                case 'cloze': 
+                case 'imageOcclusion': { return (new Interval(v4(), id, 30000, Date.now())).addTx }; 
                 default: return (async () => {})
             }
         })()

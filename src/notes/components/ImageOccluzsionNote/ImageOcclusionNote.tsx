@@ -1,7 +1,12 @@
 import { useEffect, useEffectEvent, useMemo, useState, type FC } from "react";
 import type { IVector2 } from "../../../utils/Vector2";
-import { useGetNoteQuery } from "../../note.api";
+import { useGetIntervalQuery, useGetNoteQuery } from "../../note.api";
 import type { IImageOcclusionSerialized } from "../../../db/entities/imageOcclusion";
+import { useInterval } from "../../hooks/useInterval";
+import { getBlurValue } from "../../utils/getBlurValue";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { selectMode } from "../../../List/list.selectors";
+import { setListMode } from "../../../List/list.slice";
 
 type Rect = {
     topLeft: IVector2 // percentage
@@ -26,6 +31,9 @@ interface ImageOcclusionProps {
 export const ImageOcclusionNote: FC<ImageOcclusionProps> = ({id}) => {
 
     const {data: note, } = useGetNoteQuery(id)
+    const { state: interval } = useInterval(id)
+    const currentMode = useAppSelector(selectMode)
+    const dispatch = useAppDispatch()
 
     const ioNote = useMemo(() => note && note.kind === 'imageOcclusion' ? note as IImageOcclusionSerialized : null, [note])
 
@@ -36,21 +44,30 @@ export const ImageOcclusionNote: FC<ImageOcclusionProps> = ({id}) => {
         }
     }, [ioNote])
 
+    const handleClick = () => {
+        if(currentMode.kind === 'onAnswer' || currentMode.kind === 'showAll') return         
+        dispatch(setListMode({kind: 'onAnswer', noteId: id})) 
+    }
+
     const rectStyles = useMemo(() => ioNote ? ioNote.rects.map((rect): React.CSSProperties => ({
         position: 'absolute',
         // backgroundColor: "orange",
-        backdropFilter: `blur(3px)`,
+        backdropFilter: interval.kind === 'open' ? `blur(${getBlurValue(interval.passed)}px)` : 'none',
+        backgroundColor: interval.kind === 'close' ? 'orange' : 'transparent',
         // maskImage: `linear-gradient(to bottom, black 0% 50%, transparent 50% 100%)`,
         left: `${rect.left}%`,
         top: `${rect.top}%`,
         width: `${(rect.width)}%`,
         height: `${(rect.height)}%`,
-    })) : [], [ioNote])
+    })) : [], [ioNote, interval])
 
     if(!ioNote) return null
 
     return (
-        <div className="size-48 relative">
+        <div 
+            className="size-48 relative"
+            onClick={handleClick}
+        >
             <img src={ioNote?.url ?? ""} className="w-full object-contain"/>
 
             {rectStyles.map((rectStyle) => (
