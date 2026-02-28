@@ -25,7 +25,7 @@ export const NoteEdit: FC = () => {
 
     const getChangeHandler = (noteType: NoteType) => () => setMode(noteType)
 
-    const noteTypes: NoteType[] = ['basic', 'text', 'image', 'cloze']
+    const noteTypes: NoteType[] = ['basic', 'text', 'image', 'cloze', 'imageOcclusion']
 
     const coord: IVector2 = {
         x: parseInt(posX ?? "0"),

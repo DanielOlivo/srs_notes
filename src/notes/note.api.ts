@@ -48,7 +48,7 @@ export const noteApi = api.injectEndpoints({
                 }
             },
             providesTags: (_result, _error, docId) => [
-                { type: "DocumentNotes", docId}
+                { type: "DocumentNotes", id: docId}
             ]
         }),
 

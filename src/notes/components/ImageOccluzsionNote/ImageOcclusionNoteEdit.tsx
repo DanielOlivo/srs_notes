@@ -25,6 +25,8 @@ export const ImageOcclusionNoteEdit: FC<ImageOcclusionNoteEditProps> = ({id, doc
     const [rects, setRects] = useState<IRect[]>([])
     const [rects2, setRects2] = useState<IRect[]>([]) 
 
+    const [create, ] = useCreateNoteMutation()
+
     const [isLoading, setIsLoading] = useState(true)
 
     const dispatch = useAppDispatch()
@@ -47,10 +49,16 @@ export const ImageOcclusionNoteEdit: FC<ImageOcclusionNoteEditProps> = ({id, doc
                 dispatch(noteApi.util.invalidateTags([
                     { type: 'Note', id: note.id},
                 ])) 
-            } else if(blobRef.current){
-                const note = ImageOcclusion.with(blobRef.current, rects)
-                // add position
-                await note.add()
+            } else if(blobRef.current && docId){
+                await create({
+                    docId,
+                    coord,
+                    data: {
+                        kind: 'imageOcclusion',
+                        blob: blobRef.current,
+                        rects: rects2 
+                    }
+                })
             }
 
             navigate(-1)
