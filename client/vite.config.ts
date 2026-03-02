@@ -24,7 +24,7 @@ export default defineConfig({
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@theme": path.resolve(__dirname, "./src/theme"),
 
-      "domain": path.resolve(__dirname, 'node_modules', 'domain')
+      // "domain": path.resolve(__dirname, 'node_modules', 'domain')
     }
   },
   test: {
