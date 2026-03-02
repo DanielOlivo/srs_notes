@@ -45,7 +45,6 @@ jobs:
           echo "packages/client package.json:"
           cat client/package.json
 
-
       - name: Build client app
         run: pnpm -F srs_notes_client build
 
