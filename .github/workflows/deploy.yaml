@@ -27,10 +27,14 @@ jobs:
         run: pnpm install
 
       - name: Build domain package
-        run: pnpm -F domain build
+        run: |
+          cd domain
+          pnpm build
 
       - name: Build client app
-        run: pnpm -F client build
+        run: |
+          cd client
+          pnpm build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
