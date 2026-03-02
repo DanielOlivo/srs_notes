@@ -23,6 +23,8 @@ export default defineConfig({
       "@list": path.resolve(__dirname, "./src/List"),
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@theme": path.resolve(__dirname, "./src/theme"),
+
+      "domain": path.resolve(__dirname, 'node_modules', 'domain')
     }
   },
   test: {
