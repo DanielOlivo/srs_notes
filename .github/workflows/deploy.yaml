@@ -29,19 +29,22 @@ jobs:
           version: 10
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build domain package
         run: pnpm -F domain build
 
-      - name: Inspect domain package in node_modules
+      - name: Debug workspace state
         run: |
-          echo "domain package.json:"
-          cat node_modules/domain/package.json || true
-          echo "dist listing:"
+          echo "workspace packages:"
+          pnpm -s -w -r --filter . ls --depth 0 || true
+          echo "node_modules listing for domain:"
           ls -la node_modules/domain || true
-          echo "workspace dist:"
-          ls -la packages/domain/dist || true
+          echo "packages/domain dist:"
+          ls -la domain/dist || true
+          echo "packages/client package.json:"
+          cat client/package.json
+
 
       - name: Build client app
         run: pnpm -F srs_notes_client build
