@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { Document } from "../Document";
 import { getDb, withTx } from "../LocalDb";
 import { BasicNote, Interval, TextNote } from "../entities/Note.utils";
+import { testItems } from '@danielolivo/srs_notes_domain'
 
 export const TestButton: FC = () => {
     return (
@@ -14,6 +15,9 @@ export const TestButton: FC = () => {
 
 const test = async () => {
     console.log('test...')
+    testItems()
+
+    return
     const db = await getDb()
 
     try{
