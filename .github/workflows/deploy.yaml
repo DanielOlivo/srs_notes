@@ -2,7 +2,10 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ domain ]
+    paths:
+      - 'client/**'
+      - 'domain/**'
 
 permissions:
   contents: read
@@ -23,13 +26,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
-        run: pnpm build
+      - name: Build domain package
+        run: pnpm -F domain build
+
+      - name: Build client app
+        run: pnpm -F client build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./client/dist
 
   deploy:
     needs: build
