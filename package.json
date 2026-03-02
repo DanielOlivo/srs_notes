@@ -1,5 +1,9 @@
 {
   "name": "srs_notes",
   "private": true,
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.10.0",
+
+  "scripts": {
+    "build": "pnpm -w -r build"
+  }
 }

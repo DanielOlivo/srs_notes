@@ -26,13 +26,22 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 10
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build domain package
         run: pnpm -F domain build
+
+      - name: Inspect domain package in node_modules
+        run: |
+          echo "domain package.json:"
+          cat node_modules/domain/package.json || true
+          echo "dist listing:"
+          ls -la node_modules/domain || true
+          echo "workspace dist:"
+          ls -la packages/domain/dist || true
 
       - name: Build client app
         run: pnpm -F srs_notes_client build
