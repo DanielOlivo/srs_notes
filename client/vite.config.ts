@@ -23,7 +23,6 @@ export default defineConfig({
     }
   },
   resolve: {
-    preserveSymlinks: true,
     alias: {
       "@app": path.resolve(__dirname, "./src/app"),
       "@common": path.resolve(__dirname, "./src/common"),
