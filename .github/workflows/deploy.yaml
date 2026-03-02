@@ -27,9 +27,7 @@ jobs:
         run: pnpm install
 
       - name: Build domain package
-        run: |
-          cd domain
-          pnpm build
+        run: pnpm -F domain build
 
       - name: Build client app
         run: |
