@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { Document } from "../Document";
 import { getDb, withTx } from "../LocalDb";
 import { BasicNote, Interval, TextNote } from "../entities/Note.utils";
-import { testItems } from '@danielolivo/srs_notes_domain'
+import { testItems } from 'domain'
 
 export const TestButton: FC = () => {
     return (
