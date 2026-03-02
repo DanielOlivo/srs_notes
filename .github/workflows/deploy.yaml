@@ -30,7 +30,7 @@ jobs:
         run: pnpm -F domain build
 
       - name: Build client app
-        run: pnpm -F srs_notes build
+        run: pnpm -F srs_notes_client build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
